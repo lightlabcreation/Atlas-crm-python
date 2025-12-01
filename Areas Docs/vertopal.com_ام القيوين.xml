@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:ooo="http://openoffice.org/2004/office" xmlns:ooow="http://openoffice.org/2004/writer" xmlns:oooc="http://openoffice.org/2004/calc" xmlns:dom="http://www.w3.org/2001/xml-events" xmlns:xforms="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" office:version="1.2">
+  <office:font-face-decls>
+    <style:font-face style:name="Courier New" style:font-family-generic="modern" style:font-pitch="fixed" svg:font-family="'Courier New'" />
+  </office:font-face-decls>
+  <office:automatic-styles>
+    <style:style style:name="fr2" style:family="graphic" style:parent-style-name="Formula"><style:graphic-properties style:vertical-pos="middle" style:vertical-rel="text" style:horizontal-pos="center" style:horizontal-rel="paragraph-content" style:wrap="none" /></style:style>
+    <style:style style:name="fr1" style:family="graphic" style:parent-style-name="Formula"><style:graphic-properties style:vertical-pos="middle" style:vertical-rel="text" /></style:style>
+  </office:automatic-styles>
+<office:body>
+<office:text>
+<text:p text:style-name="Text_20_body">Al Abraq 1</text:p>
+<text:p text:style-name="Text_20_body">Al Abraq 2</text:p>
+<text:p text:style-name="Text_20_body">Al Athaib</text:p>
+<text:p text:style-name="Text_20_body">Al Benaider</text:p>
+<text:p text:style-name="Text_20_body">Al Bustan</text:p>
+<text:p text:style-name="Text_20_body">Al Dar Al Bayda</text:p>
+<text:p text:style-name="Text_20_body">Al Door 1</text:p>
+<text:p text:style-name="Text_20_body">Al Door 2</text:p>
+<text:p text:style-name="Text_20_body">Al Ghafat</text:p>
+<text:p text:style-name="Text_20_body">Al Hadeetha</text:p>
+<text:p text:style-name="Text_20_body">Al Hamra</text:p>
+<text:p text:style-name="Text_20_body">Al Hamriya</text:p>
+<text:p text:style-name="Text_20_body">Al Harmala</text:p>
+<text:p text:style-name="Text_20_body">Al Heerah</text:p>
+<text:p text:style-name="Text_20_body">Al Hoboob 1</text:p>
+<text:p text:style-name="Text_20_body">Al Hoboob 2</text:p>
+<text:p text:style-name="Text_20_body">Al Humaidi</text:p>
+<text:p text:style-name="Text_20_body">Al Jurf 1</text:p>
+<text:p text:style-name="Text_20_body">Al Jurf 2</text:p>
+<text:p text:style-name="Text_20_body">Al Jurf Industrial 1</text:p>
+<text:p text:style-name="Text_20_body">Al Jurf Industrial 2</text:p>
+<text:p text:style-name="Text_20_body">Al Jurf Industrial 3</text:p>
+<text:p text:style-name="Text_20_body">Al Khor</text:p>
+<text:p text:style-name="Text_20_body">Al Madr 1</text:p>
+<text:p text:style-name="Text_20_body">Al Madr 2</text:p>
+<text:p text:style-name="Text_20_body">Al Madr 3</text:p>
+<text:p text:style-name="Text_20_body">Al Maqta-a 1</text:p>
+<text:p text:style-name="Text_20_body">Al Maqta-a 2</text:p>
+<text:p text:style-name="Text_20_body">Al Maqta-a 3</text:p>
+<text:p text:style-name="Text_20_body">Al Medfeq</text:p>
+<text:p text:style-name="Text_20_body">Al Meidan</text:p>
+<text:p text:style-name="Text_20_body">Al Morgbat</text:p>
+<text:p text:style-name="Text_20_body">Al Nabgghah</text:p>
+<text:p text:style-name="Text_20_body">Al Nakheilah</text:p>
+<text:p text:style-name="Text_20_body">Al Neefah</text:p>
+<text:p text:style-name="Text_20_body">Al Qarayen 1</text:p>
+<text:p text:style-name="Text_20_body">Al Qarayen 2</text:p>
+<text:p text:style-name="Text_20_body">Al Raas</text:p>
+<text:p text:style-name="Text_20_body">Al Rahail</text:p>
+<text:p text:style-name="Text_20_body">Al Ramlah 1</text:p>
+<text:p text:style-name="Text_20_body">Al Ramlah 2</text:p>
+<text:p text:style-name="Text_20_body">Al Ramlah 3</text:p>
+<text:p text:style-name="Text_20_body">Al Ras 1</text:p>
+<text:p text:style-name="Text_20_body">Al Ras 2</text:p>
+<text:p text:style-name="Text_20_body">Al Rawdha</text:p>
+<text:p text:style-name="Text_20_body">Al Reqqah</text:p>
+<text:p text:style-name="Text_20_body">Al Salamah</text:p>
+<text:p text:style-name="Text_20_body">Al Serra</text:p>
+<text:p text:style-name="Text_20_body">Al Shareiah</text:p>
+<text:p text:style-name="Text_20_body">Al Shebeakah</text:p>
+<text:p text:style-name="Text_20_body">Al Shes</text:p>
+<text:p text:style-name="Text_20_body">Al Sow</text:p>
+<text:p text:style-name="Text_20_body">Al Suaihat 1</text:p>
+<text:p text:style-name="Text_20_body">Al Suaihat 2</text:p>
+<text:p text:style-name="Text_20_body">Al Tayebah</text:p>
+<text:p text:style-name="Text_20_body">Al Thaniyah</text:p>
+<text:p text:style-name="Text_20_body">Batha Al Ali</text:p>
+<text:p text:style-name="Text_20_body">Emirates Modern Industrial Area
+(Umm Al Thuoob)</text:p>
+<text:p text:style-name="Text_20_body">Falaj Al Mualla</text:p>
+<text:p text:style-name="Text_20_body">Falaj Al Sheikh</text:p>
+<text:p text:style-name="Text_20_body">Green Belt</text:p>
+<text:p text:style-name="Text_20_body">Hamriyah Free Zone Phase 1
+(HFZA)</text:p>
+<text:p text:style-name="Text_20_body">Hamriyah Free Zone Phase
+2</text:p>
+<text:p text:style-name="Text_20_body">Old Umm Al Quwain</text:p>
+<text:p text:style-name="Text_20_body">Oud Al Owaid</text:p>
+<text:p text:style-name="Text_20_body">Oud Al Tayer 1</text:p>
+<text:p text:style-name="Text_20_body">Oud Al Tayer 2</text:p>
+<text:p text:style-name="Text_20_body">Rafaa</text:p>
+<text:p text:style-name="Text_20_body">Seeh Meyadher</text:p>
+<text:p text:style-name="Text_20_body">Shanteer</text:p>
+<text:p text:style-name="Text_20_body">Umm Al Karaaween</text:p>
+<text:p text:style-name="Text_20_body">Umm Al Quwain</text:p>
+<text:p text:style-name="Text_20_body">Umm Al Quwain Rural</text:p>
+<text:p text:style-name="Text_20_body">Wadi Yamah</text:p>
+<text:p text:style-name="Text_20_body">Mohathab</text:p>
+<text:p text:style-name="Text_20_body">Shabia Essa</text:p>
+<text:p text:style-name="Text_20_body">Al Chewria</text:p>
+<text:p text:style-name="Text_20_body">Al Biyatha</text:p>
+<text:p text:style-name="Text_20_body">Al Boghah</text:p>
+<text:p text:style-name="Text_20_body">Al Butain</text:p>
+<text:p text:style-name="Text_20_body">Al Haweah</text:p>
+<text:p text:style-name="Text_20_body">Al Kharmaa</text:p>
+<text:p text:style-name="Text_20_body">Al Suwaiah</text:p>
+</office:text>
+</office:body>
+</office:document-content>

@@ -1,0 +1,352 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Fees Management - Atlas Fulfillment{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Page Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-dollar-sign text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">Fees Management</h1>
+                        <p class="mt-1 text-sm text-gray-500">Configure system-wide fee structures and charges</p>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'settings:dashboard' %}" class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200 font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Settings
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-dollar-sign text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Total Fees</p>
+                        <p class="text-2xl font-semibold text-gray-900">7</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Active Fees</p>
+                        <p class="text-2xl font-semibold text-gray-900">7</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-cog text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Configured</p>
+                        <p class="text-2xl font-semibold text-gray-900">7</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Revenue Impact</p>
+                        <p class="text-2xl font-semibold text-gray-900">High</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fee Configuration Form -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4">
+                <h3 class="text-xl font-bold text-white flex items-center">
+                    <i class="fas fa-cog mr-3"></i>
+                    Fee Configuration
+                </h3>
+                <p class="text-orange-100 mt-1">Configure default fee structures that will be applied system-wide</p>
+            </div>
+            
+            <form method="post" id="feesForm" class="p-6">
+                {% csrf_token %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Upsell Fees -->
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-arrow-up text-blue-600 text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900">Upsell Fees</h4>
+                                <p class="text-sm text-gray-500">Additional product/service charges</p>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 text-sm font-medium">AED</span>
+                            </span>
+                            <input type="number" name="upsell_fee" value="{{ fees.upsell_fee }}" step="0.01" min="0" 
+                                   class="pl-12 block w-full rounded-lg border border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500 text-lg font-medium"
+                                   placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <!-- Confirmation Fees -->
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-check text-green-600 text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900">Confirmation Fees</h4>
+                                <p class="text-sm text-gray-500">Order confirmation processing</p>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 text-sm font-medium">AED</span>
+                            </span>
+                            <input type="number" name="confirmation_fee" value="{{ fees.confirmation_fee }}" step="0.01" min="0" 
+                                   class="pl-12 block w-full rounded-lg border border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500 text-lg font-medium"
+                                   placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <!-- Cancellation Fees -->
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-times text-red-600 text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900">Cancellation Fees</h4>
+                                <p class="text-sm text-gray-500">Order cancellation penalties</p>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 text-sm font-medium">AED</span>
+                            </span>
+                            <input type="number" name="cancellation_fee" value="{{ fees.cancellation_fee }}" step="0.01" min="0" 
+                                   class="pl-12 block w-full rounded-lg border border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500 text-lg font-medium"
+                                   placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <!-- Fulfillment Fees -->
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-box text-purple-600 text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900">Fulfillment Fees</h4>
+                                <p class="text-sm text-gray-500">Order processing charges</p>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 text-sm font-medium">AED</span>
+                            </span>
+                            <input type="number" name="fulfillment_fee" value="{{ fees.fulfillment_fee }}" step="0.01" min="0" 
+                                   class="pl-12 block w-full rounded-lg border border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500 text-lg font-medium"
+                                   placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <!-- Shipping Fees -->
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-truck text-indigo-600 text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900">Shipping Fees</h4>
+                                <p class="text-sm text-gray-500">Delivery service charges</p>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 text-sm font-medium">AED</span>
+                            </span>
+                            <input type="number" name="shipping_fee" value="{{ fees.shipping_fee }}" step="0.01" min="0" 
+                                   class="pl-12 block w-full rounded-lg border border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500 text-lg font-medium"
+                                   placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <!-- Return Fees -->
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-undo text-orange-600 text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900">Return Fees</h4>
+                                <p class="text-sm text-gray-500">Product return processing</p>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 text-sm font-medium">AED</span>
+                            </span>
+                            <input type="number" name="return_fee" value="{{ fees.return_fee }}" step="0.01" min="0" 
+                                   class="pl-12 block w-full rounded-lg border border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500 text-lg font-medium"
+                                   placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <!-- Warehouse Fees -->
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200 hover:shadow-md transition-shadow duration-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-warehouse text-yellow-600 text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900">Warehouse Fees</h4>
+                                <p class="text-sm text-gray-500">Storage and handling charges</p>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 text-sm font-medium">AED</span>
+                            </span>
+                            <input type="number" name="warehouse_fee" value="{{ fees.warehouse_fee }}" step="0.01" min="0" 
+                                   class="pl-12 block w-full rounded-lg border border-gray-300 shadow-sm focus:ring-orange-500 focus:border-orange-500 text-lg font-medium"
+                                   placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="mt-8 flex justify-end space-x-4">
+                    <a href="{% url 'settings:dashboard' %}" class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors duration-200 font-medium">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancel
+                    </a>
+                    <button type="submit" class="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors duration-200 font-medium">
+                        <i class="fas fa-save mr-2"></i>
+                        Save Fee Configuration
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Fee Information -->
+        <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- How Fees Work -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-info-circle text-blue-600 text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">How Fees Work</h3>
+                </div>
+                <div class="space-y-3 text-sm text-gray-600">
+                    <div class="flex items-start">
+                        <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                        <span>These are default fees applied system-wide</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                        <span>Fees can be overridden on individual orders</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                        <span>All fees are in AED currency</span>
+                    </div>
+                    <div class="flex items-start">
+                        <i class="fas fa-check text-green-500 mr-2 mt-1"></i>
+                        <span>Fees are automatically calculated in order totals</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fee Categories -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center mb-4">
+                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-list text-purple-600 text-lg"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900">Fee Categories</h3>
+                </div>
+                <div class="space-y-3 text-sm">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600"><strong>Upsell:</strong> Additional product recommendations</span>
+                        <span class="text-blue-600 font-medium">AED {{ fees.upsell_fee }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600"><strong>Confirmation:</strong> Order validation processing</span>
+                        <span class="text-green-600 font-medium">AED {{ fees.confirmation_fee }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600"><strong>Cancellation:</strong> Order cancellation penalties</span>
+                        <span class="text-red-600 font-medium">AED {{ fees.cancellation_fee }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600"><strong>Fulfillment:</strong> Order processing charges</span>
+                        <span class="text-purple-600 font-medium">AED {{ fees.fulfillment_fee }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600"><strong>Shipping:</strong> Delivery service charges</span>
+                        <span class="text-indigo-600 font-medium">AED {{ fees.shipping_fee }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600"><strong>Return:</strong> Product return processing</span>
+                        <span class="text-orange-600 font-medium">AED {{ fees.return_fee }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600"><strong>Warehouse:</strong> Storage and handling</span>
+                        <span class="text-yellow-600 font-medium">AED {{ fees.warehouse_fee }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('feesForm');
+    
+    form.addEventListener('submit', function(e) {
+        // Show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
+        submitBtn.disabled = true;
+        
+        // Form will submit normally
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }, 2000);
+    });
+});
+</script>
+{% endblock %}

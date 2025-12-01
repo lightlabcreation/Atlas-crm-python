@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Transfer Stock{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white">
+    <div class="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div class="mb-6 flex items-center justify-between">
+            <h1 class="text-xl font-semibold text-gray-800">Transfer Stock</h1>
+        </div>
+        <!-- Pending Transfers -->
+        <div class="bg-white rounded-lg border shadow-sm overflow-hidden mb-6">
+            <div class="px-4 py-3 border-b">
+                <h2 class="text-sm font-semibold text-gray-800">Pending Transfers</h2>
+                <p class="text-xs text-gray-500">Transfers awaiting processing</p>
+            </div>
+            <div class="p-4">
+                {% if pending_transfers %}
+                    <div class="space-y-4">
+                        {% for transfer in pending_transfers %}
+                        <div class="bg-gray-50 rounded-lg p-4 border">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-slate-900 text-lg">{{ transfer.product.name_en }}</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3 text-sm">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-hashtag text-amber-500 mr-2"></i>
+                                            <span class="text-slate-600">Tracking: {{ transfer.tracking_number }}</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-sort-numeric-up text-blue-500 mr-2"></i>
+                                            <span class="text-slate-600">Quantity: {{ transfer.quantity }} units</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-warehouse text-green-500 mr-2"></i>
+                                            <span class="text-slate-600">From: {{ transfer.from_warehouse.name }}</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-arrow-right text-purple-500 mr-2"></i>
+                                            <span class="text-slate-600">To: {{ transfer.to_warehouse.name }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end space-y-3">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                        Pending
+                                    </span>
+                                    <button type="button" onclick="startTransfer('{{ transfer.id }}')" 
+                                            class="inline-flex items-center justify-center px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-md">
+                                        Start Transfer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-10">
+                        <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-exchange-alt text-gray-400 text-lg"></i>
+                        </div>
+                        <p class="text-gray-500 text-sm">No pending transfers</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Manual Transfer Form -->
+        <div class="bg-white rounded-lg border shadow-sm">
+            <div class="px-4 py-3 border-b">
+                <h2 class="text-sm font-semibold text-gray-800">Create New Transfer</h2>
+                <p class="text-xs text-gray-500">Set up a new stock transfer</p>
+            </div>
+            <form method="post" id="transfer-form" class="p-6">
+                {% csrf_token %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Product Selection -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-3">Product</label>
+                        <select name="product_id" id="product-select" required 
+                                class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 bg-white/80 backdrop-blur-sm transition-all duration-200">
+                            <option value="">Select a product</option>
+                            {% for product in products %}
+                            <option value="{{ product.id }}">{{ product.name_en }} ({{ product.code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Quantity -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-3">Quantity</label>
+                        <input type="number" name="quantity" min="1" required 
+                               class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 bg-white/80 backdrop-blur-sm transition-all duration-200"
+                               placeholder="Enter quantity">
+                    </div>
+
+                    <!-- From Warehouse -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-3">From Warehouse</label>
+                        <select name="from_warehouse_id" id="from-warehouse" required 
+                                class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 bg-white/80 backdrop-blur-sm transition-all duration-200">
+                            <option value="">Select source warehouse</option>
+                            {% for warehouse in warehouses %}
+                            <option value="{{ warehouse.id }}">{{ warehouse.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- To Warehouse -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-3">To Warehouse</label>
+                        <select name="to_warehouse_id" id="to-warehouse" required 
+                                class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 bg-white/80 backdrop-blur-sm transition-all duration-200">
+                            <option value="">Select destination warehouse</option>
+                            {% for warehouse in warehouses %}
+                            <option value="{{ warehouse.id }}">{{ warehouse.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- From Location -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-3">From Location</label>
+                        <input type="text" name="from_location" 
+                               class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 bg-white/80 backdrop-blur-sm transition-all duration-200"
+                               placeholder="e.g., A-12, B-05">
+                    </div>
+
+                    <!-- To Location -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-3">To Location</label>
+                        <input type="text" name="to_location" 
+                               class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 bg-white/80 backdrop-blur-sm transition-all duration-200"
+                               placeholder="e.g., A-12, B-05">
+                    </div>
+
+                    <!-- Reason -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-slate-700 mb-3">Transfer Reason</label>
+                        <select name="reason" required 
+                                class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 bg-white/80 backdrop-blur-sm transition-all duration-200">
+                            <option value="">Select reason</option>
+                            <option value="rebalancing">Stock Rebalancing</option>
+                            <option value="fulfillment">Fulfillment Optimization</option>
+                            <option value="storage">Storage Optimization</option>
+                            <option value="demand">Demand Transfer</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="mt-6">
+                    <label class="block text-sm font-semibold text-slate-700 mb-3">Transfer Notes</label>
+                    <textarea name="notes" rows="3" 
+                              class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 bg-white/80 backdrop-blur-sm transition-all duration-200"
+                              placeholder="Additional notes about the transfer"></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="mt-6 flex justify-end">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-md">
+                        <i class="fas fa-exchange-alt mr-2"></i>Create Transfer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Transfer Progress Modal -->
+<div id="transfer-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden">
+            <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                <h3 id="modal-title" class="text-xl font-bold text-white">Processing Transfer</h3>
+            </div>
+            
+            <div id="transfer-progress" class="p-6 space-y-4">
+                <!-- Progress will be populated here -->
+            </div>
+            
+            <div class="flex justify-end space-x-3 p-6 border-t border-slate-200">
+                <button type="button" onclick="closeTransferModal()" 
+                        class="px-6 py-3 text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all duration-200">
+                    Cancel
+                </button>
+                <button type="button" id="complete-transfer" 
+                        class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+                    Complete Transfer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentTransfer = null;
+
+function startTransfer(transferId) {
+    // Fetch transfer details and populate modal
+    fetch(`/stock-keeper/api/transfer/${transferId}/`)
+        .then(response => response.json())
+        .then(data => {
+            currentTransfer = data;
+            showTransferModal(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error loading transfer details');
+        });
+}
+
+function showTransferModal(transfer) {
+    const modal = document.getElementById('transfer-modal');
+    const title = document.getElementById('modal-title');
+    const progress = document.getElementById('transfer-progress');
+    
+    title.textContent = `Transfer: ${transfer.product.name}`;
+    
+    progress.innerHTML = `
+        <div class="space-y-6">
+            <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-200">
+                <h4 class="font-semibold text-slate-900 mb-4 text-lg">Transfer Details</h4>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div class="flex items-center">
+                        <i class="fas fa-box text-blue-500 mr-2"></i>
+                        <span class="text-slate-600">Product:</span>
+                        <span class="font-semibold ml-2">${transfer.product.name}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-sort-numeric-up text-green-500 mr-2"></i>
+                        <span class="text-slate-600">Quantity:</span>
+                        <span class="font-semibold ml-2">${transfer.quantity}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-warehouse text-amber-500 mr-2"></i>
+                        <span class="text-slate-600">From:</span>
+                        <span class="font-semibold ml-2">${transfer.from_warehouse.name}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-arrow-right text-purple-500 mr-2"></i>
+                        <span class="text-slate-600">To:</span>
+                        <span class="font-semibold ml-2">${transfer.to_warehouse.name}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="space-y-4">
+                <h4 class="font-semibold text-slate-900 text-lg">Transfer Checklist</h4>
+                <div class="space-y-4">
+                    <div class="flex items-center space-x-4">
+                        <input type="number" id="transfer-quantity" min="1" max="${transfer.quantity}" 
+                               value="${transfer.quantity}" 
+                               class="w-32 px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500">
+                        <span class="text-sm text-slate-600">units to transfer</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <input type="text" id="from-location" 
+                               class="px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500"
+                               placeholder="From location">
+                        <span class="text-sm text-slate-600">from location</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <input type="text" id="to-location" 
+                               class="px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500"
+                               placeholder="To location">
+                        <span class="text-sm text-slate-600">to location</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <select id="packaging-type" class="px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500">
+                            <option value="original">Original Packaging</option>
+                            <option value="box">Box</option>
+                            <option value="pallet">Pallet</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <span class="text-sm text-slate-600">packaging</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-2xl p-4">
+                <p class="text-sm text-blue-800 flex items-start">
+                    <i class="fas fa-info-circle mr-2 mt-0.5"></i>
+                    Verify the items and locations before completing the transfer.
+                </p>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('complete-transfer').onclick = completeTransfer;
+    modal.classList.remove('hidden');
+}
+
+function completeTransfer() {
+    const quantity = document.getElementById('transfer-quantity').value;
+    const fromLocation = document.getElementById('from-location').value;
+    const toLocation = document.getElementById('to-location').value;
+    const packaging = document.getElementById('packaging-type').value;
+    
+    if (!quantity || quantity <= 0) {
+        alert('Please enter a valid quantity');
+        return;
+    }
+    
+    // Submit transfer data
+    fetch('/stock-keeper/api/transfer/complete/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            transfer_id: currentTransfer.id,
+            transferred_quantity: parseInt(quantity),
+            from_location: fromLocation,
+            to_location: toLocation,
+            packaging_type: packaging,
+            notes: 'Transfer completed via stock keeper panel'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeTransferModal();
+            showSuccess('Transfer completed successfully');
+            // Reload page to update pending transfers
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            alert(data.message || 'Error completing transfer');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error processing transfer');
+    });
+}
+
+function closeTransferModal() {
+    document.getElementById('transfer-modal').classList.add('hidden');
+    currentTransfer = null;
+}
+
+function showSuccess(message) {
+    // Implement success notification
+    alert(message);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Form validation
+document.addEventListener('DOMContentLoaded', function() {
+    const fromWarehouse = document.getElementById('from-warehouse');
+    const toWarehouse = document.getElementById('to-warehouse');
+    
+    if (fromWarehouse && toWarehouse) {
+        fromWarehouse.addEventListener('change', function() {
+            // Disable the same warehouse in destination
+            Array.from(toWarehouse.options).forEach(option => {
+                if (option.value === this.value) {
+                    option.disabled = true;
+                } else {
+                    option.disabled = false;
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %} 

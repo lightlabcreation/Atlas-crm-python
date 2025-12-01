@@ -1,0 +1,470 @@
+{% extends 'landing/base_landing.html' %}
+{% load static %}
+
+{% block title %}How It Works - Atlas Fulfillment{% endblock %}
+
+{% block extra_css %}
+<style>
+    .how-it-works-hero {
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+    }
+    
+    .step-card {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .step-card:hover {
+        transform: translateY(-10px);
+        border-color: #FFD700;
+        box-shadow: 0 25px 50px rgba(255, 215, 0, 0.2);
+    }
+    
+    .step-number {
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        transition: all 0.3s ease;
+    }
+    
+    .step-card:hover .step-number {
+        transform: scale(1.1);
+    }
+    
+    .floating-element {
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    .pulse-glow {
+        animation: pulse-glow 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes pulse-glow {
+        from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
+        to { box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); }
+    }
+    
+    .process-line {
+        position: relative;
+    }
+    
+    .process-line::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        right: -50px;
+        width: 100px;
+        height: 2px;
+        background: linear-gradient(90deg, #FFD700, #FFA500);
+        transform: translateY(-50%);
+    }
+    
+    .process-line:last-child::after {
+        display: none;
+    }
+    
+    @media (max-width: 768px) {
+        .process-line::after {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="how-it-works-hero text-white py-20 relative overflow-hidden">
+    <div class="absolute inset-0">
+        <div class="absolute top-10 left-10 w-32 h-32 bg-white opacity-10 rounded-full floating-element"></div>
+        <div class="absolute top-32 right-20 w-24 h-24 bg-white opacity-15 rounded-full floating-element" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-20 left-1/4 w-16 h-16 bg-white opacity-20 rounded-full floating-element" style="animation-delay: 4s;"></div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center">
+            <h1 class="text-5xl md:text-6xl font-bold mb-6">How It Works</h1>
+            <p class="text-xl md:text-2xl text-yellow-100 max-w-4xl mx-auto">
+                Simple steps to get started with our comprehensive logistics solutions and scale your business globally
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Main Process Steps -->
+<section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">Our Process</h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                From registration to global expansion, we guide you through every step
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Step 1 -->
+            <div class="step-card bg-white rounded-2xl p-8 shadow-lg process-line">
+                <div class="text-center">
+                    <div class="step-number w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 pulse-glow">
+                        <span class="text-3xl font-bold text-white">1</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Register & Connect</h3>
+                    <p class="text-gray-600 mb-6">
+                        Create your account and connect your e-commerce platform to our system for seamless integration.
+                    </p>
+                    <ul class="text-left space-y-2 text-gray-600">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span>Quick account setup</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span>Platform integration</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span>Data synchronization</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Step 2 -->
+            <div class="step-card bg-white rounded-2xl p-8 shadow-lg process-line">
+                <div class="text-center">
+                    <div class="step-number w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 pulse-glow">
+                        <span class="text-3xl font-bold text-white">2</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Source & Store</h3>
+                    <p class="text-gray-600 mb-6">
+                        Access our global supplier network and store your products in our strategically located warehouses.
+                    </p>
+                    <ul class="text-left space-y-2 text-gray-600">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span>Product sourcing</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span>Quality assurance</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span>Warehouse storage</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Step 3 -->
+            <div class="step-card bg-white rounded-2xl p-8 shadow-lg">
+                <div class="text-center">
+                    <div class="step-number w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 pulse-glow">
+                        <span class="text-3xl font-bold text-white">3</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Sell & Deliver</h3>
+                    <p class="text-gray-600 mb-6">
+                        Focus on marketing while we handle fulfillment, shipping, and customer support for your business.
+                    </p>
+                    <ul class="text-left space-y-2 text-gray-600">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span>Order fulfillment</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span>Global shipping</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span>Customer support</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Detailed Process -->
+<section class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">Detailed Process</h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Learn more about each step in our comprehensive logistics process
+            </p>
+        </div>
+        
+        <div class="space-y-16">
+            <!-- Registration Process -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-2xl font-bold text-white">1</span>
+                        </div>
+                        <h3 class="text-3xl font-bold text-gray-900">Registration & Setup</h3>
+                    </div>
+                    <p class="text-lg text-gray-600 mb-6">
+                        Getting started is simple. Create your account, verify your business information, and connect your e-commerce platform to our system.
+                    </p>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span class="text-gray-700">Account creation and verification</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span class="text-gray-700">E-commerce platform integration</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span class="text-gray-700">Business profile setup</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="relative">
+                    <div class="absolute -inset-4 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-2xl opacity-20 blur-xl"></div>
+                    <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="Registration Process" 
+                             class="w-full h-64 object-cover">
+                        <div class="p-6">
+                            <h4 class="text-lg font-bold text-gray-900 mb-2">Quick Setup</h4>
+                            <p class="text-gray-600">Get started in minutes with our streamlined onboarding process.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sourcing Process -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="order-2 lg:order-1">
+                    <div class="relative">
+                        <div class="absolute -inset-4 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-2xl opacity-20 blur-xl"></div>
+                        <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                                 alt="Sourcing Process" 
+                                 class="w-full h-64 object-cover">
+                            <div class="p-6">
+                                <h4 class="text-lg font-bold text-gray-900 mb-2">Global Sourcing</h4>
+                                <p class="text-gray-600">Access our extensive network of verified suppliers worldwide.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="order-1 lg:order-2">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-2xl font-bold text-white">2</span>
+                        </div>
+                        <h3 class="text-3xl font-bold text-gray-900">Sourcing & Storage</h3>
+                    </div>
+                    <p class="text-lg text-gray-600 mb-6">
+                        Leverage our global supplier network to source high-quality products and store them in our strategically located warehouses.
+                    </p>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span class="text-gray-700">Product sourcing from global suppliers</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span class="text-gray-700">Quality assurance and inspection</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span class="text-gray-700">Strategic warehouse storage</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Fulfillment Process -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-2xl font-bold text-white">3</span>
+                        </div>
+                        <h3 class="text-3xl font-bold text-gray-900">Fulfillment & Delivery</h3>
+                    </div>
+                    <p class="text-lg text-gray-600 mb-6">
+                        We handle all aspects of order fulfillment, from picking and packing to global delivery and customer support.
+                    </p>
+                    <ul class="space-y-3">
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span class="text-gray-700">Automated order processing</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span class="text-gray-700">Global shipping and tracking</span>
+                        </li>
+                        <li class="flex items-start">
+                            <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                                <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <span class="text-gray-700">Customer support and returns</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="relative">
+                    <div class="absolute -inset-4 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-2xl opacity-20 blur-xl"></div>
+                    <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                             alt="Fulfillment Process" 
+                             class="w-full h-64 object-cover">
+                        <div class="p-6">
+                            <h4 class="text-lg font-bold text-gray-900 mb-2">End-to-End Fulfillment</h4>
+                            <p class="text-gray-600">Complete order processing from warehouse to customer doorstep.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">Why Choose Atlas Fulfillment?</h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Discover the advantages of working with our comprehensive logistics platform
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="bg-gray-50 rounded-xl p-8 text-center">
+                <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Fast Setup</h3>
+                <p class="text-gray-600">
+                    Get started in minutes with our streamlined onboarding process and quick platform integration.
+                </p>
+            </div>
+            
+            <div class="bg-gray-50 rounded-xl p-8 text-center">
+                <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Reliable Service</h3>
+                <p class="text-gray-600">
+                    Trusted by thousands of businesses with 99.9% uptime and reliable delivery performance.
+                </p>
+            </div>
+            
+            <div class="bg-gray-50 rounded-xl p-8 text-center">
+                <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Cost Effective</h3>
+                <p class="text-gray-600">
+                    Save up to 40% on logistics costs with our optimized processes and bulk shipping rates.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-4xl font-bold mb-6">Ready to Get Started?</h2>
+        <p class="text-xl mb-8 max-w-3xl mx-auto">
+            Join thousands of successful businesses that trust Atlas Fulfillment for their logistics needs.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'users:register' %}" class="bg-white text-orange-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-all duration-300 shadow-lg">
+                Get Started Today
+            </a>
+            <a href="{% url 'landing:contact' %}" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-orange-600 transition-all duration-300">
+                Contact Sales
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

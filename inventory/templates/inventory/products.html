@@ -1,0 +1,561 @@
+{% extends 'base.html' %}
+{% load role_filters %}
+
+{% block title %}Products{% endblock %}
+
+{% block extrahead %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+{% csrf_token %}
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white">
+    <!-- Simple Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-box text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">Products</h1>
+                        <p class="mt-1 text-sm text-gray-500">Manage your product inventory and stock levels</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'dashboard:index' %}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-home mr-2"></i>
+                        Dashboard
+                    </a>
+                    <a href="{% url 'inventory:add_product' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Product
+                    </a>
+                    <a href="{% url 'inventory:product_approval' %}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-check mr-2"></i>
+                        Product Approval
+                    </a>
+                    <a href="{% url 'inventory:products' %}?{% if search_query %}search={{ search_query }}&{% endif %}{% if selected_warehouse_id %}warehouse={{ selected_warehouse_id }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}export=csv" 
+                       class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-download mr-2"></i>
+                        Export
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <!-- Total Items -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-boxes text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Total Items</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ inventory_data|length }}</p>
+                        <p class="text-xs text-gray-500">↑ All products</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Low Stock -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Low Stock</p>
+                        <p class="text-2xl font-bold text-gray-900">
+                            {% for item in inventory_data %}
+                                {% if item.status == 'low_stock' %}{{ forloop.counter0|add:1 }}{% endif %}
+                            {% empty %}0{% endfor %}
+                        </p>
+                        <p class="text-xs text-gray-500">↑ Need restocking</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Out of Stock -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-times-circle text-red-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Out of Stock</p>
+                        <p class="text-2xl font-bold text-gray-900">
+                            {% for item in inventory_data %}
+                                {% if item.status == 'out_of_stock' %}{{ forloop.counter0|add:1 }}{% endif %}
+                            {% empty %}0{% endfor %}
+                        </p>
+                        <p class="text-xs text-gray-500">↑ No stock</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warehouses -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-warehouse text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Warehouses</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ warehouses|length }}</p>
+                        <p class="text-xs text-gray-500">↑ Total warehouses</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="bg-gray-50 rounded-lg border border-gray-300 mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Search & Filters</h3>
+                <p class="text-sm text-gray-500">Find and filter products quickly</p>
+            </div>
+            <div class="px-6 py-4">
+                <form method="get" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Search Products</label>
+                            <input type="text" name="search" value="{{ search_query }}" placeholder="Search by name, code, etc" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Warehouse</label>
+                            <select name="warehouse" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">All Warehouses</option>
+                                {% for warehouse in warehouses %}
+                                    <option value="{{ warehouse.id }}" {% if selected_warehouse_id == warehouse.id %}selected{% endif %}>
+                                        {{ warehouse.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                            <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">All Status</option>
+                                <option value="in_stock" {% if status_filter == 'in_stock' %}selected{% endif %}>In Stock</option>
+                                <option value="low_stock" {% if status_filter == 'low_stock' %}selected{% endif %}>Low Stock</option>
+                                <option value="out_of_stock" {% if status_filter == 'out_of_stock' %}selected{% endif %}>Out of Stock</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            Apply Filters
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Products List -->
+        <div class="bg-gray-50 rounded-lg border border-gray-300">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900">Products List</h3>
+                        <p class="text-sm text-gray-500">Manage and monitor your inventory</p>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        {{ inventory_data|length }} products found
+                    </div>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock Level</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Warehouse</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for item in inventory_data %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center mr-3">
+                                        {% if item.product.image %}
+                                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name_en }}" class="w-10 h-10 rounded-lg object-cover">
+                                        {% else %}
+                                            <i class="fas fa-image text-gray-400"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">{{ item.product.name_en|default:"N/A" }}</div>
+                                        <div class="text-sm text-gray-500">{{ item.product.name_ar|default:"N/A" }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {% if item.product.code %}
+                                    <span class="font-mono text-xs bg-gray-100 px-2 py-1 rounded">{{ item.product.code }}</span>
+                                {% else %}
+                                    <span class="text-gray-400">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {% if item.product.selling_price and item.product.selling_price > 0 %}
+                                    AED {{ item.product.selling_price|floatformat:2 }}
+                                {% else %}
+                                    <span class="text-gray-400">Not Set</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <div class="flex items-center">
+                                    <span class="text-lg font-semibold">{{ item.total_quantity }}</span>
+                                    {% if item.status == 'out_of_stock' %}
+                                        <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            Out of Stock
+                                        </span>
+                                    {% elif item.status == 'low_stock' %}
+                                        <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            Low Stock
+                                        </span>
+                                    {% else %}
+                                        <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            Good
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if item.product.is_approved %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-check mr-1"></i>
+                                        Active
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <i class="fas fa-times mr-1"></i>
+                                        Inactive
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {% if request.user|is_admin %}
+                                    {% if item.main_warehouse %}
+                                        {{ item.main_warehouse.name }}
+                                    {% else %}
+                                        No Warehouse
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-gray-400">Restricted</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {% if item.product.updated_at %}
+                                    {{ item.product.updated_at|date:"M d, Y" }}
+                                {% elif item.product.created_at %}
+                                    {{ item.product.created_at|date:"M d, Y" }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                {% if item.product.id %}
+                                    <a href="{% url 'inventory:edit_product' product_id=item.product.id %}" class="text-blue-600 hover:text-blue-900">
+                                        <i class="fas fa-edit mr-1"></i>
+                                        Edit
+                                    </a>
+                                    <button onclick="deductStock({{ item.product.id }})" class="text-green-600 hover:text-green-900">
+                                        <i class="fas fa-minus mr-1"></i>
+                                        Stock
+                                    </button>
+                                {% else %}
+                                    <span class="text-gray-400">No ID</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="px-6 py-4 text-center text-gray-500">
+                                No products found
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stock Deduction Modal -->
+<div id="stockModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 h-10 w-10 bg-red-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-minus text-red-600 text-lg"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Deduct Stock</h3>
+                    <p class="text-sm text-gray-500">Enter the quantity to deduct from inventory</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="px-6 py-4">
+            <form id="stockForm">
+                <div class="mb-4">
+                    <label for="quantityInput" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-cubes mr-1 text-gray-400"></i>
+                        Quantity to Deduct
+                    </label>
+                    <input type="number" id="quantityInput" min="1" step="1" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="Enter quantity..." required>
+                    <p class="text-xs text-gray-500 mt-1">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Enter a positive number
+                    </p>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-box mr-1 text-gray-400"></i>
+                        Product Information
+                    </label>
+                    <div class="bg-gray-50 rounded-md p-3">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-image text-gray-400"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm font-medium text-gray-900" id="productName">-</div>
+                                <div class="text-xs text-gray-500" id="productCode">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <div class="px-6 py-4 bg-gray-50 rounded-b-lg flex justify-end space-x-3">
+            <button type="button" onclick="closeStockModal()" 
+                    class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm font-medium">
+                <i class="fas fa-times mr-2"></i>Cancel
+            </button>
+            <button type="button" onclick="confirmDeductStock()" 
+                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-medium">
+                <i class="fas fa-minus mr-2"></i>Deduct Stock
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-check text-green-600 text-lg"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Success</h3>
+                    <p class="text-sm text-gray-500">Operation completed successfully</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="px-6 py-4">
+            <p class="text-gray-700" id="successMessage">-</p>
+        </div>
+        
+        <div class="px-6 py-4 bg-gray-50 rounded-b-lg flex justify-end">
+            <button type="button" onclick="closeSuccessModal()" 
+                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium">
+                <i class="fas fa-check mr-2"></i>OK
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 h-10 w-10 bg-red-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-lg"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Error</h3>
+                    <p class="text-sm text-gray-500">Something went wrong</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="px-6 py-4">
+            <p class="text-gray-700" id="errorMessage">-</p>
+        </div>
+        
+        <div class="px-6 py-4 bg-gray-50 rounded-b-lg flex justify-end">
+            <button type="button" onclick="closeErrorModal()" 
+                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-medium">
+                <i class="fas fa-times mr-2"></i>OK
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentProductId = null;
+let currentProductName = '';
+let currentProductCode = '';
+
+function deductStock(productId) {
+    // Get product information from the table
+    const row = document.querySelector(`button[onclick="deductStock(${productId})"]`).closest('tr');
+    const productName = row.querySelector('td:first-child .text-sm.font-medium').textContent;
+    const productCode = row.querySelector('td:nth-child(2)').textContent;
+    
+    currentProductId = productId;
+    currentProductName = productName;
+    currentProductCode = productCode;
+    
+    // Update modal content
+    document.getElementById('productName').textContent = productName;
+    document.getElementById('productCode').textContent = productCode;
+    document.getElementById('quantityInput').value = '';
+    
+    // Show modal
+    document.getElementById('stockModal').classList.remove('hidden');
+    document.getElementById('quantityInput').focus();
+}
+
+function closeStockModal() {
+    document.getElementById('stockModal').classList.add('hidden');
+    currentProductId = null;
+    currentProductName = '';
+    currentProductCode = '';
+}
+
+function confirmDeductStock() {
+    const quantity = document.getElementById('quantityInput').value;
+    
+    if (!quantity || isNaN(quantity) || quantity <= 0) {
+        showErrorModal('Please enter a valid quantity');
+        return;
+    }
+    
+    // Show loading state
+    const submitBtn = document.querySelector('button[onclick="confirmDeductStock()"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+    submitBtn.disabled = true;
+    
+    fetch(`/inventory/products/${currentProductId}/deduct-stock/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: `quantity=${quantity}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            showSuccessModal(data.message);
+            closeStockModal();
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            showErrorModal(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showErrorModal('An error occurred while deducting stock');
+    })
+    .finally(() => {
+        // Reset button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
+// Close modal when clicking outside
+document.getElementById('stockModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeStockModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !document.getElementById('stockModal').classList.contains('hidden')) {
+        closeStockModal();
+    }
+});
+
+// Handle Enter key in quantity input
+document.getElementById('quantityInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        confirmDeductStock();
+    }
+});
+
+// Success Modal Functions
+function showSuccessModal(message) {
+    document.getElementById('successMessage').textContent = message;
+    document.getElementById('successModal').classList.remove('hidden');
+}
+
+function closeSuccessModal() {
+    document.getElementById('successModal').classList.add('hidden');
+}
+
+// Error Modal Functions
+function showErrorModal(message) {
+    document.getElementById('errorMessage').textContent = message;
+    document.getElementById('errorModal').classList.remove('hidden');
+}
+
+function closeErrorModal() {
+    document.getElementById('errorModal').classList.add('hidden');
+}
+
+// Close modals when clicking outside
+document.getElementById('successModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeSuccessModal();
+    }
+});
+
+document.getElementById('errorModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeErrorModal();
+    }
+});
+
+// Close modals with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        if (!document.getElementById('successModal').classList.contains('hidden')) {
+            closeSuccessModal();
+        }
+        if (!document.getElementById('errorModal').classList.contains('hidden')) {
+            closeErrorModal();
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Confirmation - Pending Approval</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            color: #f59e0b;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .status-badge {
+            background-color: #fbbf24;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: bold;
+        }
+        .info-box {
+            background-color: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 14px;
+        }
+        .contact-info {
+            background-color: #e0f2fe;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Atlas Fulfillment</div>
+            <h1>Hello {{ user.full_name }}</h1>
+            <div class="status-badge">Pending Approval</div>
+        </div>
+
+        <p>Thank you for registering with Atlas Fulfillment System!</p>
+
+        <div class="info-box">
+            <h3>Registration Information:</h3>
+            <ul>
+                <li><strong>Name:</strong> {{ user.full_name }}</li>
+                <li><strong>Email:</strong> {{ user.email }}</li>
+                <li><strong>Phone Number:</strong> {{ user.phone_number }}</li>
+                <li><strong>Store Name:</strong> {{ user.store_name }}</li>
+                <li><strong>Registration Date:</strong> {{ registration_date }}</li>
+            </ul>
+        </div>
+
+        <h3>What happens now:</h3>
+        <p>Your registration request has been received successfully. Our team will review the provided information and verify the data, including:</p>
+        <ul>
+            <li>ID images (front and back)</li>
+            <li>Online store information</li>
+            <li>Banking details</li>
+        </ul>
+
+        <h3>Next Steps:</h3>
+        <p>You will receive an email within 24-48 hours containing:</p>
+        <ul>
+            <li>✅ <strong>Approval:</strong> If all information is correct</li>
+            <li>❌ <strong>Rejection with reason:</strong> If there's an issue with the information</li>
+        </ul>
+
+        <div class="contact-info">
+            <h4>Need Immediate Assistance?</h4>
+            <p>If you have any questions or need immediate help, please contact us at:</p>
+            <p><strong>Phone:</strong> <a href="tel:+971503565009">+971503565009</a></p>
+        </div>
+
+        <div class="footer">
+            <p>If you have any questions, please don't hesitate to contact us</p>
+            <p>Thank you for choosing Atlas Fulfillment</p>
+        </div>
+    </div>
+</body>
+</html> 

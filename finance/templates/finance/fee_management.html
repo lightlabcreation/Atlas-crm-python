@@ -1,0 +1,471 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Fee Management - Atlas Fulfillment{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white">
+    <!-- Page Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-coins text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">Fee Management</h1>
+                        <p class="mt-1 text-sm text-gray-500">Order {{ order.order_code }}</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'dashboard:index' %}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-home mr-2"></i>
+                        Dashboard
+                    </a>
+                    <a href="{% url 'finance:order_management' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <form method="POST" id="feeForm">
+            {% csrf_token %}
+            
+            <!-- Order Details -->
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
+                <div class="bg-orange-100 border-b border-gray-200 px-6 py-4 -m-6 mb-6">
+                    <h3 class="text-lg font-semibold text-orange-600">Order Details</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Product</p>
+                        <p class="text-lg font-semibold text-gray-900">
+                            {% if order.product %}
+                                {{ order.product.name_en }} × {{ order.quantity }}
+                            {% else %}
+                                No Product
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Seller</p>
+                        <p class="text-lg font-semibold text-gray-900">
+                            {% if order.seller %}
+                                {{ order.seller.get_full_name }}
+                            {% else %}
+                                No Seller
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Date</p>
+                        <p class="text-lg font-semibold text-gray-900">{{ order.date|date:"M d, Y" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Base Price</p>
+                        <p class="text-lg font-semibold text-blue-600">AED {{ base_price|floatformat:2 }}</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <p class="text-sm font-medium text-gray-500">Current Total Fees</p>
+                    <p class="text-2xl font-bold text-green-600">AED {{ total_fees|floatformat:2 }}</p>
+                </div>
+            </div>
+
+            <!-- Fee Breakdown -->
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
+                <div class="bg-orange-100 border-b border-gray-200 px-6 py-4 -m-6 mb-6">
+                    <h3 class="text-lg font-semibold text-orange-600">Fee Breakdown</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fee Type</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Amount</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Default</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Custom</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <!-- Seller Fees -->
+                            {% if seller_info %}
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">Seller Fee</div>
+                                    <div class="text-xs text-gray-500">Based on seller percentage</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex px-2 py-1 text-sm font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        AED {{ fees.seller_fee|floatformat:2 }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        <i class="fas fa-check mr-1"></i>
+                                        Applied
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    Calculated
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <input type="number" name="fee_seller_fee" value="{{ fees.seller_fee|floatformat:2 }}" step="0.01" min="0" 
+                                           class="w-24 border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button type="button" class="text-orange-600 hover:text-orange-500" onclick="editFee('seller_fee')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            
+                            <!-- Upsell Fees -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">Upsell Fees</div>
+                                    <div class="text-xs text-gray-500">3% of order value</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex px-2 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">
+                                        AED {{ fees.upsell|floatformat:2 }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-check mr-1"></i>
+                                        Applied
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ base_price|floatformat:2 }} × 3%
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <input type="number" name="fee_upsell" value="{{ fees.upsell|floatformat:2 }}" step="0.01" min="0" 
+                                           class="w-24 border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button type="button" class="text-orange-600 hover:text-orange-500" onclick="editFee('upsell')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Confirmation Fees -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">Confirmation Fees</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex px-2 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">
+                                        AED {{ fees.confirmation|floatformat:2 }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-check mr-1"></i>
+                                        Applied
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    AED 10.00
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <input type="number" name="fee_confirmation" value="{{ fees.confirmation|floatformat:2 }}" step="0.01" min="0" 
+                                           class="w-24 border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button type="button" class="text-orange-600 hover:text-orange-500" onclick="editFee('confirmation')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Cancellation Fees -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">Cancellation Fees</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex px-2 py-1 text-sm font-semibold rounded-full bg-gray-100 text-gray-800">
+                                        AED {{ fees.cancellation|floatformat:2 }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if order.status == 'cancelled' %}
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            <i class="fas fa-check mr-1"></i>
+                                            Applied
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            <i class="fas fa-times mr-1"></i>
+                                            N/A
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    AED 5.00
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <input type="number" name="fee_cancellation" value="{{ fees.cancellation|floatformat:2 }}" step="0.01" min="0" 
+                                           class="w-24 border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button type="button" class="text-orange-600 hover:text-orange-500" onclick="editFee('cancellation')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Fulfillment Fees -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">Fulfillment Fees</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex px-2 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">
+                                        AED {{ fees.fulfillment|floatformat:2 }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-check mr-1"></i>
+                                        Applied
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    AED 8.99
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <input type="number" name="fee_fulfillment" value="{{ fees.fulfillment|floatformat:2 }}" step="0.01" min="0" 
+                                           class="w-24 border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button type="button" class="text-orange-600 hover:text-orange-500" onclick="editFee('fulfillment')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Shipping Fees -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">Shipping Fees</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex px-2 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">
+                                        AED {{ fees.shipping|floatformat:2 }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-check mr-1"></i>
+                                        Applied
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    AED 12.00
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <input type="number" name="fee_shipping" value="{{ fees.shipping|floatformat:2 }}" step="0.01" min="0" 
+                                           class="w-24 border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button type="button" class="text-orange-600 hover:text-orange-500" onclick="editFee('shipping')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Return Fees -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">Return Fees</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex px-2 py-1 text-sm font-semibold rounded-full bg-gray-100 text-gray-800">
+                                        AED {{ fees.return|floatformat:2 }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                        <i class="fas fa-times mr-1"></i>
+                                        N/A
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    AED 3.00
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <input type="number" name="fee_return" value="{{ fees.return|floatformat:2 }}" step="0.01" min="0" 
+                                           class="w-24 border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button type="button" class="text-orange-600 hover:text-orange-500" onclick="editFee('return')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+
+                            <!-- Warehouse Fees -->
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">Warehouse Fees</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex px-2 py-1 text-sm font-semibold rounded-full bg-gray-100 text-gray-800">
+                                        AED {{ fees.warehouse|floatformat:2 }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                        <i class="fas fa-times mr-1"></i>
+                                        N/A
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    AED 2.50
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <input type="number" name="fee_warehouse" value="{{ fees.warehouse|floatformat:2 }}" step="0.01" min="0" 
+                                           class="w-24 border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button type="button" class="text-orange-600 hover:text-orange-500" onclick="editFee('warehouse')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Total Fees Calculation -->
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
+                <div class="bg-orange-100 border-b border-gray-200 px-6 py-4 -m-6 mb-6">
+                    <h3 class="text-lg font-semibold text-orange-600">Total Fees Calculation</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="text-center p-4 bg-blue-50 rounded-lg">
+                        <p class="text-sm font-medium text-gray-500">Applied Fees</p>
+                        <p class="text-2xl font-bold text-blue-600" id="appliedFees">AED {{ total_fees|floatformat:2 }}</p>
+                    </div>
+                    <div class="text-center p-4 bg-yellow-50 rounded-lg">
+                        <p class="text-sm font-medium text-gray-500">Tax Amount ({{ tax_rate|floatformat:1 }}%)</p>
+                        <p class="text-2xl font-bold text-yellow-600" id="taxAmount">AED {{ tax_amount|floatformat:2 }}</p>
+                    </div>
+                    <div class="text-center p-4 bg-purple-50 rounded-lg">
+                        <p class="text-sm font-medium text-gray-500">Final Total</p>
+                        <p class="text-2xl font-bold text-purple-600" id="finalTotal">AED {{ final_total|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                <div class="flex justify-between items-center">
+                    <div class="flex space-x-4">
+                        <button type="button" onclick="recalculateTotal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center">
+                            <i class="fas fa-calculator mr-2"></i>
+                            Recalculate Total
+                        </button>
+                        <button type="button" onclick="resetToDefault()" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md flex items-center">
+                            <i class="fas fa-undo mr-2"></i>
+                            Reset to Default
+                        </button>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md flex items-center">
+                            <i class="fas fa-save mr-2"></i>
+                            Save Changes
+                        </button>
+                        <a href="{% url 'finance:order_management' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md flex items-center">
+                            <i class="fas fa-times mr-2"></i>
+                            Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function editFee(feeType) {
+    const input = document.querySelector(`input[name="fee_${feeType}"]`);
+    input.focus();
+    input.select();
+}
+
+function recalculateTotal() {
+    const feeInputs = document.querySelectorAll('input[name^="fee_"]');
+    let totalFees = 0;
+    
+    feeInputs.forEach(function(input) {
+        totalFees += parseFloat(input.value) || 0;
+    });
+    
+    const basePrice = parseFloat('{{ base_price }}');
+    const taxRate = parseFloat('{{ tax_rate }}');
+    const taxAmount = (basePrice + totalFees) * (taxRate / 100);
+    const finalTotal = basePrice + totalFees + taxAmount;
+    
+    const appliedFeesElement = document.getElementById('appliedFees');
+    const taxAmountElement = document.getElementById('taxAmount');
+    const finalTotalElement = document.getElementById('finalTotal');
+    
+    if (appliedFeesElement) {
+        appliedFeesElement.textContent = 'AED ' + totalFees.toFixed(2);
+    }
+    if (taxAmountElement) {
+        taxAmountElement.textContent = 'AED ' + taxAmount.toFixed(2);
+    }
+    if (finalTotalElement) {
+        finalTotalElement.textContent = 'AED ' + finalTotal.toFixed(2);
+    }
+}
+
+function resetToDefault() {
+    if (confirm('Reset all fees to default values? This will recalculate based on order value.')) {
+        const basePrice = parseFloat('{{ base_price }}');
+        const defaultFees = {
+            'seller_fee': parseFloat('{{ fees.seller_fee }}'),
+            'upsell': basePrice * 0.03,  // 3% of order value
+            'confirmation': 10.00,
+            'cancellation': {% if order.status == 'cancelled' %}5.00{% else %}0.00{% endif %},
+            'fulfillment': basePrice * 0.02,  // 2% of order value
+            'shipping': 12.00,
+            'return': 0.00,
+            'warehouse': basePrice * 0.01  // 1% warehouse fee
+        };
+        
+        Object.keys(defaultFees).forEach(function(feeType) {
+            const input = document.querySelector('input[name="fee_' + feeType + '"]');
+            if (input) {
+                input.value = defaultFees[feeType].toFixed(2);
+            }
+        });
+        
+        recalculateTotal();
+    }
+}
+
+// Recalculate on input change
+document.addEventListener('DOMContentLoaded', function() {
+    const feeInputs = document.querySelectorAll('input[name^="fee_"]');
+    feeInputs.forEach(function(input) {
+        input.addEventListener('input', recalculateTotal);
+    });
+});
+</script>
+{% endblock %}

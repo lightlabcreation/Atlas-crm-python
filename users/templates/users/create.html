@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+
+{% block title %}Create User{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100">
+    <!-- Simple Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-user-plus text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">Create New User</h1>
+                        <p class="mt-1 text-sm text-gray-500">Add a new user to the system with specific role and permissions</p>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'sellers:dashboard' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Sellers
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <form method="post" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Personal Information Section -->
+            <div class="bg-gray-50 rounded-lg border border-gray-300">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Personal Information</h3>
+                    <p class="text-sm text-gray-500">Basic user details and contact information</p>
+                </div>
+                <div class="px-6 py-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                            <input type="text" name="first_name" value="{{ form.first_name.value|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            {% if form.first_name.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.first_name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                            <input type="text" name="last_name" value="{{ form.last_name.value|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            {% if form.last_name.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.last_name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                            <input type="email" name="email" value="{{ form.email.value|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            {% if form.email.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                            <input type="text" name="phone_number" value="{{ form.phone_number.value|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            {% if form.phone_number.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.phone_number.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role Assignment Section -->
+            <div class="bg-gray-50 rounded-lg border border-gray-300">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Role Assignment</h3>
+                    <p class="text-sm text-gray-500">Assign role to the user</p>
+                </div>
+                <div class="px-6 py-4">
+                    <div class="grid grid-cols-1 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">User Role</label>
+                            <select name="primary_role" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select User Role</option>
+                                {% for role in roles %}
+                                    <option value="{{ role.id }}" {% if form.primary_role.value == role.id %}selected{% endif %}>
+                                        {{ role.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.primary_role.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.primary_role.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Store Information Section (for Seller role) -->
+            <div class="bg-gray-50 rounded-lg border border-gray-300">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Store Information</h3>
+                    <p class="text-sm text-gray-500">Store details and website link</p>
+                </div>
+                <div class="px-6 py-4">
+                    <div class="grid grid-cols-1 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Store Link <span class="text-gray-500 text-xs">(Optional)</span></label>
+                            <input type="url" name="store_link" value="{{ form.store_link.value|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="https://yourstore.com">
+                            {% if form.store_link.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.store_link.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bank Account Information Section (for Seller role) -->
+            <div class="bg-gray-50 rounded-lg border border-gray-300">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Bank Account Information</h3>
+                    <p class="text-sm text-gray-500">Bank details for payment processing</p>
+                </div>
+                <div class="px-6 py-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Bank Name <span class="text-gray-500 text-xs">(Optional)</span></label>
+                            <input type="text" name="bank_name" value="{{ form.bank_name.value|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter bank name">
+                            {% if form.bank_name.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.bank_name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Account Holder Name <span class="text-gray-500 text-xs">(Optional)</span></label>
+                            <input type="text" name="account_holder_name" value="{{ form.account_holder_name.value|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter account holder name">
+                            {% if form.account_holder_name.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.account_holder_name.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Account Number / IBAN <span class="text-gray-500 text-xs">(Optional)</span></label>
+                            <input type="text" name="account_number" value="{{ form.account_number.value|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter account number or IBAN">
+                            {% if form.account_number.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.account_number.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">IBAN Confirmation <span class="text-gray-500 text-xs">(Optional)</span></label>
+                            <input type="text" name="iban_confirmation" value="{{ form.iban_confirmation.value|default:'' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Confirm IBAN">
+                            {% if form.iban_confirmation.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.iban_confirmation.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ID Verification Section (for Seller role) -->
+            <div class="bg-gray-50 rounded-lg border border-gray-300">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">ID Verification</h3>
+                    <p class="text-sm text-gray-500">Upload ID images for verification</p>
+                </div>
+                <div class="px-6 py-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ID Front Image <span class="text-gray-500 text-xs">(Optional)</span></label>
+                            <input type="file" name="id_front_image" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            {% if form.id_front_image.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.id_front_image.errors.0 }}</p>
+                            {% endif %}
+                            <small class="text-gray-500 text-xs mt-1">Upload the front side of ID card</small>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">ID Back Image <span class="text-gray-500 text-xs">(Optional)</span></label>
+                            <input type="file" name="id_back_image" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            {% if form.id_back_image.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.id_back_image.errors.0 }}</p>
+                            {% endif %}
+                            <small class="text-gray-500 text-xs mt-1">Upload the back side of ID card</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Security Section -->
+            <div class="bg-gray-50 rounded-lg border border-gray-300">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Account Security</h3>
+                    <p class="text-sm text-gray-500">Set up user credentials and security settings</p>
+                </div>
+                <div class="px-6 py-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                            <input type="password" name="password1" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <small class="text-gray-500 text-xs mt-1">Minimum 8 characters, must contain uppercase, lowercase, and numbers</small>
+                            {% if form.password1.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.password1.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                            <input type="password" name="password2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            {% if form.password2.errors %}
+                                <p class="mt-1 text-sm text-red-600">{{ form.password2.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Is Active</label>
+                            <div class="flex items-center">
+                                <input type="checkbox" name="is_active" {% if form.is_active.value %}checked{% endif %} class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm text-gray-700">User account is active</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="bg-gray-50 rounded-lg border border-gray-300">
+                <div class="px-6 py-4">
+                    <div class="flex justify-end space-x-3">
+                        <a href="{% url 'sellers:dashboard' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium">
+                            Cancel
+                        </a>
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            Create User
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Returned Orders - Delivery Manager{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white" dir="ltr">
+    <!-- Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-undo text-red-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-red-600">Returned Orders</h1>
+                        <p class="mt-1 text-sm text-gray-500">Manage and Process Returned Orders</p>
+                    </div>
+                </div>
+                <a href="{% url 'delivery:manager_dashboard' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Barcode Scanner Section -->
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fas fa-barcode text-red-600 text-xl mr-3"></i>
+                    <div>
+                        <h3 class="text-sm font-medium text-red-900">Scan Order Barcode</h3>
+                        <p class="text-xs text-red-700">Use barcode scanner to quickly find orders</p>
+                    </div>
+                </div>
+                <button type="button" id="cameraBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                    <i class="fas fa-camera mr-2"></i>
+                    Open Scanner
+                </button>
+            </div>
+            <div id="cameraContainer" class="mt-4 hidden">
+                <video id="barcodeCamera" width="100%" height="300" style="border: 1px solid #ccc; border-radius: 8px;"></video>
+                <div class="mt-2 flex gap-2">
+                    <input type="text" id="barcodeInput" placeholder="Or enter order code manually" class="flex-1 border-gray-300 rounded-md px-3 py-2 text-sm">
+                    <button type="button" id="stopCameraBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-stop mr-2"></i>
+                        Stop Camera
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="bg-white rounded-lg border border-red-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-undo text-red-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Total Returned</p>
+                        <p class="text-2xl font-bold text-red-600">{{ total_returned }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg border border-orange-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-calendar-day text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Today</p>
+                        <p class="text-2xl font-bold text-orange-600">{{ returned_today }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg border border-yellow-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-calendar-week text-yellow-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">This Week</p>
+                        <p class="text-2xl font-bold text-yellow-600">{{ returned_this_week }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg border border-blue-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-calendar-alt text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">This Month</p>
+                        <p class="text-2xl font-bold text-blue-600">{{ returned_this_month }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+            <form method="GET" class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                        <input type="text" name="search" value="{{ filters.search }}" placeholder="Order Number / Customer / Phone" class="w-full border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                        <select name="date" class="w-full border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring-red-500">
+                            <option value="">All Dates</option>
+                            <option value="today" {% if filters.date == 'today' %}selected{% endif %}>Today</option>
+                            <option value="week" {% if filters.date == 'week' %}selected{% endif %}>Last 7 Days</option>
+                            <option value="month" {% if filters.date == 'month' %}selected{% endif %}>Last 30 Days</option>
+                            <option value="year" {% if filters.date == 'year' %}selected{% endif %}>Last Year</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Carrier</label>
+                        <select name="agent" class="w-full border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring-red-500">
+                            <option value="">All Carriers</option>
+                            {% for agent in delivery_agents %}
+                            <option value="{{ agent.id }}" {% if filters.agent == agent.id|stringformat:"s" %}selected{% endif %}>
+                                {{ agent.get_full_name|default:agent.email }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Delivery Company</label>
+                        <select name="company" class="w-full border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring-red-500">
+                            <option value="">All Companies</option>
+                            {% for company in companies %}
+                            <option value="{{ company.id }}" {% if filters.company == company.id|stringformat:"s" %}selected{% endif %}>
+                                {{ company.name_ar|default:company.name_en }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-search mr-2"></i>
+                        Search
+                    </button>
+                    <a href="{% url 'delivery:manager_returned_orders' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-redo mr-2"></i>
+                        Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900">Returned Orders</h2>
+                <span class="text-sm text-gray-500">Total: {{ page_obj.paginator.count }} orders</span>
+            </div>
+            <div class="overflow-x-auto">
+                {% if orders %}
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Number</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Carrier</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delivery Company</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for order in orders %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ order.order_code }}</div>
+                                <div class="text-xs text-gray-500">{{ order.get_workflow_status_display }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ order.customer }}</div>
+                                {% if order.city %}
+                                <div class="text-xs text-gray-500">{{ order.city }}{% if order.emirate %}, {{ order.emirate }}{% endif %}</div>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ order.customer_phone|default:"-" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {% if order.delivery.courier %}
+                                {{ order.delivery.courier.user.get_full_name|default:order.delivery.courier.user.email }}
+                                {% else %}
+                                <span class="text-gray-400">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {% if order.delivery.delivery_company %}
+                                {{ order.delivery.delivery_company.name_ar|default:order.delivery.delivery_company.name_en }}
+                                {% else %}
+                                <span class="text-gray-400">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ order.date|date:"Y-m-d" }}
+                                <div class="text-xs text-gray-400">{{ order.date|date:"H:i" }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {{ order.total_price_aed }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex flex-col gap-2">
+                                    <form method="POST" class="inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                                        <button type="submit" name="action" value="reprocess" class="text-green-600 hover:text-green-900" onclick="return confirm('Do you want to send the order for reprocessing?')">
+                                            <i class="fas fa-recycle mr-1"></i>
+                                            Reprocess
+                                        </button>
+                                    </form>
+                                    <form method="POST" class="inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                                        <button type="submit" name="action" value="return_to_packaging" class="text-blue-600 hover:text-blue-900" onclick="return confirm('Do you want to return the order to packaging status?')">
+                                            <i class="fas fa-box mr-1"></i>
+                                            Return to Packaging
+                                        </button>
+                                    </form>
+                                    <form method="POST" class="inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                                        <button type="submit" name="action" value="cancel" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure you want to cancel the order?')">
+                                            <i class="fas fa-times-circle mr-1"></i>
+                                            Cancel
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="px-6 py-12 text-center">
+                    <i class="fas fa-inbox text-gray-300 text-6xl mb-4"></i>
+                    <p class="text-gray-500 text-lg">No returned orders</p>
+                    <p class="text-gray-400 text-sm mt-2">No returned orders match the specified search criteria.</p>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Pagination -->
+            {% if orders.has_other_pages %}
+            <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                <div class="text-sm text-gray-700">
+                    Showing {{ orders.start_index }} to {{ orders.end_index }} of {{ orders.paginator.count }} orders
+                </div>
+                <div class="flex gap-2">
+                    {% if orders.has_previous %}
+                    <a href="?page={{ orders.previous_page_number }}{% if filters.search %}&search={{ filters.search }}{% endif %}{% if filters.date %}&date={{ filters.date }}{% endif %}{% if filters.agent %}&agent={{ filters.agent }}{% endif %}{% if filters.company %}&company={{ filters.company }}{% endif %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm">
+                        Previous
+                    </a>
+                    {% endif %}
+                    {% if orders.has_next %}
+                    <a href="?page={{ orders.next_page_number }}{% if filters.search %}&search={{ filters.search }}{% endif %}{% if filters.date %}&date={{ filters.date }}{% endif %}{% if filters.agent %}&agent={{ filters.agent }}{% endif %}{% if filters.company %}&company={{ filters.company }}{% endif %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm">
+                        Next
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Barcode Scanner for Delivery
+let stream = null;
+let barcodeDetector = null;
+
+if ('BarcodeDetector' in window) {
+    barcodeDetector = new BarcodeDetector({ formats: ['qr_code', 'ean_13', 'code_128', 'code_39'] });
+}
+
+document.getElementById('cameraBtn')?.addEventListener('click', async function() {
+    const cameraContainer = document.getElementById('cameraContainer');
+    const video = document.getElementById('barcodeCamera');
+    
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }
+        });
+        
+        video.srcObject = stream;
+        video.play();
+        cameraContainer.classList.remove('hidden');
+        this.style.display = 'none';
+        
+        if (barcodeDetector) {
+            detectBarcode(video);
+        } else {
+            alert('Barcode detection not supported. Please enter order code manually.');
+        }
+    } catch (error) {
+        console.error('Error accessing camera:', error);
+        alert('Unable to access camera. Please use manual input.');
+    }
+});
+
+document.getElementById('stopCameraBtn')?.addEventListener('click', function() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+    document.getElementById('barcodeCamera').srcObject = null;
+    document.getElementById('cameraContainer').classList.add('hidden');
+    document.getElementById('cameraBtn').style.display = 'block';
+});
+
+async function detectBarcode(video) {
+    if (!barcodeDetector) return;
+    
+    try {
+        const barcodes = await barcodeDetector.detect(video);
+        
+        if (barcodes.length > 0) {
+            const barcodeValue = barcodes[0].rawValue;
+            document.getElementById('barcodeInput').value = barcodeValue;
+            document.querySelector('input[name="search"]').value = barcodeValue;
+            document.querySelector('form[method="GET"]').submit();
+            document.getElementById('stopCameraBtn').click();
+        }
+    } catch (error) {
+        console.error('Barcode detection error:', error);
+    }
+    
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        requestAnimationFrame(() => detectBarcode(video));
+    } else {
+        video.addEventListener('loadeddata', () => {
+            requestAnimationFrame(() => detectBarcode(video));
+        });
+    }
+}
+
+// Manual barcode input
+document.getElementById('barcodeInput')?.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        const orderCode = this.value.trim();
+        if (orderCode) {
+            document.querySelector('input[name="search"]').value = orderCode;
+            document.querySelector('form[method="GET"]').submit();
+        }
+    }
+});
+</script>
+{% endblock %}
+

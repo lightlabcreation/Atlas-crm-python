@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+
+{% block title %}Order Details - {{ delivery.tracking_number }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <!-- Back Button & Title -->
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'delivery:dashboard' %}" class="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back
+                    </a>
+                    <div>
+                        <h1 class="text-2xl font-bold text-orange-600 flex items-center">
+                            <i class="fas fa-truck text-yellow-600 mr-3"></i>
+                            Order Details
+                        </h1>
+                        <p class="text-gray-600 mt-1">Track and manage delivery order</p>
+                    </div>
+                </div>
+                
+                <!-- Status & Actions -->
+                <div class="flex items-center space-x-3">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                        {% if delivery.status == 'delivered' %}bg-green-100 text-green-800
+                        {% elif delivery.status == 'failed' %}bg-red-100 text-red-800
+                        {% elif delivery.status == 'in_transit' %}bg-blue-100 text-blue-800
+                        {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                        <i class="fas fa-circle text-xs mr-2"></i>
+                        {{ delivery.get_status_display }}
+                    </span>
+                    <a href="{% url 'delivery:update_order_status' order.id %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                        <i class="fas fa-edit mr-2"></i>
+                        Update Status
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column - Main Information -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Order Information Card -->
+                <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+                    <div class="px-6 py-4 bg-gradient-to-r from-yellow-50 to-yellow-100 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-info-circle text-yellow-600 mr-2"></i>
+                            Order Information
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500 mb-1">Order Number</label>
+                                    <p class="text-lg font-semibold text-gray-900">{{ delivery.order.order_code|default:"N/A" }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500 mb-1">Priority</label>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {% if delivery.priority == 'high' %}bg-red-100 text-red-800
+                                        {% elif delivery.priority == 'medium' %}bg-yellow-100 text-yellow-800
+                                        {% else %}bg-green-100 text-green-800{% endif %}">
+                                        {{ delivery.priority|default:"Normal" }}
+                                    </span>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500 mb-1">Assigned Date</label>
+                                    <p class="text-sm text-gray-900">{{ delivery.assigned_at|date:"M d, Y H:i"|default:"Not assigned" }}</p>
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500 mb-1">Tracking Number</label>
+                                    <p class="text-lg font-semibold text-gray-900 font-mono">{{ delivery.tracking_number|default:"N/A" }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500 mb-1">Delivery Cost</label>
+                                    <p class="text-lg font-semibold text-green-600">AED {{ delivery.delivery_cost|floatformat:2|default:"0.00" }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500 mb-1">Expected Delivery</label>
+                                    <p class="text-sm text-gray-900">{{ delivery.expected_delivery|date:"M d, Y H:i"|default:"Not set" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Information Card -->
+                <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+                    <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-blue-100 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-user text-blue-600 mr-2"></i>
+                            Customer Information
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500 mb-1">Customer Name</label>
+                                    <p class="text-lg font-semibold text-gray-900">{{ delivery.order.customer_name|default:"N/A" }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500 mb-1">Phone Number</label>
+                                    <p class="text-sm text-gray-900">{{ delivery.order.customer_phone|default:"N/A" }}</p>
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500 mb-1">Delivery Address</label>
+                                    <p class="text-sm text-gray-900 leading-relaxed">{{ delivery.delivery_address|default:"N/A" }}</p>
+                                    <div class="mt-2">
+                                        <a href="#" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium">
+                                            <i class="fas fa-map-marker-alt mr-1"></i>
+                                            View on Map
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Packaging Information Card -->
+                {% if delivery.order.packaging %}
+                <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+                    <div class="px-6 py-4 bg-gradient-to-r from-green-50 to-green-100 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-box text-green-600 mr-2"></i>
+                            Packaging Information
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                {% if delivery.order.packaging.barcode %}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500 mb-1">Package Barcode</label>
+                                    <p class="text-lg font-semibold text-gray-900 font-mono">{{ delivery.order.packaging.barcode }}</p>
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500 mb-1">Package Type</label>
+                                    <p class="text-sm text-gray-900">{{ delivery.order.packaging.get_package_type_display|default:"N/A" }}</p>
+                                </div>
+                                {% if delivery.order.packaging.packager %}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500 mb-1">Packaged By</label>
+                                    <p class="text-sm text-gray-900">{{ delivery.order.packaging.packager.get_full_name|default:delivery.order.packaging.packager.email }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="space-y-4">
+                                {% if delivery.order.packaging.package_weight %}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500 mb-1">Package Weight</label>
+                                    <p class="text-sm text-gray-900">{{ delivery.order.packaging.package_weight }} kg</p>
+                                </div>
+                                {% endif %}
+                                {% if delivery.order.packaging.dimensions %}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500 mb-1">Dimensions</label>
+                                    <p class="text-sm text-gray-900">{{ delivery.order.packaging.dimensions }}</p>
+                                </div>
+                                {% endif %}
+                                {% if delivery.order.packaging.packaging_completed %}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500 mb-1">Packaging Completed</label>
+                                    <p class="text-sm text-gray-900">{{ delivery.order.packaging.packaging_completed|date:"M d, Y H:i" }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Right Column - Actions & Stats -->
+            <div class="space-y-6">
+                <!-- Quick Actions Card -->
+                <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+                    <div class="px-6 py-4 bg-gradient-to-r from-orange-50 to-orange-100 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-bolt text-orange-600 mr-2"></i>
+                            Quick Actions
+                        </h3>
+                    </div>
+                    <div class="p-6 space-y-3">
+                        <button class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center">
+                            <i class="fas fa-phone mr-2"></i>
+                            Call Customer
+                        </button>
+                        <button class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center">
+                            <i class="fas fa-sms mr-2"></i>
+                            Send SMS
+                        </button>
+                        <button class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            Get Directions
+                        </button>
+                        <button class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center">
+                            <i class="fas fa-camera mr-2"></i>
+                            Capture Proof
+                        </button>
+                        <button class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center justify-center">
+                            <i class="fas fa-print mr-2"></i>
+                            Print Label
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Delivery Statistics Card -->
+                <div class="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
+                    <div class="px-6 py-4 bg-gradient-to-r from-green-50 to-green-100 border-b border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-chart-line text-green-600 mr-2"></i>
+                            Delivery Statistics
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <i class="fas fa-clock text-gray-500 mr-3"></i>
+                                    <span class="text-sm font-medium text-gray-700">Delivery Time</span>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-900">In Progress</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <i class="fas fa-route text-gray-500 mr-3"></i>
+                                    <span class="text-sm font-medium text-gray-700">Distance</span>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-900">5.2 km</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center">
+                                    <i class="fas fa-hourglass-half text-gray-500 mr-3"></i>
+                                    <span class="text-sm font-medium text-gray-700">ETA</span>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-900">15 min</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

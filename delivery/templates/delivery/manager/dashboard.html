@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Delivery Manager Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white">
+    <!-- Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-truck text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">Delivery Manager Dashboard</h1>
+                        <p class="mt-1 text-sm text-gray-500">Manage and track delivery orders</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'delivery:manager_all_orders' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-list mr-2"></i>
+                        All Orders
+                    </a>
+                    <a href="{% url 'delivery:manager_pending_confirmations' %}" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium {% if pending_confirmations_count > 0 %}animate-pulse{% endif %}">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        Pending Confirmations
+                        {% if pending_confirmations_count > 0 %}
+                        <span class="ml-2 bg-white text-orange-600 px-2 py-1 rounded-full text-xs font-bold">{{ pending_confirmations_count }}</span>
+                        {% endif %}
+                    </a>
+                    <a href="{% url 'delivery:manager_shipping_companies' %}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-building mr-2"></i>
+                        Shipping Companies
+                    </a>
+                    <a href="{% url 'delivery:manager_returned_orders' %}" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-undo mr-2"></i>
+                        Returned Orders
+                        {% if returned_orders_count > 0 %}
+                        <span class="ml-2 bg-white text-red-600 px-2 py-1 rounded-full text-xs font-bold">{{ returned_orders_count }}</span>
+                        {% endif %}
+                    </a>
+                    <a href="{% url 'delivery:manager_process_returns' %}" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-tasks mr-2"></i>
+                        Process Returns
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-6">
+            <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-shopping-cart text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Total Orders</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ total_orders }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Completed</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ completed_orders }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-times-circle text-red-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Cancelled</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ cancelled_orders }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Pending</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ pending_orders }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <a href="{% url 'delivery:manager_pending_confirmations' %}" class="bg-white rounded-lg border-2 border-orange-300 p-6 shadow-sm hover:shadow-md transition-shadow {% if pending_confirmations_count > 0 %}border-orange-500{% endif %}">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-check-circle text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Pending Confirmations</p>
+                        <p class="text-2xl font-bold {% if pending_confirmations_count > 0 %}text-orange-600{% else %}text-gray-900{% endif %}">
+                            {{ pending_confirmations_count }}
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Orders by Company -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Orders by Shipping Company</h2>
+            </div>
+            <div class="p-6">
+                {% if orders_by_company %}
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for company, data in orders_by_company.items %}
+                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-gray-900">{{ company.name_en }}</h3>
+                            <a href="{% url 'delivery:manager_company_orders' company.id %}" class="text-blue-600 hover:text-blue-700 text-sm">
+                                <i class="fas fa-filter mr-1"></i>
+                                Filter
+                            </a>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-sm text-gray-600">Total Orders: <span class="font-semibold">{{ data.total }}</span></p>
+                            <p class="text-sm text-gray-600">Completed: <span class="font-semibold text-green-600">{{ data.delivered }}</span></p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-gray-500 text-center py-4">No orders assigned to shipping companies</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Access Buttons -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Quick Access</h2>
+            </div>
+            <div class="p-6">
+                <div class="flex flex-wrap gap-4">
+                    <a href="{% url 'delivery:manager_pending_confirmations' %}" class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-4 py-2 rounded-md text-sm font-medium transition-colors {% if pending_confirmations_count > 0 %}ring-2 ring-orange-400{% endif %}">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        Pending Confirmations ({{ pending_confirmations_count }})
+                    </a>
+                    <a href="{% url 'delivery:manager_returned_orders' %}" class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-md text-sm font-medium transition-colors {% if returned_orders_count > 0 %}ring-2 ring-red-400{% endif %}">
+                        <i class="fas fa-undo mr-2"></i>
+                        Returned Orders ({{ returned_orders_count }})
+                    </a>
+                    <a href="{% url 'delivery:manager_process_returns' %}?type=unchecked" class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        Unchecked Returns ({{ unchecked_returns_count }})
+                    </a>
+                    <a href="{% url 'delivery:manager_process_returns' %}?type=returned" class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                        <i class="fas fa-tasks mr-2"></i>
+                        Process Returns
+                    </a>
+                    <a href="{% url 'delivery:manager_assign_orders' %}" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                        <i class="fas fa-tasks mr-2"></i>
+                        Assign New Orders
+                    </a>
+                    <a href="{% url 'delivery:manager_update_orders' %}" class="bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                        <i class="fas fa-edit mr-2"></i>
+                        Update Order Statuses
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

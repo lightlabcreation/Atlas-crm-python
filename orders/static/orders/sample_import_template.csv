@@ -1,0 +1,5 @@
+Order Code,Customer Name,Mobile Number,Shipping Address,Product ID/Code,Quantity,Price Per Unit (AED),Product Variant,Notes,Product Link,Order Date (YYYY-MM-DD)
+ORD-12345678,John Doe,+971501234567,Dubai Marina, UAE,PROD001,2,150.00,Red Large,Express delivery,https://example.com/product1,2024-01-15
+ORD-12345679,Jane Smith,+971507654321,Sheikh Zayed Road,PROD002,1,299.99,Premium Black,Handle with care,https://example.com/product2,2024-01-15
+ORD-12345680,Mike Johnson,+971509876543,JBR Beach,PROD003,3,75.50,Standard Blue,Leave at reception,https://example.com/product3,2024-01-15
+ORD-12345681,Sarah Wilson,+971501112233,Abu Dhabi City,PROD004,1,200.00,"Red Small, Blue Medium, Green Large",Multiple variants order,https://example.com/product4,2024-01-15

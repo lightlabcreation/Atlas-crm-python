@@ -1,0 +1,134 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:orders_order_changelist' %}">{% trans 'Orders' %}</a>
+&rsaquo; {% trans 'Change Seller' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<h1>{{ title }}</h1>
+
+<div class="results">
+    <h2>Selected Orders ({{ orders.count }})</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Order Code</th>
+                <th>Customer</th>
+                <th>Current Seller</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.order_code }}</td>
+                <td>{{ order.customer }}</td>
+                <td>{{ order.seller.get_full_name|default:order.seller_email|default:"No Seller" }}</td>
+                <td>{{ order.get_status_display }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    <fieldset class="module aligned">
+        <h2>Select New Seller</h2>
+        <div class="form-row">
+            <div>
+                <label for="new_seller">New Seller:</label>
+                <select name="new_seller" id="new_seller" required>
+                    <option value="">-- Select Seller --</option>
+                    {% for seller in sellers %}
+                    <option value="{{ seller.id }}">{{ seller.get_full_name|default:seller.email }} ({{ seller.email }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </fieldset>
+    
+    <div class="submit-row">
+        <input type="submit" value="Change Seller" class="default" name="apply">
+        <a href="{% url 'admin:orders_order_changelist' %}" class="button cancel-link">Cancel</a>
+    </div>
+</form>
+
+<style>
+.results table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.results th,
+.results td {
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.results th {
+    background-color: #f8f8f8;
+    font-weight: bold;
+}
+
+.form-row {
+    margin-bottom: 15px;
+}
+
+.form-row label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-row select {
+    width: 100%;
+    max-width: 400px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.submit-row {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+}
+
+.submit-row input[type="submit"] {
+    background-color: #417690;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.submit-row input[type="submit"]:hover {
+    background-color: #205067;
+}
+
+.cancel-link {
+    color: #417690;
+    text-decoration: none;
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.cancel-link:hover {
+    background-color: #f8f8f8;
+}
+</style>
+{% endblock %}

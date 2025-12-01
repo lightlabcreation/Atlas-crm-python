@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white">
+
+    <div class="w-full px-4">
+
+
+    <!-- Quick Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Orders Stats -->
+        <div class="stat-card">
+            <div class="stat-card-content">
+                <div class="flex items-center">
+                    <div class="stat-icon orders">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <p class="stat-label">Total Orders</p>
+                        <p class="stat-value">{{ total_orders|default:"0" }}</p>
+                        <p class="stat-change positive">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            +12% from last month
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Stats -->
+        <div class="stat-card">
+            <div class="stat-card-content">
+                <div class="flex items-center">
+                    <div class="stat-icon products">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <p class="stat-label">Total Products</p>
+                        <p class="stat-value">{{ total_products|default:"0" }}</p>
+                        <p class="stat-change positive">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            +8% from last month
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Stats -->
+        <div class="stat-card">
+            <div class="stat-card-content">
+                <div class="flex items-center">
+                    <div class="stat-icon users">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <p class="stat-label">Total Users</p>
+                        <p class="stat-value">{{ total_users|default:"0" }}</p>
+                        <p class="stat-change positive">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            +15% from last month
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Stats -->
+        <div class="stat-card">
+            <div class="stat-card-content">
+                <div class="flex items-center">
+                    <div class="stat-icon revenue">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <p class="stat-label">Total Revenue</p>
+                        <p class="stat-value">${{ total_revenue|default:"0" }}</p>
+                        <p class="stat-change positive">
+                            <i class="fas fa-arrow-up mr-1"></i>
+                            +23% from last month
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <!-- Recent Orders -->
+        <div class="lg:col-span-2">
+            <div class="content-card">
+                <div class="content-card-header">
+                    <h3 class="text-xl font-bold text-gray-900">Recent Orders</h3>
+                    <a href="#" class="view-all-link">View All</a>
+                </div>
+                <div class="content-card-body">
+                    <div class="space-y-4">
+                        {% for order in recent_orders|slice:":5" %}
+                        <div class="order-item">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="order-status-badge {{ order.status }}">
+                                        <i class="fas fa-circle text-xs"></i>
+                                        {{ order.status|title }}
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-900">{{ order.order_code }}</p>
+                                        <p class="text-sm text-gray-500">{{ order.customer }}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-bold text-gray-900">${{ order.total_amount|default:"0" }}</p>
+                                    <p class="text-xs text-gray-500">{{ order.date|date:"M d, Y" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="empty-state">
+                            <i class="fas fa-shopping-cart text-4xl text-gray-300 mb-3"></i>
+                            <p class="text-gray-500">No orders yet</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="lg:col-span-1">
+            <div class="content-card">
+                <div class="content-card-header">
+                    <h3 class="text-xl font-bold text-gray-900">Quick Actions</h3>
+                </div>
+                <div class="content-card-body">
+                    <div class="space-y-3">
+                        <a href="{% url 'users:create' %}" class="quick-action-btn primary">
+                            <i class="fas fa-user-plus mr-3"></i>
+                            Create User
+                        </a>
+                        <a href="{% url 'sellers:dashboard' %}" class="quick-action-btn secondary">
+                            <i class="fas fa-store mr-3"></i>
+                            Manage Sellers
+                        </a>
+                        <a href="{% url 'orders:list' %}" class="quick-action-btn secondary">
+                            <i class="fas fa-project-diagram mr-3"></i>
+                            View Workflow
+                        </a>
+                        <a href="{% url 'delivery:dashboard' %}" class="quick-action-btn secondary">
+                            <i class="fas fa-truck mr-3"></i>
+                            Delivery Status
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Status -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        <!-- System Health -->
+        <div class="content-card">
+            <div class="content-card-header">
+                <h3 class="text-xl font-bold text-gray-900">System Health</h3>
+                <span class="status-indicator online">Online</span>
+            </div>
+            <div class="content-card-body">
+                <div class="space-y-4">
+                    <div class="health-item">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-700">Database</span>
+                            <span class="health-status online">Healthy</span>
+                        </div>
+                        <div class="health-bar">
+                            <div class="health-progress online" style="width: 95%"></div>
+                        </div>
+                    </div>
+                    <div class="health-item">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-700">API Services</span>
+                            <span class="health-status online">Healthy</span>
+                        </div>
+                        <div class="health-bar">
+                            <div class="health-progress online" style="width: 98%"></div>
+                        </div>
+                    </div>
+                    <div class="health-item">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-700">Storage</span>
+                            <span class="health-status warning">75% Used</span>
+                        </div>
+                        <div class="health-bar">
+                            <div class="health-progress warning" style="width: 75%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="content-card">
+            <div class="content-card-header">
+                <h3 class="text-xl font-bold text-gray-900">Recent Activity</h3>
+                <a href="#" class="view-all-link">View All</a>
+            </div>
+            <div class="content-card-body">
+                <div class="space-y-4">
+                    {% for activity in recent_activities|slice:":5" %}
+                    <div class="activity-item">
+                        <div class="flex items-start space-x-3">
+                            <div class="activity-icon {{ activity.type }}">
+                                <i class="fas fa-{{ activity.icon }}"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-gray-900">{{ activity.description }}</p>
+                                <p class="text-xs text-gray-500">{{ activity.timestamp|timesince }} ago</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">
+                        <i class="fas fa-activity text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-500">No recent activity</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Update current time and date
+    function updateDateTime() {
+        const now = new Date();
+        
+        // Update time
+        const timeElement = document.getElementById('current-time');
+        if (timeElement) {
+            timeElement.textContent = now.toLocaleTimeString('en-US', { 
+                hour12: true, 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            });
+        }
+        
+        // Update date
+        const dateElement = document.getElementById('current-date');
+        if (dateElement) {
+            dateElement.textContent = now.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+    }
+
+    // Update every second
+    setInterval(updateDateTime, 1000);
+    updateDateTime(); // Initial call
+</script>
+{% endblock %} 

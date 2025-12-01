@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/30 to-yellow-50/20">
+    <!-- Enhanced Page Header -->
+    <div class="bg-gradient-to-r from-amber-500 to-yellow-600 shadow-2xl border-b-4 border-amber-400">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div class="space-y-2">
+                    <div class="flex items-center gap-3">
+                        <a href="{% url 'stock_keeper:task_management' %}" class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center hover:bg-white/30 transition-all duration-200">
+                            <i class="fas fa-arrow-left text-white text-lg"></i>
+                        </a>
+                        <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                            <i class="fas fa-edit text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-4xl font-bold text-white">{{ title }}</h1>
+                            <p class="text-amber-100 text-lg">Update task details</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <a href="{% url 'stock_keeper:task_management' %}" 
+                       class="inline-flex items-center justify-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white font-semibold rounded-xl hover:bg-white/30 transition-all duration-200 border border-white/30">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Tasks
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+            <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                        <i class="fas fa-tasks text-slate-900 text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-white">{{ title }}</h2>
+                        <p class="text-slate-300 text-sm">Manage task information and settings</p>
+                    </div>
+                </div>
+            </div>
+            
+            <form method="post" class="p-8 space-y-8">
+                {% csrf_token %}
+                
+                <div>
+                    <label for="{{ form.title.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-3">
+                        Task Title
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                    <p class="mt-2 text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{{ form.title.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <label for="{{ form.description.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-3">
+                        Description
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                    <p class="mt-2 text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{{ form.description.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.task_type.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-3">
+                            Task Type
+                        </label>
+                        {{ form.task_type }}
+                        {% if form.task_type.errors %}
+                        <p class="mt-2 text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{{ form.task_type.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.priority.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-3">
+                            Priority
+                        </label>
+                        {{ form.priority }}
+                        {% if form.priority.errors %}
+                        <p class="mt-2 text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{{ form.priority.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.due_date.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-3">
+                            Due Date
+                        </label>
+                        {{ form.due_date }}
+                        {% if form.due_date.errors %}
+                        <p class="mt-2 text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{{ form.due_date.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="{{ form.estimated_duration.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-3">
+                            Estimated Duration (minutes)
+                        </label>
+                        {{ form.estimated_duration }}
+                        {% if form.estimated_duration.errors %}
+                        <p class="mt-2 text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">{{ form.estimated_duration.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t border-slate-200">
+                    <a href="{% url 'stock_keeper:task_management' %}" 
+                       class="inline-flex items-center justify-center px-6 py-3 border border-slate-300 rounded-xl text-sm font-semibold text-slate-700 bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-200 shadow-sm">
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                            class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-sm font-semibold rounded-xl text-white bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+                        <i class="fas fa-save mr-2"></i>
+                        Save Task
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

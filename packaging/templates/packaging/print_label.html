@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Print Label - {{ order.order_code }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="bg-white border border-gray-200 rounded-md p-6 max-w-4xl mx-auto">
+        <!-- Print Header -->
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Shipping Label</h1>
+            <div class="flex gap-2">
+                <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium">
+                    <i class="fas fa-print mr-2"></i> Print
+                </button>
+                <a href="{% url 'packaging:order_detail' order.id %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i> Back
+                </a>
+            </div>
+        </div>
+        
+        <!-- Label Content -->
+        <div id="labelContent" class="border-2 border-gray-800 p-6" style="width: 4in; min-height: 6in;">
+            <!-- Company Logo/Header -->
+            <div class="text-center mb-4 border-b border-gray-300 pb-3">
+                <h2 class="text-xl font-bold">SHIPPING LABEL</h2>
+                <p class="text-xs text-gray-600">Order: {{ order.order_code }}</p>
+            </div>
+            
+            <!-- Barcode -->
+            <div class="text-center mb-4">
+                <div id="barcodeContainer" class="mb-2"></div>
+                <p class="text-xs font-mono font-bold">{{ packaging_record.barcode }}</p>
+                <p class="text-xs text-gray-600">Tracking: {{ packaging_record.tracking_number }}</p>
+            </div>
+            
+            <!-- Shipping To -->
+            <div class="mb-4">
+                <h3 class="text-sm font-bold mb-2 border-b border-gray-300 pb-1">SHIP TO:</h3>
+                <div class="text-sm">
+                    <p class="font-semibold">{{ order.customer }}</p>
+                    {% if order.shipping_address %}
+                    <p>{{ order.shipping_address }}</p>
+                    {% endif %}
+                    {% if order.city %}
+                    <p>{{ order.city }}{% if order.state %}, {{ order.state }}{% endif %}</p>
+                    {% endif %}
+                    {% if order.emirate %}
+                    <p>{{ order.emirate }}, UAE</p>
+                    {% endif %}
+                    {% if order.customer_phone %}
+                    <p class="mt-1">Phone: {{ order.customer_phone }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Package Info -->
+            <div class="mb-4 border-t border-gray-300 pt-3">
+                <h3 class="text-sm font-bold mb-2">PACKAGE INFO:</h3>
+                <div class="text-xs space-y-1">
+                    <p><strong>Type:</strong> {{ packaging_record.get_package_type_display }}</p>
+                    {% if packaging_record.package_weight %}
+                    <p><strong>Weight:</strong> {{ packaging_record.package_weight }} kg</p>
+                    {% endif %}
+                    {% if packaging_record.dimensions %}
+                    <p><strong>Dimensions:</strong> {{ packaging_record.dimensions }} cm</p>
+                    {% endif %}
+                    <p><strong>Packaged:</strong> {{ packaging_record.packaging_completed|date:"M d, Y H:i" }}</p>
+                </div>
+            </div>
+            
+            <!-- Instructions -->
+            <div class="mt-4 pt-3 border-t border-gray-300">
+                <p class="text-xs text-gray-600 text-center">
+                    Handle with care. Fragile items inside.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include barcode library -->
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script>
+// Generate barcode
+window.onload = function() {
+    if (typeof JsBarcode !== 'undefined') {
+        JsBarcode("#barcodeContainer", "{{ packaging_record.barcode }}", {
+            format: "CODE128",
+            width: 2,
+            height: 50,
+            displayValue: false
+        });
+    }
+};
+
+// Print styles
+const style = document.createElement('style');
+style.textContent = `
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #labelContent, #labelContent * {
+            visibility: visible;
+        }
+        #labelContent {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4in;
+            min-height: 6in;
+        }
+        button, a {
+            display: none !important;
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}
+

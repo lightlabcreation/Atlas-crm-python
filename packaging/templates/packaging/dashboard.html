@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Pick and Pack{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white">
+    <!-- Simple Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-box text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">Pick and Pack</h1>
+                        <p class="mt-1 text-sm text-gray-500">Manage packaging operations and materials</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'dashboard:index' %}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-home mr-2"></i>
+                        Dashboard
+                    </a>
+                    <a href="{% url 'packaging:orders' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-list mr-2"></i>
+                        View Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Search Box -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+            <form method="get" action="{% url 'packaging:orders' %}" class="p-4">
+                <div class="flex gap-2">
+                    <input type="text" name="search" value="{{ request.GET.search }}" placeholder="Search by Order Code, Customer, Phone..." class="flex-1 border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                    <button type="submit" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-search mr-2"></i>
+                        Search
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-gray-50 rounded-lg border border-gray-300 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-clock text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Pending Packaging</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ pending_packaging|default:"0" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg border border-gray-300 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-cogs text-yellow-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">In Progress</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ in_progress_packaging|default:"0" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg border border-gray-300 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-check text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Completed Today</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ completed_today|default:"0" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg border border-gray-300 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-boxes text-purple-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Total Records</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ total_packaging_records|default:"0" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <a href="{% url 'packaging:orders' %}" class="bg-gray-50 rounded-lg border border-gray-300 p-6 hover:bg-gray-100 transition-colors">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-box text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900">Packaging Orders</h3>
+                        <p class="text-sm text-gray-500">View all packaging orders</p>
+                    </div>
+                </div>
+            </a>
+
+
+            <a href="{% url 'packaging:materials_inventory' %}" class="bg-gray-50 rounded-lg border border-gray-300 p-6 hover:bg-gray-100 transition-colors">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-tools text-purple-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900">Materials</h3>
+                        <p class="text-sm text-gray-500">Manage packaging materials</p>
+                    </div>
+                </div>
+            </a>
+
+
+            <a href="{% url 'packaging:packaging_report' %}" class="bg-gray-50 rounded-lg border border-gray-300 p-6 hover:bg-gray-100 transition-colors">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-chart-bar text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900">Reports</h3>
+                        <p class="text-sm text-gray-500">View packaging reports</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="{% url 'packaging:update_pending_orders' %}" class="bg-gray-50 rounded-lg border border-gray-300 p-6 hover:bg-gray-100 transition-colors">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900">Update Pending</h3>
+                        <p class="text-sm text-gray-500">Mark old orders as postponed</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-gray-50 rounded-lg border border-gray-300">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Recent Packaging</h3>
+                </div>
+                <div class="p-6">
+                    {% if recent_packaging %}
+                        <div class="space-y-3">
+                            {% for record in recent_packaging|slice:":5" %}
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">Order #{{ record.order.order_code|default:record.order.id }}</p>
+                                    <p class="text-xs text-gray-500">
+                                        {% if record.packager %}
+                                            Packaged by {{ record.packager.get_full_name|default:record.packager.email }}
+                                        {% else %}
+                                            Packaging record
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                    {% if record.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                    {% elif record.status == 'in_progress' %}bg-blue-100 text-blue-800
+                                    {% elif record.status == 'completed' %}bg-green-100 text-green-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ record.status|title }}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-sm text-gray-500">No recent packaging records</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="bg-gray-50 rounded-lg border border-gray-300">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Recent Orders</h3>
+                </div>
+                <div class="p-6">
+                    {% if recent_packaging_orders %}
+                        <div class="space-y-3">
+                            {% for order in recent_packaging_orders|slice:":5" %}
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">Order #{{ order.order_code|default:order.id }}</p>
+                                    <p class="text-xs text-gray-500">{{ order.customer|default:"Customer order" }}</p>
+                                </div>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                    {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                    {% elif order.status == 'processing' %}bg-blue-100 text-blue-800
+                                    {% elif order.status == 'completed' %}bg-green-100 text-green-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ order.status|title }}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-sm text-gray-500">No recent orders found</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Complete Packaging - {{ order.order_code }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">
+            Complete Packaging: {{ order.order_code }}
+        </h1>
+        <a href="{% url 'packaging:order_detail' order.id %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Order Details
+        </a>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Complete Packaging Form -->
+        <div class="lg:col-span-2">
+            <div class="bg-white border border-gray-200 rounded-md mb-6">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-medium text-gray-800">Complete Packaging Process</h2>
+                </div>
+                
+                <div class="p-6">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="actual_weight" class="block text-sm font-medium text-gray-700 mb-1">Actual Weight (kg) <span class="text-gray-400 text-xs">(Optional)</span></label>
+                                    <input type="number" name="actual_weight" id="actual_weight" step="0.01" min="0" value="{{ packaging_record.package_weight|default:'' }}" class="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" placeholder="0.5">
+                                </div>
+                                
+                                <div>
+                                    <label for="final_dimensions" class="block text-sm font-medium text-gray-700 mb-1">Final Dimensions (L x W x H cm)</label>
+                                    <input type="text" name="final_dimensions" id="final_dimensions" value="{{ packaging_record.dimensions|default:'' }}" class="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" placeholder="20 x 15 x 10" required>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="materials_used" class="block text-sm font-medium text-gray-700 mb-1">Materials Used</label>
+                                <textarea name="materials_used" id="materials_used" rows="2" class="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" placeholder="List materials used (e.g., Box: 1, Bubble wrap: 2m, Tape: 1 roll)">{{ packaging_record.materials_used|default:'' }}</textarea>
+                            </div>
+                            
+                            
+                            <div>
+                                <label for="completion_notes" class="block text-sm font-medium text-gray-700 mb-1">Completion Notes</label>
+                                <textarea name="completion_notes" id="completion_notes" rows="2" class="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" placeholder="Any notes about the packaging completion...">{{ packaging_record.packaging_notes|default:'' }}</textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <a href="{% url 'packaging:order_detail' order.id %}" class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
+                                Cancel
+                            </a>
+                            <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-medium transition-colors">
+                                <i class="fas fa-check mr-2"></i> Complete Packaging
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Packaging Summary -->
+        <div class="lg:col-span-1">
+            <div class="bg-white border border-gray-200 rounded-md mb-6">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-medium text-gray-800">Packaging Summary</h2>
+                </div>
+                
+                <div class="p-6 space-y-4">
+                    <div>
+                        <div class="text-sm text-gray-500">Package Type</div>
+                        <div class="font-medium text-gray-900">{{ packaging_record.get_package_type_display }}</div>
+                    </div>
+                    
+                    <div>
+                        <div class="text-sm text-gray-500">Started At</div>
+                        <div class="font-medium text-gray-900">{{ packaging_record.packaging_started|date:"F j, Y H:i" }}</div>
+                    </div>
+                    
+                    <div>
+                        <div class="text-sm text-gray-500">Packager</div>
+                        <div class="font-medium text-gray-900">
+                            {% if packaging_record.packager %}
+                                {{ packaging_record.packager.get_full_name }}
+                            {% else %}
+                                Not assigned
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if packaging_record.packaging_duration %}
+                    <div>
+                        <div class="text-sm text-gray-500">Current Duration</div>
+                        <div class="font-medium text-gray-900">{{ packaging_record.packaging_duration|floatformat:1 }} minutes</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if packaging_record.barcode %}
+                    <div>
+                        <div class="text-sm text-gray-500">Barcode</div>
+                        <div class="font-medium text-gray-900 font-mono">{{ packaging_record.barcode }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Next Steps -->
+            <div class="bg-white border border-gray-200 rounded-md">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-medium text-gray-800">Next Steps</h2>
+                </div>
+                
+                <div class="p-6">
+                    <div class="space-y-3 text-sm">
+                        <div class="flex items-start">
+                            <i class="fas fa-arrow-right text-blue-500 mt-1 mr-2"></i>
+                            <p class="text-gray-600">Order will be marked as ready for shipping</p>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <i class="fas fa-arrow-right text-blue-500 mt-1 mr-2"></i>
+                            <p class="text-gray-600">Delivery team will be notified</p>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <i class="fas fa-arrow-right text-blue-500 mt-1 mr-2"></i>
+                            <p class="text-gray-600">Customer will receive tracking information</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,449 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Call Center{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white">
+    <!-- Enhanced Page Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-phone text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">Call Center</h1>
+                        <p class="mt-1 text-sm text-gray-500">Manage calls and customer interactions efficiently</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'dashboard:index' %}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-home mr-2"></i>
+                        Dashboard
+                    </a>
+                    <a href="{% url 'callcenter:orders' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-list mr-2"></i>
+                        View Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Enhanced Stats Cards -->
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-10">
+            <!-- Total Calls Today -->
+            <div class="group relative overflow-hidden bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-2 border border-white/20">
+                <div class="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-yellow-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="relative p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-xl p-3 shadow-lg">
+                            <i class="fas fa-phone text-white text-lg"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-slate-500 uppercase tracking-wide">
+                                    Total Calls Today
+                                </dt>
+                                <dd>
+                                    <div class="text-2xl font-bold text-slate-900">
+                                        {{ total_calls_today }}
+                                    </div>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders Confirmed -->
+            <div class="group relative overflow-hidden bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-2 border border-white/20">
+                <div class="absolute inset-0 bg-gradient-to-br from-green-500/10 to-green-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="relative p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-3 shadow-lg">
+                            <i class="fas fa-check text-white text-lg"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-slate-500 uppercase tracking-wide">
+                                    Orders Confirmed
+                                </dt>
+                                <dd>
+                                    <div class="text-2xl font-bold text-slate-900">
+                                        {{ confirmed_orders }}
+                                    </div>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Failed Calls -->
+            <div class="group relative overflow-hidden bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-2 border border-white/20">
+                <div class="absolute inset-0 bg-gradient-to-br from-red-500/10 to-red-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="relative p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-3 shadow-lg">
+                            <i class="fas fa-times text-white text-lg"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-slate-500 uppercase tracking-wide">
+                                    Failed Calls
+                                </dt>
+                                <dd>
+                                    <div class="text-2xl font-bold text-slate-900">
+                                        {{ failed_calls }}
+                                    </div>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Average Call Duration -->
+            <div class="group relative overflow-hidden bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl hover:shadow-3xl transition-all duration-300 transform hover:-translate-y-2 border border-white/20">
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="relative p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-3 shadow-lg">
+                            <i class="fas fa-clock text-white text-lg"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-slate-500 uppercase tracking-wide">
+                                    Avg. Call Duration
+                                </dt>
+                                <dd>
+                                    <div class="text-2xl font-bold text-slate-900">
+                                        {{ avg_call_duration|default:"3:25" }}
+                                    </div>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Recent Calls and Performance -->
+        <div class="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-2 mb-10">
+            <!-- Enhanced Recent Calls -->
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-phone text-slate-900 text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">Recent Calls</h3>
+                                <p class="text-slate-300 text-sm">Latest customer interactions</p>
+                            </div>
+                        </div>
+                        <a href="{% url 'callcenter:orders' %}" class="text-sm text-amber-300 hover:text-amber-200 transition-colors duration-200">View all</a>
+                    </div>
+                </div>
+                <div class="flow-root">
+                    <ul role="list" class="-my-5 divide-y divide-slate-200/50">
+                        <li class="py-5 px-6 hover:bg-slate-50/50 transition-colors duration-200">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-green-100 text-green-600 shadow-lg">
+                                        <i class="fas fa-check text-sm"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-semibold text-slate-900">
+                                        Order #1234 - Ahmed Mohamed
+                                    </p>
+                                    <p class="text-sm text-slate-500 truncate">
+                                        Confirmed delivery for tomorrow
+                                    </p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-slate-500">
+                                        10:28 AM
+                                    </p>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="py-5 px-6 hover:bg-slate-50/50 transition-colors duration-200">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-red-100 text-red-600 shadow-lg">
+                                        <i class="fas fa-times text-sm"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-semibold text-slate-900">
+                                        Order #2345 - Sara Walid
+                                    </p>
+                                    <p class="text-sm text-slate-500 truncate">
+                                        No answer - 3rd attempt
+                                    </p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-slate-500">
+                                        9:52 AM
+                                    </p>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="py-5 px-6 hover:bg-slate-50/50 transition-colors duration-200">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-green-100 text-green-600 shadow-lg">
+                                        <i class="fas fa-check text-sm"></i>
+                                    </span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-semibold text-slate-900">
+                                        Order #3456 - Khalid Ibrahim
+                                    </p>
+                                    <p class="text-sm text-slate-500 truncate">
+                                        Confirmed delivery, changed address
+                                    </p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-slate-500">
+                                        9:41 AM
+                                    </p>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Enhanced Your Performance -->
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-chart-line text-slate-900 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Your Performance Today</h3>
+                            <p class="text-slate-300 text-sm">Key metrics and achievements</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-6 py-6">
+                    <dl class="grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-2">
+                        <div class="sm:col-span-1">
+                            <dt class="text-sm font-medium text-slate-500">
+                                Call Completion Rate
+                            </dt>
+                            <dd class="mt-2 text-2xl font-bold text-slate-900">
+                                86%
+                            </dd>
+                        </div>
+                        <div class="sm:col-span-1">
+                            <dt class="text-sm font-medium text-slate-500">
+                                Task Completion
+                            </dt>
+                            <dd class="mt-2 text-2xl font-bold text-slate-900">
+                                18/25
+                            </dd>
+                        </div>
+                        <div class="sm:col-span-1">
+                            <dt class="text-sm font-medium text-slate-500">
+                                Average Response Time
+                            </dt>
+                            <dd class="mt-2 text-2xl font-bold text-slate-900">
+                                4.2 min
+                            </dd>
+                        </div>
+                        <div class="sm:col-span-1">
+                            <dt class="text-sm font-medium text-slate-500">
+                                Customer Satisfaction
+                            </dt>
+                            <dd class="mt-2 text-2xl font-bold text-slate-900">
+                                4.7/5
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Upcoming Calls -->
+        <div class="mt-10 mb-10">
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-calendar-alt text-slate-900 text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">Upcoming Scheduled Calls</h3>
+                                <p class="text-slate-300 text-sm">Today's call schedule</p>
+                            </div>
+                        </div>
+                        <button type="button" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 border border-amber-400/20">
+                            Schedule New Call
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200/50">
+                        <thead class="bg-amber-50/50">
+                            <tr>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-amber-700 uppercase tracking-wider">
+                                    Time
+                                </th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-amber-700 uppercase tracking-wider">
+                                    Customer
+                                </th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-amber-700 uppercase tracking-wider">
+                                    Order ID
+                                </th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-amber-700 uppercase tracking-wider">
+                                    Purpose
+                                </th>
+                                <th scope="col" class="relative px-6 py-4">
+                                    <span class="sr-only">Actions</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-slate-200/50">
+                            <tr class="hover:bg-slate-50/50 transition-colors duration-200">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">
+                                    1:30 PM
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-semibold text-slate-900">Fatima Ali</div>
+                                    <div class="text-sm text-slate-500">+20 123-456-7890</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">
+                                    #4567
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                                        Delivery Confirmation
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="#" class="text-amber-600 hover:text-amber-800 transition-colors duration-200">Call</a>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition-colors duration-200">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">
+                                    2:15 PM
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-semibold text-slate-900">Omar Hassan</div>
+                                    <div class="text-sm text-slate-500">+20 123-555-7890</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">
+                                    #5678
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 border border-red-200">
+                                        Order Issue
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="#" class="text-amber-600 hover:text-amber-800 transition-colors duration-200">Call</a>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition-colors duration-200">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">
+                                    3:45 PM
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-semibold text-slate-900">Nadia Mahmoud</div>
+                                    <div class="text-sm text-slate-500">+20 123-777-7890</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">
+                                    #6789
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                                        Feedback Collection
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="#" class="text-amber-600 hover:text-amber-800 transition-colors duration-200">Call</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Call Schedule --> 
+        <div class="mt-10">
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                                <i class="fas fa-clock text-slate-900 text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">Orders Pending Confirmation</h3>
+                                <p class="text-slate-300 text-sm">Orders that require a follow-up call</p>
+                            </div>
+                        </div>
+                        <div>
+                            <a href="{% url 'callcenter:orders' %}" class="inline-flex items-center px-6 py-3 bg-white text-amber-700 font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 border-2 border-amber-200 hover:border-amber-300">
+                                View All Orders
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200/50">
+                        <thead class="bg-slate-50/50">
+                            <tr>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Order ID</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Customer</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Phone</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Priority</th>
+                                <th scope="col" class="relative px-6 py-4">
+                                    <span class="sr-only">Call Now</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-slate-200/50">
+                            <tr class="hover:bg-slate-50/50 transition-colors duration-200">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">ORD-7821</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">Ahmed Ali</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">+971 50 123 4567</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                                        Pending Confirmation
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 border border-red-200">
+                                        High
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="#" class="inline-flex items-center text-amber-600 hover:text-amber-800 transition-colors duration-200">
+                                        <i class="fas fa-phone mr-2"></i>
+                                        Call Now
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

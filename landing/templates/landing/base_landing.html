@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+{% load static %}
+{% load i18n %}
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Atlas Fulfillment - Global Logistics & E-commerce Solutions{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="{% static 'img/atlas_logo.svg' %}" type="image/svg+xml">
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <link rel="stylesheet" href="{% static 'css/arabic-fonts.css' %}">
+    
+    <!-- AOS Animation Library -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#fefce8',
+                            100: '#fef9c3',
+                            200: '#fef08a',
+                            300: '#fde047',
+                            400: '#facc15',
+                            500: '#eab308',
+                            600: '#ca8a04',
+                            700: '#a16207',
+                            800: '#854d0e',
+                            900: '#713f12',
+                        },
+                        yellow: {
+                            50: '#fefce8',
+                            100: '#fef9c3',
+                            200: '#fef08a',
+                            300: '#fde047',
+                            400: '#facc15',
+                            500: '#eab308',
+                            600: '#ca8a04',
+                            700: '#a16207',
+                            800: '#854d0e',
+                            900: '#713f12',
+                        }
+                    },
+                    fontFamily: {
+                        'sans': ['Poppins', 'Cairo', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script> 
+    <style>
+        body {
+            font-family: 'Cairo', 'Poppins', sans-serif;
+            scroll-behavior: smooth;
+        }
+        
+        /* DHL/Aramex inspired header */
+        .header-gradient {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+        }
+        
+        /* RTL specific styles for Arabic only */
+        [dir="rtl"],
+        [dir="rtl"] body,
+        [dir="rtl"] html {
+            direction: rtl !important;
+            text-align: right !important;
+        }
+        
+        [dir="rtl"] * {
+            direction: inherit;
+        }
+        
+        [dir="rtl"] .flex {
+            flex-direction: row-reverse;
+        }
+        
+        /* Force all text to start from right in RTL */
+        [dir="rtl"] *:not(input):not(textarea):not(select):not([dir="ltr"]) {
+            text-align: right !important;
+        }
+        
+        /* ULTRA STRONG RTL FORCE - Override everything */
+        [dir="rtl"] {
+            direction: rtl !important;
+            text-align: right !important;
+        }
+        
+        [dir="rtl"] * {
+            direction: rtl !important;
+            text-align: right !important;
+        }
+        
+        /* Exceptions for specific elements that should stay LTR */
+        [dir="rtl"] input[type="email"],
+        [dir="rtl"] input[type="tel"],
+        [dir="rtl"] input[type="number"],
+        [dir="rtl"] [dir="ltr"] {
+            direction: ltr !important;
+            text-align: left !important;
+        }
+        
+        /* Force all text elements */
+        [dir="rtl"] p,
+        [dir="rtl"] h1,
+        [dir="rtl"] h2,
+        [dir="rtl"] h3,
+        [dir="rtl"] h4,
+        [dir="rtl"] h5,
+        [dir="rtl"] h6,
+        [dir="rtl"] span,
+        [dir="rtl"] div,
+        [dir="rtl"] li,
+        [dir="rtl"] ul,
+        [dir="rtl"] a {
+            direction: rtl !important;
+            text-align: right !important;
+        }
+        
+        [dir="ltr"],
+        [dir="ltr"] body,
+        [dir="ltr"] html {
+            direction: ltr !important;
+            text-align: left;
+        }
+        
+        [dir="rtl"] .space-x-1 > * + * {
+            margin-right: 0.25rem;
+            margin-left: 0;
+        }
+        
+        [dir="rtl"] .space-x-3 > * + * {
+            margin-right: 0.75rem;
+            margin-left: 0;
+        }
+        
+        [dir="rtl"] .space-x-4 > * + * {
+            margin-right: 1rem;
+            margin-left: 0;
+        }
+        
+        [dir="rtl"] .space-x-6 > * + * {
+            margin-right: 1.5rem;
+            margin-left: 0;
+        }
+        
+        [dir="rtl"] .space-x-8 > * + * {
+            margin-right: 2rem;
+            margin-left: 0;
+        }
+        
+        [dir="rtl"] .mr-2 {
+            margin-right: 0;
+            margin-left: 0.5rem;
+        }
+        
+        [dir="rtl"] .mr-3 {
+            margin-right: 0;
+            margin-left: 0.75rem;
+        }
+        
+        [dir="rtl"] .ml-2 {
+            margin-left: 0;
+            margin-right: 0.5rem;
+        }
+        
+        [dir="rtl"] .ml-3 {
+            margin-left: 0;
+            margin-right: 0.75rem;
+        }
+        
+        /* RTL Input and Form elements */
+        [dir="rtl"] input,
+        [dir="rtl"] textarea,
+        [dir="rtl"] select {
+            text-align: right;
+            direction: rtl;
+        }
+        
+        [dir="rtl"] label {
+            text-align: right;
+        }
+        
+        /* RTL Grid adjustments */
+        [dir="rtl"] .grid {
+            direction: rtl;
+        }
+        
+        /* RTL Text alignment - force right alignment for Arabic */
+        [dir="rtl"] .text-center:not(.keep-center) {
+            text-align: right !important;
+        }
+        
+        /* Force RTL for all text elements in Arabic */
+        [dir="rtl"] p,
+        [dir="rtl"] h1,
+        [dir="rtl"] h2,
+        [dir="rtl"] h3,
+        [dir="rtl"] h4,
+        [dir="rtl"] h5,
+        [dir="rtl"] h6,
+        [dir="rtl"] span,
+        [dir="rtl"] div:not(.keep-center):not(.keep-ltr) {
+            text-align: right;
+            direction: rtl;
+        }
+        
+        /* Force RTL for sections and containers */
+        [dir="rtl"] section,
+        [dir="rtl"] .section,
+        [dir="rtl"] .container {
+            direction: rtl;
+        }
+        
+        /* Grid RTL support */
+        [dir="rtl"] .grid {
+            direction: rtl;
+        }
+        
+        /* Cards and boxes RTL */
+        [dir="rtl"] .card,
+        [dir="rtl"] .service-card,
+        [dir="rtl"] .contact-card {
+            text-align: right;
+            direction: rtl;
+        }
+        
+        /* Force RTL for footer lists and links */
+        [dir="rtl"] footer ul,
+        [dir="rtl"] footer li,
+        [dir="rtl"] footer a {
+            text-align: right !important;
+            direction: rtl !important;
+        }
+        
+        [dir="rtl"] footer .text-right ul,
+        [dir="rtl"] footer .text-right li,
+        [dir="rtl"] footer .text-right a {
+            text-align: right !important;
+            direction: rtl !important;
+        }
+        
+        /* Force footer grid RTL */
+        [dir="rtl"] footer .grid {
+            direction: rtl !important;
+        }
+        
+        /* Force all footer columns to RTL */
+        [dir="rtl"] footer .grid > div {
+            direction: rtl !important;
+            text-align: right !important;
+        }
+        
+        /* Force footer lists alignment */
+        [dir="rtl"] footer ul li {
+            text-align: right !important;
+            direction: rtl !important;
+        }
+        
+        [dir="rtl"] footer ul li a {
+            text-align: right !important;
+            direction: rtl !important;
+            display: inline-block;
+        }
+        
+        /* Force RTL for all lists in Arabic */
+        [dir="rtl"] ul,
+        [dir="rtl"] ul li,
+        [dir="rtl"] ul li span {
+            text-align: right !important;
+            direction: rtl !important;
+        }
+        
+        /* Force RTL for flex items in lists */
+        [dir="rtl"] ul li.flex-row-reverse {
+            flex-direction: row-reverse !important;
+        }
+        
+        [dir="rtl"] ul li.flex-row-reverse span {
+            text-align: right !important;
+        }
+        
+        /* Force checkmark icons to be on the right in RTL */
+        [dir="rtl"] ul li.flex-row-reverse > div {
+            order: 2 !important;
+            margin-left: 0.75rem !important;
+            margin-right: 0 !important;
+        }
+        
+        [dir="rtl"] ul li.flex-row-reverse > span {
+            order: 1 !important;
+            text-align: right !important;
+            direction: rtl !important;
+        }
+        
+        /* Ensure list items start from right */
+        [dir="rtl"] ul li {
+            justify-content: flex-start !important;
+            flex-direction: row-reverse !important;
+            text-align: right !important;
+            direction: rtl !important;
+        }
+        
+        [dir="rtl"] ul li > div:first-child {
+            margin-left: 0.75rem !important;
+            margin-right: 0 !important;
+        }
+        
+        [dir="rtl"] ul li > span {
+            text-align: right !important;
+            direction: rtl !important;
+        }
+        
+        /* Force all spans and text in lists to RTL */
+        [dir="rtl"] ul li span,
+        [dir="rtl"] ul li p {
+            text-align: right !important;
+            direction: rtl !important;
+        }
+        
+        [dir="ltr"] input,
+        [dir="ltr"] textarea,
+        [dir="ltr"] select {
+            text-align: left;
+            direction: ltr;
+        }
+        
+        [dir="ltr"] label {
+            text-align: left;
+        }
+        
+        /* Responsive improvements */
+        @media (max-width: 640px) {
+            .header-gradient h1 {
+                font-size: 1.25rem;
+            }
+            .header-gradient p {
+                font-size: 0.625rem;
+            }
+            .header-gradient img {
+                height: 3rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .service-card {
+                padding: 1.5rem;
+            }
+            .service-card h3 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Animations */
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #eab308;
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ca8a04;
+        }
+        
+        /* Language Switcher */
+        .language-switcher {
+            position: relative;
+            z-index: 50;
+        }
+        
+        .language-dropdown {
+            position: absolute;
+            top: 100%;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            width: 150px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .language-switcher:hover .language-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        /* Navbar Active Link */
+        .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Notification Animation */
+        @keyframes notification-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(234, 179, 8, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
+        }
+        
+        .pulse-animation {
+            animation: notification-pulse 2s infinite;
+        }
+        
+        /* Responsive navbar styles */
+        @media (max-width: 1023px) {
+            .mobile-menu-open {
+                overflow: hidden !important;
+                position: fixed;
+                width: 100%;
+                height: 100%;
+            }
+            
+            #mobile-menu-backdrop {
+                transition: opacity 0.3s ease, visibility 0.3s ease;
+            }
+            
+            .mobile-menu {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                max-width: 100vw !important;
+                max-height: 100vh !important;
+                background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%) !important;
+                z-index: 99999 !important;
+                padding-top: 5rem;
+                overflow-y: auto;
+                overflow-x: hidden;
+                transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+                transform: translateX(-100%);
+                opacity: 0;
+                visibility: hidden;
+                margin: 0 !important;
+                padding-left: 0;
+                padding-right: 0;
+                box-sizing: border-box;
+            }
+            
+            .mobile-menu.active {
+                transform: translateX(0) !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+            
+            /* Ensure header doesn't overlap */
+            header {
+                z-index: 1000;
+                position: relative;
+            }
+            
+            /* Prevent body scroll when menu is open */
+            body.mobile-menu-open {
+                overflow: hidden !important;
+                position: fixed !important;
+                width: 100% !important;
+            }
+        }
+        
+        /* Language switcher responsive */
+        .language-switcher select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 20 20'%3E%3Cpath d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+        
+        [dir="rtl"] .language-switcher select {
+            background-position: left 0.5rem center;
+            padding-right: 0.75rem;
+            padding-left: 2.5rem;
+        }
+        
+        /* DHL/Aramex style buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: inline-block;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255, 215, 0, 0.3);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid white;
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: inline-block;
+        }
+        
+        .btn-secondary:hover {
+            background: white;
+            color: #FF8C00;
+        }
+        
+        /* Navbar spacing fixes */
+        header nav a {
+            white-space: nowrap;
+        }
+        
+        /* Responsive navbar spacing */
+        @media (min-width: 1024px) {
+            header .flex {
+                gap: 1rem;
+            }
+            
+            header nav {
+                margin: 0 1rem;
+            }
+        }
+        
+        @media (min-width: 1280px) {
+            header nav {
+                margin: 0 2rem;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="min-h-screen flex flex-col bg-gray-50">
+    <!-- Header - DHL/Aramex Style -->
+    <header class="header-gradient text-white relative z-50 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4 {% if LANGUAGE_CODE == 'ar' %}flex-row-reverse{% endif %}">
+                <!-- Logo -->
+                <a href="{% url 'landing:home' %}" class="flex items-center flex-shrink-0 {% if LANGUAGE_CODE == 'ar' %}flex-row-reverse{% endif %}">
+                    <img src="{% static 'img/logo_icon.png' %}" class="h-10 sm:h-12 md:h-14 w-auto {% if LANGUAGE_CODE == 'ar' %}ml-2 sm:ml-3{% else %}mr-2 sm:mr-3{% endif %}"/>
+                    <div class="hidden sm:block">
+                        <h1 class="text-lg sm:text-xl md:text-2xl font-bold">Atlas Fulfillment</h1>
+                        <p class="text-xs sm:text-sm text-yellow-100 uppercase font-semibold">FULFILLMENT DELIVERY SERVICES</p>
+                    </div>
+                </a>
+                
+                <!-- Desktop Menu -->
+                <nav class="hidden lg:flex items-center {% if LANGUAGE_CODE == 'ar' %}flex-row-reverse{% endif %}" {% if LANGUAGE_CODE == 'ar' %}style="gap: 1.5rem;"{% else %}style="gap: 2rem;"{% endif %}>
+                    <a href="{% url 'landing:home' %}" class="nav-link px-3 py-2 rounded-md hover:bg-white hover:bg-opacity-20 transition-colors font-medium whitespace-nowrap {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                        {% trans "Home" %}
+                    </a>
+                    <a href="{% url 'landing:services' %}" class="nav-link px-3 py-2 rounded-md hover:bg-white hover:bg-opacity-20 transition-colors font-medium whitespace-nowrap {% if request.resolver_match.url_name == 'services' %}active{% endif %}">
+                        {% trans "Services" %}
+                    </a>
+                    <a href="{% url 'landing:about' %}" class="nav-link px-3 py-2 rounded-md hover:bg-white hover:bg-opacity-20 transition-colors font-medium whitespace-nowrap {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
+                        {% trans "About Us" %}
+                    </a>
+                    <a href="{% url 'landing:contact' %}" class="nav-link px-3 py-2 rounded-md hover:bg-white hover:bg-opacity-20 transition-colors font-medium whitespace-nowrap {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">
+                        {% trans "Contact" %}
+                    </a>
+                </nav>
+                
+                <!-- Right section -->
+                <div class="hidden lg:flex items-center {% if LANGUAGE_CODE == 'ar' %}flex-row-reverse{% endif %}" {% if LANGUAGE_CODE == 'ar' %}style="gap: 0.75rem;"{% else %}style="gap: 1rem;"{% endif %}>
+                    <!-- Language Switcher -->
+                    <div class="language-switcher relative flex-shrink-0">
+                        <form action="{% url 'landing:switch_language' %}" method="get" class="inline">
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <select name="language" onchange="this.form.submit()" class="bg-white bg-opacity-20 text-white border border-white border-opacity-30 rounded px-3 py-2 text-sm cursor-pointer appearance-none whitespace-nowrap {% if LANGUAGE_CODE == 'ar' %}pl-8{% else %}pr-8{% endif %} focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 min-w-[100px]">
+                                <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>English</option>
+                                <option value="ar" {% if LANGUAGE_CODE == 'ar' %}selected{% endif %}>العربية</option>
+                            </select>
+                            <i class="fas fa-chevron-down absolute {% if LANGUAGE_CODE == 'ar' %}left-2{% else %}right-2{% endif %} top-1/2 transform -translate-y-1/2 text-white text-xs pointer-events-none"></i>
+                        </form>
+                    </div>
+                    
+                    <!-- Authentication Links -->
+                    {% if user.is_authenticated %}
+                        <div class="relative flex-shrink-0">
+                            <button id="user-menu-button" class="flex items-center px-4 py-2 rounded-md border border-white border-opacity-30 hover:bg-white hover:bg-opacity-20 transition-colors whitespace-nowrap {% if LANGUAGE_CODE == 'ar' %}flex-row-reverse{% endif %}">
+                                <span class="{% if LANGUAGE_CODE == 'ar' %}ml-2{% else %}mr-2{% endif %}">{{ user.get_full_name|default:user.username }}</span>
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </button>
+                            <div id="user-dropdown" class="hidden absolute {% if LANGUAGE_CODE == 'ar' %}left-0{% else %}right-0{% endif %} mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                                <a href="{% url 'dashboard:index' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">{% trans "Dashboard" %}</a>
+                                <a href="/users/profile/" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">{% trans "Profile" %}</a>
+                                <div class="border-t border-gray-100"></div>
+                                <a href="/users/logout/" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">{% trans "Logout" %}</a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <a href="/users/login/" class="btn-secondary whitespace-nowrap flex-shrink-0">
+                            {% trans "Login" %}
+                        </a>
+                        <a href="/users/register/" class="btn-primary whitespace-nowrap flex-shrink-0">
+                            {% trans "Get Started" %}
+                        </a>
+                    {% endif %}
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-button" class="lg:hidden text-white focus:outline-none z-50 relative">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Backdrop -->
+        <div id="mobile-menu-backdrop" class="fixed inset-0 bg-black bg-opacity-50 z-[99998] lg:hidden hidden"></div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="mobile-menu lg:hidden" style="z-index: 99999 !important;">
+            <div class="h-full overflow-y-auto">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+                    <!-- Close button -->
+                    <div class="flex justify-end mb-6">
+                        <button id="mobile-menu-close" class="text-white focus:outline-none hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors z-[100000] relative">
+                            <i class="fas fa-times text-2xl"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Navigation Links -->
+                    <div class="flex flex-col space-y-2 mb-6">
+                        <a href="{% url 'landing:home' %}" class="nav-link px-4 py-3 rounded-md hover:bg-white hover:bg-opacity-20 transition-colors font-medium text-white {% if request.resolver_match.url_name == 'home' %}active bg-white bg-opacity-20{% endif %}">
+                            {% trans "Home" %}
+                        </a>
+                        <a href="{% url 'landing:services' %}" class="nav-link px-4 py-3 rounded-md hover:bg-white hover:bg-opacity-20 transition-colors font-medium text-white {% if request.resolver_match.url_name == 'services' %}active bg-white bg-opacity-20{% endif %}">
+                            {% trans "Services" %}
+                        </a>
+                        <a href="{% url 'landing:about' %}" class="nav-link px-4 py-3 rounded-md hover:bg-white hover:bg-opacity-20 transition-colors font-medium text-white {% if request.resolver_match.url_name == 'about' %}active bg-white bg-opacity-20{% endif %}">
+                            {% trans "About Us" %}
+                        </a>
+                        <a href="{% url 'landing:contact' %}" class="nav-link px-4 py-3 rounded-md hover:bg-white hover:bg-opacity-20 transition-colors font-medium text-white {% if request.resolver_match.url_name == 'contact' %}active bg-white bg-opacity-20{% endif %}">
+                            {% trans "Contact" %}
+                        </a>
+                    </div>
+                    
+                    <!-- Language Switcher Mobile -->
+                    <div class="pt-4 border-t border-white border-opacity-20 mb-4">
+                        <h3 class="text-white text-opacity-90 text-sm font-medium mb-3">{% trans "Language" %}</h3>
+                        <form action="{% url 'landing:switch_language' %}" method="get">
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <select name="language" onchange="this.form.submit()" class="w-full bg-white bg-opacity-20 text-white border border-white border-opacity-30 rounded-lg px-4 py-2.5 text-sm cursor-pointer appearance-none focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50">
+                                <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>English</option>
+                                <option value="ar" {% if LANGUAGE_CODE == 'ar' %}selected{% endif %}>العربية</option>
+                            </select>
+                        </form>
+                    </div>
+                    
+                    <!-- Account Section -->
+                    <div class="pt-4 border-t border-white border-opacity-20">
+                        <h3 class="text-white text-opacity-90 text-sm font-medium mb-3">{% trans "Account" %}</h3>
+                        <div class="flex flex-col space-y-2">
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'dashboard:index' %}" class="text-center px-4 py-2.5 rounded-md border border-white border-opacity-30 hover:bg-white hover:bg-opacity-20 transition-colors text-white font-medium">
+                                    {% trans "Dashboard" %}
+                                </a>
+                                <a href="/users/logout/" class="text-center px-4 py-2.5 rounded-md bg-white text-orange-600 font-medium hover:bg-gray-100 transition-colors">
+                                    {% trans "Logout" %}
+                                </a>
+                            {% else %}
+                                <a href="/users/login/" class="text-center px-4 py-2.5 rounded-md border border-white border-opacity-30 hover:bg-white hover:bg-opacity-20 transition-colors text-white font-medium">
+                                    {% trans "Login" %}
+                                </a>
+                                <a href="/users/register/" class="text-center px-4 py-2.5 rounded-md bg-white text-orange-600 font-medium hover:bg-gray-100 transition-colors">
+                                    {% trans "Get Started" %}
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer - DHL/Aramex Style -->
+    <footer class="bg-gray-900 text-white pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12" {% if LANGUAGE_CODE == 'ar' %}dir="rtl"{% endif %}>
+                <!-- Company Info -->
+                <div class="{% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}">
+                    <div class="flex items-center mb-6 {% if LANGUAGE_CODE == 'ar' %}flex-row-reverse{% endif %}">
+                        <img src="{% static 'img/delivery_logo_white.png' %}" class="h-10 sm:h-12 w-auto {% if LANGUAGE_CODE == 'ar' %}ml-3{% else %}mr-3{% endif %}"/>
+                        <div>
+                            <h3 class="text-xl font-bold">Atlas Fulfillment</h3>
+                            <p class="text-sm text-yellow-400 uppercase font-semibold">FULFILLMENT DELIVERY SERVICES</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-400 mb-6">
+                        {% trans "Your trusted partner for end-to-end logistics, warehousing, and e-commerce fulfillment across the Middle East and beyond." %}
+                    </p>
+                    <div class="flex {% if LANGUAGE_CODE == 'ar' %}flex-row-reverse{% endif %} gap-3">
+                        <a href="https://www.facebook.com/profile.php?id=61572272592060" target="_blank" rel="noopener noreferrer" class="bg-yellow-500 hover:bg-yellow-600 h-10 w-10 rounded-full flex items-center justify-center transition-colors flex-shrink-0">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="https://www.instagram.com/atlasfulfillment/" target="_blank" rel="noopener noreferrer" class="bg-yellow-500 hover:bg-yellow-600 h-10 w-10 rounded-full flex items-center justify-center transition-colors flex-shrink-0">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://x.com/atlasfulfillmnt/" target="_blank" rel="noopener noreferrer" class="bg-yellow-500 hover:bg-yellow-600 h-10 w-10 rounded-full flex items-center justify-center transition-colors flex-shrink-0">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="https://wa.me/971503565009" target="_blank" rel="noopener noreferrer" class="bg-yellow-500 hover:bg-yellow-600 h-10 w-10 rounded-full flex items-center justify-center transition-colors flex-shrink-0">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                        <a href="https://www.tiktok.com/@atlasfulfillment" target="_blank" rel="noopener noreferrer" class="bg-yellow-500 hover:bg-yellow-600 h-10 w-10 rounded-full flex items-center justify-center transition-colors flex-shrink-0">
+                            <i class="fab fa-tiktok"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Services -->
+                <div class="{% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}" {% if LANGUAGE_CODE == 'ar' %}dir="rtl"{% endif %}>
+                    <h3 class="text-xl font-bold mb-6">{% trans "Our Services" %}</h3>
+                    <ul class="space-y-3 {% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}" {% if LANGUAGE_CODE == 'ar' %}dir="rtl"{% endif %}>
+                        <li class="{% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}"><a href="{% url 'landing:services' %}" class="text-gray-400 hover:text-yellow-400 transition-colors {% if LANGUAGE_CODE == 'ar' %}inline-block text-right{% else %}inline-block{% endif %}">{% trans "Sourcing" %}</a></li>
+                        <li class="{% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}"><a href="{% url 'landing:services' %}" class="text-gray-400 hover:text-yellow-400 transition-colors {% if LANGUAGE_CODE == 'ar' %}inline-block text-right{% else %}inline-block{% endif %}">{% trans "Warehousing" %}</a></li>
+                        <li class="{% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}"><a href="{% url 'landing:services' %}" class="text-gray-400 hover:text-yellow-400 transition-colors {% if LANGUAGE_CODE == 'ar' %}inline-block text-right{% else %}inline-block{% endif %}">{% trans "Delivery" %}</a></li>
+                        <li class="{% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}"><a href="{% url 'landing:services' %}" class="text-gray-400 hover:text-yellow-400 transition-colors {% if LANGUAGE_CODE == 'ar' %}inline-block text-right{% else %}inline-block{% endif %}">{% trans "Customs Clearance" %}</a></li>
+                        <li class="{% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}"><a href="{% url 'landing:services' %}" class="text-gray-400 hover:text-yellow-400 transition-colors {% if LANGUAGE_CODE == 'ar' %}inline-block text-right{% else %}inline-block{% endif %}">{% trans "Call Center" %}</a></li>
+                        <li class="{% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}"><a href="{% url 'landing:services' %}" class="text-gray-400 hover:text-yellow-400 transition-colors {% if LANGUAGE_CODE == 'ar' %}inline-block text-right{% else %}inline-block{% endif %}">{% trans "COD Remittance" %}</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Quick Links -->
+                <div class="{% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}" {% if LANGUAGE_CODE == 'ar' %}dir="rtl"{% endif %}>
+                    <h3 class="text-xl font-bold mb-6">{% trans "Quick Links" %}</h3>
+                    <ul class="space-y-3 {% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}" {% if LANGUAGE_CODE == 'ar' %}dir="rtl"{% endif %}>
+                        <li class="{% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}"><a href="{% url 'landing:home' %}" class="text-gray-400 hover:text-yellow-400 transition-colors {% if LANGUAGE_CODE == 'ar' %}inline-block text-right{% else %}inline-block{% endif %}">{% trans "Home" %}</a></li>
+                        <li class="{% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}"><a href="{% url 'landing:about' %}" class="text-gray-400 hover:text-yellow-400 transition-colors {% if LANGUAGE_CODE == 'ar' %}inline-block text-right{% else %}inline-block{% endif %}">{% trans "About Us" %}</a></li>
+                        <li class="{% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}"><a href="{% url 'landing:contact' %}" class="text-gray-400 hover:text-yellow-400 transition-colors {% if LANGUAGE_CODE == 'ar' %}inline-block text-right{% else %}inline-block{% endif %}">{% trans "Contact Us" %}</a></li>
+                        <li class="{% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}"><a href="{% url 'landing:faq' %}" class="text-gray-400 hover:text-yellow-400 transition-colors {% if LANGUAGE_CODE == 'ar' %}inline-block text-right{% else %}inline-block{% endif %}">{% trans "FAQ" %}</a></li>
+                        <li class="{% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}"><a href="/users/login/" class="text-gray-400 hover:text-yellow-400 transition-colors {% if LANGUAGE_CODE == 'ar' %}inline-block text-right{% else %}inline-block{% endif %}">{% trans "Login" %}</a></li>
+                        <li class="{% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}"><a href="/users/register/" class="text-gray-400 hover:text-yellow-400 transition-colors {% if LANGUAGE_CODE == 'ar' %}inline-block text-right{% else %}inline-block{% endif %}">{% trans "Register" %}</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Contact Info -->
+                <div class="{% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}" {% if LANGUAGE_CODE == 'ar' %}dir="rtl"{% endif %}>
+                    <h3 class="text-xl font-bold mb-6">{% trans "Contact Us" %}</h3>
+                    <ul class="space-y-4 {% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}" {% if LANGUAGE_CODE == 'ar' %}dir="rtl"{% endif %}>
+                        <li class="flex items-start {% if LANGUAGE_CODE == 'ar' %}flex-row-reverse{% endif %} {% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}">
+                            <i class="fas fa-phone-alt mt-1.5 {% if LANGUAGE_CODE == 'ar' %}ml-3{% else %}mr-3{% endif %} text-yellow-400"></i>
+                            <div class="flex flex-col {% if LANGUAGE_CODE == 'ar' %}items-end{% else %}items-start{% endif %} space-y-1">
+                                <a href="tel:+971503565009" class="text-gray-400 hover:text-yellow-400 transition-colors" dir="ltr" style="direction: ltr !important; text-align: left !important; unicode-bidi: bidi-override;">
+                                    +971 50 356 5009
+                                </a>
+                                <a href="tel:+971542121434" class="text-gray-400 hover:text-yellow-400 transition-colors" dir="ltr" style="direction: ltr !important; text-align: left !important; unicode-bidi: bidi-override;">
+                                    +971 54 212 1434
+                                </a>
+                            </div>
+                        </li>
+                        <li class="flex items-start {% if LANGUAGE_CODE == 'ar' %}flex-row-reverse{% endif %} {% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}">
+                            <i class="fas fa-envelope mt-1.5 {% if LANGUAGE_CODE == 'ar' %}ml-3{% else %}mr-3{% endif %} text-yellow-400"></i>
+                            <a href="mailto:contact@atlasfulfillments.com" class="text-gray-400 hover:text-yellow-400 transition-colors {% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}" dir="ltr">
+                                contact@atlasfulfillments.com
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Bottom Footer -->
+            <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row {% if LANGUAGE_CODE == 'ar' %}flex-row-reverse{% endif %} justify-between items-center space-y-4 md:space-y-0 {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %}">
+                <div class="text-gray-500 text-sm {% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}">
+                    &copy; {% now "Y" %} Atlas Fulfillment. {% trans "All rights reserved." %}
+                </div>
+                <div class="flex {% if LANGUAGE_CODE == 'ar' %}flex-row-reverse space-x-reverse{% endif %} space-x-6 text-sm">
+                    <a href="#" class="text-gray-500 hover:text-yellow-400 transition-colors">{% trans "Privacy Policy" %}</a>
+                    <a href="#" class="text-gray-500 hover:text-yellow-400 transition-colors">{% trans "Terms of Service" %}</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            easing: 'ease',
+            once: true
+        });
+        
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileMenuClose = document.getElementById('mobile-menu-close');
+        const mobileMenuBackdrop = document.getElementById('mobile-menu-backdrop');
+        
+        function openMobileMenu() {
+            if (mobileMenu && mobileMenuBackdrop) {
+                mobileMenu.classList.add('active');
+                mobileMenuBackdrop.classList.remove('hidden');
+                mobileMenuBackdrop.classList.add('block');
+                document.body.classList.add('mobile-menu-open');
+            }
+        }
+        
+        function closeMobileMenu() {
+            if (mobileMenu && mobileMenuBackdrop) {
+                mobileMenu.classList.remove('active');
+                mobileMenuBackdrop.classList.add('hidden');
+                mobileMenuBackdrop.classList.remove('block');
+                document.body.classList.remove('mobile-menu-open');
+            }
+        }
+        
+        if (mobileMenuButton && mobileMenu && mobileMenuClose && mobileMenuBackdrop) {
+            mobileMenuButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                openMobileMenu();
+            });
+            
+            mobileMenuClose.addEventListener('click', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                closeMobileMenu();
+            });
+            
+            // Close menu when clicking on backdrop
+            mobileMenuBackdrop.addEventListener('click', function(e) {
+                e.stopPropagation();
+                closeMobileMenu();
+            });
+            
+            // Close menu on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
+                    closeMobileMenu();
+                }
+            });
+        }
+        
+        // Add active class to current page link
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // User dropdown toggle
+        const userMenuButton = document.getElementById('user-menu-button');
+        const userDropdown = document.getElementById('user-dropdown');
+        
+        if (userMenuButton && userDropdown) {
+            userMenuButton.addEventListener('click', function() {
+                userDropdown.classList.toggle('hidden');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!userMenuButton.contains(event.target) && !userDropdown.contains(event.target)) {
+                    userDropdown.classList.add('hidden');
+                }
+            });
+        }
+
+        function switchLang(select) {
+            const lang = select.value;
+            const form = select.closest("form");
+            const input = form.querySelector("input[name=language]");
+            input.value = lang;
+            form.submit();
+        }
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

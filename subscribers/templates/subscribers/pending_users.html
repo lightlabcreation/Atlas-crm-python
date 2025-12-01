@@ -1,0 +1,495 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pending Registration Requests{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100">
+    <!-- CSRF Token -->
+    {% csrf_token %}
+    
+    <!-- Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-yellow-600">Pending Registration Requests</h1>
+                        <p class="mt-1 text-sm text-gray-500">Review and approve new user registrations</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+                        {{ total_pending }} pending requests
+                    </div>
+                    <a href="{% url 'subscribers:list' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to All Users
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Messages -->
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+            <div class="p-4 rounded-md {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-700{% else %}bg-green-50 border border-green-200 text-green-700{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-yellow-50 rounded-lg border border-yellow-200 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-yellow-700">Total Pending</p>
+                        <p class="text-2xl font-bold text-yellow-800">{{ total_pending }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-blue-50 rounded-lg border border-blue-200 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-users text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-blue-700">Total Users</p>
+                        <p class="text-2xl font-bold text-blue-800">{{ total_users }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-green-50 rounded-lg border border-green-200 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-calendar-week text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-green-700">This Week</p>
+                        <p class="text-2xl font-bold text-green-800">{{ recent_pending }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search -->
+        <div class="bg-white rounded-lg border border-gray-300 mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Search Pending Users</h3>
+            </div>
+            <div class="p-6">
+                <form method="get" class="space-y-4">
+                    <div class="flex space-x-4">
+                        <div class="flex-1">
+                            <input type="text" name="search" value="{{ search_query }}" 
+                                   placeholder="Search by name, email, phone, or company..." 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
+                        </div>
+                        <button type="submit" class="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-2 rounded-md font-medium">
+                            <i class="fas fa-search mr-2"></i>Search
+                        </button>
+                        {% if search_query %}
+                        <a href="{% url 'subscribers:pending_users' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-md font-medium">
+                            <i class="fas fa-times mr-2"></i>Clear
+                        </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Pending Users Table -->
+        <div class="bg-white rounded-lg border border-gray-300 shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Pending Users</h3>
+            </div>
+            
+            {% if page_obj %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-yellow-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">User</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Store Information</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Bank Information</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">ID Images</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Registration Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-yellow-700 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for user in page_obj %}
+                        <tr class="hover:bg-gray-50">
+                            <!-- User Column -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mr-4">
+                                        <span class="text-sm font-medium text-yellow-800">{{ user.get_full_name|first }}</span>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">{{ user.get_full_name }}</div>
+                                        <div class="text-sm text-gray-500">{{ user.email }}</div>
+                                        <div class="text-sm text-gray-500">{{ user.phone_number|default:"No phone" }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            
+                            <!-- Store Information Column -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    <div><strong>Store Name:</strong> {{ user.company_name|default:"Not specified" }}</div>
+                                    <div><strong>Store Link:</strong> {{ user.store_link|default:"Not specified" }}</div>
+                                    <div><strong>Store Type:</strong> {{ user.store_type|default:"Not specified" }}</div>
+                                </div>
+                            </td>
+                            
+                            <!-- Bank Information Column -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    <div><strong>Bank Name:</strong> {{ user.bank_name|default:"Not specified" }}</div>
+                                    <div><strong>Account Holder:</strong> {{ user.account_holder_name|default:"Not specified" }}</div>
+                                    <div><strong>Account Number:</strong> 
+                                        {% if user.account_number %}
+                                            <span class="font-mono text-xs bg-gray-100 px-2 py-1 rounded">{{ user.account_number|truncatechars:20 }}</span>
+                                        {% else %}
+                                            Not specified
+                                        {% endif %}
+                                    </div>
+                                    <div><strong>IBAN:</strong> 
+                                        {% if user.iban_confirmation %}
+                                            <span class="font-mono text-xs bg-gray-100 px-2 py-1 rounded">{{ user.iban_confirmation|truncatechars:20 }}</span>
+                                        {% else %}
+                                            Not specified
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            
+                            <!-- ID Images Column -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex space-x-2">
+                                    <button onclick="showIdImages({{ user.id }})" 
+                                            class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded-md text-sm font-medium">
+                                        <i class="fas fa-eye mr-1"></i>View Details
+                                    </button>
+                                </div>
+                            </td>
+                            
+                            <!-- Registration Date Column -->
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ user.date_joined|date:"Y-m-d H:i" }}
+                            </td>
+                            
+                            <!-- Actions Column -->
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                                <button onclick="approveUser({{ user.id }})" 
+                                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                    <i class="fas fa-check mr-1"></i>Approve
+                                </button>
+                                <button onclick="rejectUser({{ user.id }})" 
+                                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                    <i class="fas fa-times mr-1"></i>Reject
+                                </button>
+                                <a href="{% url 'subscribers:view_details' user.id %}" 
+                                   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                    <i class="fas fa-eye mr-1"></i>View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <div class="px-6 py-4 border-t border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-700">
+                        Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} results
+                    </div>
+                    <div class="flex space-x-2">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                               class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                Previous
+                            </a>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <span class="px-3 py-2 bg-yellow-600 text-white rounded-md text-sm font-medium">{{ num }}</span>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                                   class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                    {{ num }}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" 
+                               class="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                Next
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% else %}
+            <div class="px-6 py-12 text-center">
+                <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check-circle text-yellow-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No Pending Requests</h3>
+                <p class="text-gray-500">All registration requests have been processed.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- ID Images Modal -->
+<div id="idImagesModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-4 border-b">
+                <h3 class="text-lg font-medium text-gray-900">User Verification Details</h3>
+                <button onclick="closeIdImagesModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Content -->
+            <div class="mt-4" id="idImagesContent">
+                <!-- Content will be loaded here -->
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="flex justify-end space-x-3 mt-6 pt-4 border-t">
+                <button onclick="closeIdImagesModal()" 
+                        class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md font-medium">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Actions -->
+<script>
+function approveUser(userId) {
+    if (confirm('Are you sure you want to approve this user?')) {
+        fetch(`/subscribers/approve-user/${userId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('User approved successfully!');
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error approving user');
+        });
+    }
+}
+
+function rejectUser(userId) {
+    const reason = prompt('Please enter the reason for rejection:');
+    if (reason && reason.trim()) {
+        fetch(`/subscribers/reject-user/${userId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                'reason': reason.trim()
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('User rejected successfully!');
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error rejecting user');
+        });
+    }
+}
+
+function showIdImages(userId) {
+    // Show modal
+    document.getElementById('idImagesModal').classList.remove('hidden');
+    
+    // Show loading state
+    const content = document.getElementById('idImagesContent');
+    content.innerHTML = `
+        <div class="text-center py-8">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600 mx-auto mb-4"></div>
+            <p class="text-gray-600">Loading ID images...</p>
+        </div>
+    `;
+    
+    // Load user data and display images
+    fetch(`/subscribers/user/${userId}/id-images/`)
+        .then(response => response.json())
+        .then(data => {
+            displayIdImages(data);
+        })
+        .catch(error => {
+            console.error('Error loading user data:', error);
+            content.innerHTML = `
+                <div class="text-center py-8">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+                    <p class="text-red-600">Error loading ID images</p>
+                    <p class="text-sm text-gray-500 mt-2">Please try again or check user details page</p>
+                </div>
+            `;
+        });
+}
+
+function displayIdImages(userData) {
+    const content = document.getElementById('idImagesContent');
+    
+    // Create front image HTML
+    const frontImageHtml = userData.has_front_image ? 
+        `<img src="${userData.front_image}" alt="Front ID" class="w-full h-48 object-contain border rounded-lg bg-gray-50">` :
+        `<div class="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50 h-48 flex flex-col items-center justify-center">
+            <i class="fas fa-id-card text-gray-400 text-3xl mb-2"></i>
+            <p class="text-gray-500 text-sm">No front image uploaded</p>
+        </div>`;
+    
+    // Create back image HTML
+    const backImageHtml = userData.has_back_image ? 
+        `<img src="${userData.back_image}" alt="Back ID" class="w-full h-48 object-contain border rounded-lg bg-gray-50">` :
+        `<div class="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50 h-48 flex flex-col items-center justify-center">
+            <i class="fas fa-id-card text-gray-400 text-3xl mb-2"></i>
+            <p class="text-gray-500 text-sm">No back image uploaded</p>
+        </div>`;
+    
+    // Create bank info HTML
+    const bankInfoHtml = userData.has_bank_info ? 
+        `<div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="grid grid-cols-1 gap-3 text-sm">
+                <div><strong>Bank Name:</strong> ${userData.bank_name || 'Not specified'}</div>
+                <div><strong>Account Holder:</strong> ${userData.account_holder_name || 'Not specified'}</div>
+                <div><strong>Account Number:</strong> 
+                    ${userData.account_number ? 
+                        `<span class="font-mono bg-white px-2 py-1 rounded text-xs">${userData.account_number}</span>` : 
+                        'Not specified'
+                    }
+                </div>
+                <div><strong>IBAN:</strong> 
+                    ${userData.iban_confirmation ? 
+                        `<span class="font-mono bg-white px-2 py-1 rounded text-xs">${userData.iban_confirmation}</span>` : 
+                        'Not specified'
+                    }
+                </div>
+            </div>
+        </div>` :
+        `<div class="border-2 border-dashed border-gray-300 rounded-lg p-6 bg-gray-50 flex flex-col items-center justify-center">
+            <i class="fas fa-university text-gray-400 text-3xl mb-2"></i>
+            <p class="text-gray-500 text-sm">No bank information provided</p>
+        </div>`;
+    
+    content.innerHTML = `
+        <div class="space-y-6">
+            <div class="text-center">
+                <h4 class="text-lg font-semibold text-gray-800">${userData.name}</h4>
+                <p class="text-gray-600">${userData.email}</p>
+                <p class="text-sm text-gray-500">${userData.phone || 'No phone number'}</p>
+            </div>
+            
+            <!-- Bank Information Section -->
+            <div>
+                <h5 class="text-md font-medium text-gray-700 mb-3 flex items-center">
+                    <i class="fas fa-university mr-2 text-blue-600"></i>
+                    Bank Information
+                </h5>
+                ${bankInfoHtml}
+            </div>
+            
+            <!-- ID Images Section -->
+            <div>
+                <h5 class="text-md font-medium text-gray-700 mb-3 flex items-center">
+                    <i class="fas fa-id-card mr-2 text-green-600"></i>
+                    ID Verification Images
+                </h5>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="text-center">
+                        <h6 class="text-sm font-medium text-gray-600 mb-2">Front ID Image</h6>
+                        ${frontImageHtml}
+                        ${userData.has_front_image ? 
+                            `<a href="${userData.front_image}" target="_blank" class="inline-block mt-2 text-blue-600 hover:text-blue-800 text-xs">
+                                <i class="fas fa-external-link-alt mr-1"></i>Open in new tab
+                            </a>` : ''
+                        }
+                    </div>
+                    
+                    <div class="text-center">
+                        <h6 class="text-sm font-medium text-gray-600 mb-2">Back ID Image</h6>
+                        ${backImageHtml}
+                        ${userData.has_back_image ? 
+                            `<a href="${userData.back_image}" target="_blank" class="inline-block mt-2 text-blue-600 hover:text-blue-800 text-xs">
+                                <i class="fas fa-external-link-alt mr-1"></i>Open in new tab
+                            </a>` : ''
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="text-center space-x-3 pt-4 border-t">
+                <a href="/subscribers/user/${userData.id}/" 
+                   class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium">
+                    <i class="fas fa-external-link-alt mr-2"></i>
+                    View Full Details
+                </a>
+                <button onclick="approveUser(${userData.id})" 
+                        class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md font-medium">
+                    <i class="fas fa-check mr-2"></i>
+                    Approve User
+                </button>
+                <button onclick="rejectUser(${userData.id})" 
+                        class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md font-medium">
+                    <i class="fas fa-times mr-2"></i>
+                    Reject User
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function closeIdImagesModal() {
+    document.getElementById('idImagesModal').classList.add('hidden');
+}
+</script>
+{% endblock %}

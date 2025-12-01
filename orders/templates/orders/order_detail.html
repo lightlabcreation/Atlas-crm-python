@@ -1,0 +1,517 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load role_filters %}
+
+{% block title %}Order Detail{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-receipt text-orange-600 text-xl"></i>
+                    </div>
+        <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">Order Details</h1>
+                        <p class="mt-1 text-sm text-gray-500">Order #{{ order.order_code }}</p>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'orders:list' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Orders
+                    </a>
+                    {% if order.status != 'confirmed' %}
+                    <a href="{% url 'orders:edit' order.id %}" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-edit mr-2"></i>
+                        Edit Order
+                    </a>
+                    {% endif %}
+                    {% if user|has_admin_role %}
+                    <a href="{% url 'orders:change_seller' order.id %}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-exchange-alt mr-2"></i>
+                        Change Seller
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'orders:invoice' order.id %}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-print mr-2"></i>
+                        Print Invoice
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Workflow Progress Bar -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+            <div class="px-6 py-4">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Order Progress</h3>
+                <div class="flex items-center justify-between">
+                    <!-- Workflow Steps -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Step 1: Seller Submitted -->
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium
+                                {% if order.workflow_status == 'seller_submitted' %}bg-yellow-500 text-white
+                                {% elif order.workflow_status in 'callcenter_review,callcenter_approved,packaging_in_progress,packaging_completed,ready_for_delivery,delivery_in_progress,delivery_completed' %}bg-green-500 text-white
+                                {% else %}bg-gray-200 text-gray-500{% endif %}">
+                                1
+                            </div>
+                            <span class="ml-2 text-sm font-medium text-gray-700">Submitted</span>
+                        </div>
+                        
+                        <div class="w-8 h-0.5 {% if order.workflow_status in 'callcenter_review,callcenter_approved,packaging_in_progress,packaging_completed,ready_for_delivery,delivery_in_progress,delivery_completed' %}bg-green-500{% else %}bg-gray-200{% endif %}"></div>
+                        
+                        <!-- Step 2: Call Center Review -->
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium
+                                {% if order.workflow_status == 'callcenter_review' %}bg-orange-500 text-white
+                                {% elif order.workflow_status in 'callcenter_approved,packaging_in_progress,packaging_completed,ready_for_delivery,delivery_in_progress,delivery_completed' %}bg-green-500 text-white
+                                {% else %}bg-gray-200 text-gray-500{% endif %}">
+                                2
+                            </div>
+                            <span class="ml-2 text-sm font-medium text-gray-700">Call Center</span>
+                        </div>
+                        
+                        <div class="w-8 h-0.5 {% if order.workflow_status in 'callcenter_approved,packaging_in_progress,packaging_completed,ready_for_delivery,delivery_in_progress,delivery_completed' %}bg-green-500{% else %}bg-gray-200{% endif %}"></div>
+                        
+                        <!-- Step 3: Packaging -->
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium
+                                {% if order.workflow_status in 'packaging_in_progress,packaging_completed' %}bg-blue-500 text-white
+                                {% elif order.workflow_status in 'ready_for_delivery,delivery_in_progress,delivery_completed' %}bg-green-500 text-white
+                                {% else %}bg-gray-200 text-gray-500{% endif %}">
+                                3
+                            </div>
+                            <span class="ml-2 text-sm font-medium text-gray-700">Packaging</span>
+                        </div>
+                        
+                        <div class="w-8 h-0.5 {% if order.workflow_status in 'ready_for_delivery,delivery_in_progress,delivery_completed' %}bg-green-500{% else %}bg-gray-200{% endif %}"></div>
+                        
+                        <!-- Step 4: Delivery -->
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium
+                                {% if order.workflow_status in 'delivery_in_progress,delivery_completed' %}bg-teal-500 text-white
+                                {% elif order.workflow_status == 'delivery_completed' %}bg-green-500 text-white
+                                {% else %}bg-gray-200 text-gray-500{% endif %}">
+                                4
+                            </div>
+                            <span class="ml-2 text-sm font-medium text-gray-700">Delivery</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Current Status Badge -->
+                    <div class="text-right">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                            {% if order.workflow_status == 'seller_submitted' %}bg-yellow-100 text-yellow-800
+                            {% elif order.workflow_status == 'callcenter_review' %}bg-orange-100 text-orange-800
+                            {% elif order.workflow_status == 'callcenter_approved' %}bg-green-100 text-green-800
+                            {% elif order.workflow_status == 'packaging_in_progress' %}bg-blue-100 text-blue-800
+                            {% elif order.workflow_status == 'packaging_completed' %}bg-purple-100 text-purple-800
+                            {% elif order.workflow_status == 'ready_for_delivery' %}bg-indigo-100 text-indigo-800
+                            {% elif order.workflow_status == 'delivery_in_progress' %}bg-teal-100 text-teal-800
+                            {% elif order.workflow_status == 'delivery_completed' %}bg-emerald-100 text-emerald-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {% if order.workflow_status == 'seller_submitted' %}
+                                Awaiting Review
+                            {% elif order.workflow_status == 'callcenter_review' %}
+                                Under Review
+                            {% elif order.workflow_status == 'callcenter_approved' %}
+                                Approved
+                            {% elif order.workflow_status == 'packaging_in_progress' %}
+                                Packaging
+                            {% elif order.workflow_status == 'packaging_completed' %}
+                                Packaged
+                            {% elif order.workflow_status == 'ready_for_delivery' %}
+                                Ready
+                            {% elif order.workflow_status == 'delivery_in_progress' %}
+                                Delivering
+                            {% elif order.workflow_status == 'delivery_completed' %}
+                                Delivered
+                            {% else %}
+                                {{ order.get_workflow_status_display }}
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Main Order Information -->
+            <div class="lg:col-span-2">
+                <!-- Basic Information -->
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Basic Information</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Order Code</label>
+                                <p class="mt-1 text-lg font-semibold text-gray-900">{{ order.order_code }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Order Date</label>
+                                <p class="mt-1 text-lg font-semibold text-gray-900">{{ order.date|date:"M d, Y H:i" }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Total Amount</label>
+                                <p class="mt-1 text-lg font-semibold text-green-600">AED {{ order.total_price|floatformat:2 }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Status</label>
+                                <div class="mt-1">
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                        {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                        {% elif order.status == 'processing' %}bg-orange-100 text-orange-800
+                                        {% elif order.status == 'confirmed' %}bg-blue-100 text-blue-800
+                                        {% elif order.status == 'shipped' %}bg-purple-100 text-purple-800
+                                        {% elif order.status == 'delivered' %}bg-green-100 text-green-800
+                                        {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+            </div>
+            
+            {% if order.notes %}
+                <div class="mt-6">
+                    <label class="block text-sm font-medium text-gray-500">Customer Notes</label>
+                    <p class="mt-1 text-sm text-gray-900">{{ order.notes }}</p>
+                </div>
+            {% endif %}
+            {% if order.internal_notes %}
+                <div class="mt-6">
+                    <label class="block text-sm font-medium text-gray-500">Internal Notes</label>
+                    <p class="mt-1 text-sm text-gray-900">{{ order.internal_notes }}</p>
+                </div>
+            {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Customer Information -->
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Customer Information</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Name</label>
+                                <p class="mt-1 text-lg font-semibold text-gray-900">{{ order.customer|default:"N/A" }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Phone</label>
+                                <p class="mt-1 text-lg font-semibold text-gray-900">{{ order.customer_phone|default:"N/A" }}</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-500">Shipping Address</label>
+                                <p class="mt-1 text-sm text-gray-900">
+                                    {% if order.shipping_address %}
+                                        {{ order.shipping_address|linebreaksbr }}
+                                    {% else %}
+                                        {% if order.city %}{{ order.city }}{% endif %}
+                                        {% if order.state %}, {{ order.state }}{% endif %}
+                                        {% if order.zip_code %}, {{ order.zip_code }}{% endif %}
+                                        {% if order.country %}, {{ order.country }}{% endif %}
+                                        {% if not order.city and not order.state and not order.zip_code and not order.country %}
+                                            N/A
+                                        {% endif %}
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seller Information -->
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                            <i class="fas fa-store text-orange-500 mr-2"></i>
+                            Seller Information
+                        </h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Seller Name</label>
+                                <p class="mt-1 text-lg font-semibold text-gray-900">
+                                    {% if order.seller %}
+                                        {{ order.seller.get_full_name|default:order.seller.email|default:"N/A" }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Seller Email</label>
+                                <p class="mt-1 text-lg font-semibold text-gray-900">{{ order.seller_email|default:"N/A" }}</p>
+                            </div>
+                            {% if order.store_link %}
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-500">Store Link</label>
+                                <p class="mt-1 text-sm text-blue-600">
+                                    <a href="{{ order.store_link }}" target="_blank" class="hover:underline">
+                                        {{ order.store_link }}
+                                    </a>
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Details -->
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Product Details</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        {% if order.items.all %}
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {% for item in order.items.all %}
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10">
+                                                {% if item.product.image %}
+                                                <img class="h-10 w-10 rounded-lg object-cover" src="{{ item.product.image.url }}" alt="{{ item.product.name_en }}">
+                                                {% else %}
+                                                <div class="h-10 w-10 rounded-lg bg-gray-100 flex items-center justify-center">
+                                                    <i class="fas fa-box text-gray-400"></i>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">{{ item.product.name_en }}</div>
+                                                <div class="text-sm text-gray-500">{{ item.product.name_ar|default:"" }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">{{ item.product.code }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.quantity }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">AED {{ item.price|floatformat:2 }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">AED {{ item.total_price|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <!-- Fallback for legacy orders without OrderItems -->
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">Product</label>
+                                    <p class="mt-1 text-sm text-gray-900">
+                                        {% if order.product %}
+                                            {{ order.product.name_en|default:"N/A" }}
+                                        {% else %}
+                                            {% for item in order.items.all %}
+                                                {{ item.product.name_en|default:"N/A" }}{% if not forloop.last %}, {% endif %}
+                                            {% empty %}
+                                                N/A
+                                            {% endfor %}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">Quantity</label>
+                                    <p class="mt-1 text-sm text-gray-900">{{ order.quantity }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">Unit Price</label>
+                                    <p class="mt-1 text-sm text-gray-900">AED {{ order.price_per_unit|floatformat:2 }}</p>
+                                </div>
+                </div>
+                </div>
+                        {% endif %}
+                </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="lg:col-span-1">
+                <!-- Order Status Timeline -->
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Order Workflow</h3>
+                    </div>
+                    <div class="p-6">
+                        <ol class="relative border-l border-gray-200">                  
+                            {% for log in order.workflow_logs.all %}
+                            <li class="mb-6 ml-4">
+                                <div class="absolute w-3 h-3 bg-gray-200 rounded-full mt-1.5 -left-1.5 border border-white"></div>
+                                <time class="mb-1 text-sm font-normal leading-none text-gray-400">{{ log.timestamp|date:"M d, Y H:i" }}</time>
+                                <h3 class="text-md font-semibold text-gray-900">{{ log.get_to_status_display }}</h3>
+                                <p class="text-sm font-normal text-gray-500">{{ log.notes|default:"-" }}</p>
+                                <p class="text-xs text-gray-400">By: {{ log.user.get_full_name|default:log.user.username }}</p>
+                            </li>
+                            {% empty %}
+                            <li class="ml-4">
+                                <p class="text-sm text-gray-500">No workflow history available.</p>
+                            </li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                </div>
+                
+                <!-- Current Workflow Status -->
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Current Status</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-3 h-3 rounded-full 
+                                    {% if order.workflow_status == 'seller_submitted' %}bg-yellow-500
+                                    {% elif order.workflow_status == 'callcenter_review' %}bg-orange-500
+                                    {% elif order.workflow_status == 'callcenter_approved' %}bg-green-500
+                                    {% elif order.workflow_status == 'packaging_in_progress' %}bg-blue-500
+                                    {% elif order.workflow_status == 'packaging_completed' %}bg-purple-500
+                                    {% elif order.workflow_status == 'ready_for_delivery' %}bg-indigo-500
+                                    {% elif order.workflow_status == 'delivery_in_progress' %}bg-teal-500
+                                    {% elif order.workflow_status == 'delivery_completed' %}bg-emerald-500
+                                    {% else %}bg-gray-500{% endif %}">
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">
+                                        {% if order.workflow_status == 'seller_submitted' %}
+                                            Awaiting Call Center Review
+                                        {% elif order.workflow_status == 'callcenter_review' %}
+                                            Under Call Center Review
+                                        {% elif order.workflow_status == 'callcenter_approved' %}
+                                            Approved - Ready for Packaging
+                                        {% elif order.workflow_status == 'packaging_in_progress' %}
+                                            Packaging in Progress
+                                        {% elif order.workflow_status == 'packaging_completed' %}
+                                            Packaged - Ready for Delivery
+                                        {% elif order.workflow_status == 'ready_for_delivery' %}
+                                            Ready for Delivery
+                                        {% elif order.workflow_status == 'delivery_in_progress' %}
+                                            Out for Delivery
+                                        {% elif order.workflow_status == 'delivery_completed' %}
+                                            Delivered
+                                        {% else %}
+                                            {{ order.get_workflow_status_display }}
+                                        {% endif %}
+                                    </p>
+                                    <p class="text-xs text-gray-500">
+                                        Status: {{ order.get_workflow_status_display }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                    {% if order.workflow_status == 'seller_submitted' %}bg-yellow-100 text-yellow-800
+                                    {% elif order.workflow_status == 'callcenter_review' %}bg-orange-100 text-orange-800
+                                    {% elif order.workflow_status == 'callcenter_approved' %}bg-green-100 text-green-800
+                                    {% elif order.workflow_status == 'packaging_in_progress' %}bg-blue-100 text-blue-800
+                                    {% elif order.workflow_status == 'packaging_completed' %}bg-purple-100 text-purple-800
+                                    {% elif order.workflow_status == 'ready_for_delivery' %}bg-indigo-100 text-indigo-800
+                                    {% elif order.workflow_status == 'delivery_in_progress' %}bg-teal-100 text-teal-800
+                                    {% elif order.workflow_status == 'delivery_completed' %}bg-emerald-100 text-emerald-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ order.get_workflow_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
+                </div>
+                    <div class="p-6 space-y-3">
+                        {% if order.status != 'confirmed' %}
+                        <a href="{% url 'orders:edit' order.id %}" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center">
+                            <i class="fas fa-edit mr-2"></i>
+                            Edit Order
+                        </a>
+                        {% endif %}
+                        
+                        <!-- Workflow Action Buttons based on current status -->
+                        {% if order.workflow_status == 'seller_submitted' %}
+                            {% if user.primary_role.name in 'Call Center Agent,Call Center Manager,Admin,Super Admin' %}
+                            <a href="{% url 'orders:callcenter_approve' order.id %}" class="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center">
+                                <i class="fas fa-phone mr-2"></i>
+                                Start Call Center Review
+                            </a>
+                            {% endif %}
+                        {% elif order.workflow_status == 'callcenter_review' %}
+                            {% if user.primary_role.name in 'Call Center Agent,Call Center Manager,Admin,Super Admin' %}
+                            <a href="{% url 'orders:callcenter_approve' order.id %}" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center">
+                                <i class="fas fa-check mr-2"></i>
+                                Approve for Packaging
+                            </a>
+                            {% endif %}
+                        {% elif order.workflow_status == 'callcenter_approved' %}
+                            {% if user.primary_role.name in 'Packaging Agent,Admin,Super Admin' %}
+                            <a href="{% url 'packaging:start_packaging' order.id %}" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center">
+                                <i class="fas fa-box mr-2"></i>
+                                Start Packaging
+                            </a>
+                            {% endif %}
+                        {% elif order.workflow_status == 'packaging_in_progress' %}
+                            {% if user.primary_role.name in 'Packaging Agent,Admin,Super Admin' %}
+                            <a href="{% url 'packaging:complete_packaging' order.id %}" class="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                Complete Packaging
+                            </a>
+                            {% endif %}
+                        {% elif order.workflow_status == 'packaging_completed' %}
+                            {% if user.primary_role.name in 'Delivery Agent,Admin,Super Admin' %}
+                            <a href="{% url 'delivery:assign_order' order.id %}" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center">
+                                <i class="fas fa-truck mr-2"></i>
+                                Assign for Delivery
+                            </a>
+                            {% endif %}
+                        {% elif order.workflow_status == 'ready_for_delivery' %}
+                            {% if user.primary_role.name in 'Delivery Agent,Admin,Super Admin' %}
+                            <a href="{% url 'delivery:start_delivery' order.id %}" class="w-full bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center">
+                                <i class="fas fa-shipping-fast mr-2"></i>
+                                Start Delivery
+                            </a>
+                            {% endif %}
+                        {% elif order.workflow_status == 'delivery_in_progress' %}
+                            {% if user.primary_role.name in 'Delivery Agent,Admin,Super Admin' %}
+                            <a href="{% url 'delivery:complete_delivery' order.id %}" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center">
+                                <i class="fas fa-flag-checkered mr-2"></i>
+                                Complete Delivery
+                            </a>
+                            {% endif %}
+                        {% endif %}
+                        <a href="{% url 'orders:invoice' order.id %}" target="_blank" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center">
+                            <i class="fas fa-print mr-2"></i>
+                            Print Invoice
+                        </a>
+                        <a href="{% url 'orders:list' %}" class="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center">
+                            <i class="fas fa-list mr-2"></i>
+                            All Orders
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+<div class="space-y-4">
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <p class="text-sm text-gray-500">Product Name</p>
+            <p class="text-base font-semibold text-gray-900">{{ record.product.name_en }}</p>
+        </div>
+        <div>
+            <p class="text-sm text-gray-500">Product Code</p>
+            <p class="text-base font-semibold text-gray-900">{{ record.product.code }}</p>
+        </div>
+        <div>
+            <p class="text-sm text-gray-500">Warehouse</p>
+            <p class="text-base font-semibold text-gray-900">{{ record.warehouse.name }}</p>
+        </div>
+        <div>
+            <p class="text-sm text-gray-500">Location</p>
+            <p class="text-base font-semibold text-gray-900">
+                {% if record.location %}
+                    {{ record.location.zone }}{% if record.location.shelf %}-{{ record.location.shelf }}{% endif %}
+                {% else %}
+                    N/A
+                {% endif %}
+            </p>
+        </div>
+        <div>
+            <p class="text-sm text-gray-500">Quantity</p>
+            <p class="text-base font-semibold text-gray-900">{{ record.quantity }}</p>
+        </div>
+        <div>
+            <p class="text-sm text-gray-500">Last Updated</p>
+            <p class="text-base font-semibold text-gray-900">{{ record.last_updated|date:"Y-m-d H:i" }}</p>
+        </div>
+    </div>
+    
+    {% if movements %}
+    <div class="border-t pt-4">
+        <h4 class="text-sm font-semibold text-gray-900 mb-3">Recent Movements</h4>
+        <div class="space-y-2 max-h-64 overflow-y-auto">
+            {% for movement in movements %}
+            <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <div>
+                    <p class="text-xs font-medium text-gray-900">{{ movement.get_movement_type_display }}</p>
+                    <p class="text-xs text-gray-500">{{ movement.created_at|date:"Y-m-d H:i" }}</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs font-semibold {% if movement.movement_type == 'stock_in' %}text-green-600{% else %}text-red-600{% endif %}">
+                        {% if movement.movement_type == 'stock_in' %}+{% else %}-{% endif %}{{ movement.quantity }}
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+

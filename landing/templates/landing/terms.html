@@ -1,0 +1,46 @@
+{% extends 'landing/base_landing.html' %}
+{% load static %}
+
+{% block title %}Terms of Service - Atlas Fulfillment{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-5xl font-bold mb-6">Terms of Service</h1>
+        <p class="text-xl text-yellow-100">Last updated: December 2024</p>
+    </div>
+</section>
+
+<!-- Content -->
+<section class="py-20 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="prose prose-lg max-w-none {% if LANGUAGE_CODE == 'ar' %}text-right{% else %}text-left{% endif %}" {% if LANGUAGE_CODE == 'ar' %}dir="rtl"{% endif %}>
+            <h2 class="text-3xl font-bold text-gray-900 mb-6">Acceptance of Terms</h2>
+            <p class="text-gray-600 mb-6">
+                By accessing and using our services, you accept and agree to be bound by the terms and provision of this agreement.
+            </p>
+            
+            <h2 class="text-3xl font-bold text-gray-900 mb-6">Use License</h2>
+            <p class="text-gray-600 mb-6">
+                Permission is granted to temporarily use our services for personal, non-commercial transitory viewing only.
+            </p>
+            
+            <h2 class="text-3xl font-bold text-gray-900 mb-6">Service Availability</h2>
+            <p class="text-gray-600 mb-6">
+                We strive to maintain high service availability, but we do not guarantee uninterrupted access to our services.
+            </p>
+            
+            <h2 class="text-3xl font-bold text-gray-900 mb-6">Limitation of Liability</h2>
+            <p class="text-gray-600 mb-6">
+                In no event shall Atlas Fulfillment be liable for any damages arising out of the use or inability to use our services.
+            </p>
+            
+            <h2 class="text-3xl font-bold text-gray-900 mb-6">Contact Information</h2>
+            <p class="text-gray-600 mb-6">
+                If you have any questions about these Terms of Service, please contact us at legal@atlasfulfillment.com
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}

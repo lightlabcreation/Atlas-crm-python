@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Performance Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100">
+    <!-- Simple Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-semibold text-gray-900">My Performance Dashboard</h1>
+                    <p class="mt-1 text-sm text-gray-500">Track your delivery performance and achievements</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm text-gray-500">Current Time</p>
+                    <p class="text-lg font-semibold text-gray-900" id="current-time"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav class="flex space-x-8 py-4">
+                <a href="{% url 'delivery:dashboard' %}" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                    Dashboard
+                </a>
+
+                <a href="{% url 'delivery:performance' %}" class="text-blue-600 bg-blue-50 px-3 py-2 rounded-md text-sm font-medium">
+                    Performance
+                </a>
+                <a href="{% url 'delivery:settings' %}" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                    Settings
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Today's Date -->
+        <div class="mb-6 text-right">
+            <p class="text-sm text-gray-500">Today's Date</p>
+            <p class="text-lg font-semibold text-gray-900" id="today-date"></p>
+        </div>
+
+        <!-- Order Statistics for Delivery -->
+        <div class="bg-gray-50 rounded-lg border border-gray-300 mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Order Statistics for Delivery</h3>
+                <p class="text-sm text-gray-500">Current order status in delivery workflow</p>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-white rounded-lg border border-gray-200 p-4">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-file-alt text-gray-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900">{{ total_orders }}</p>
+                                <p class="text-sm text-gray-500">Total Orders</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg border border-gray-200 p-4">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-check text-green-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900">{{ ready_for_delivery }}</p>
+                                <p class="text-sm text-gray-500">Ready for Delivery</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg border border-gray-200 p-4">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-bolt text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900">{{ in_delivery }}</p>
+                                <p class="text-sm text-gray-500">In Delivery</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg border border-gray-200 p-4">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-check-double text-purple-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900">{{ delivered }}</p>
+                                <p class="text-sm text-gray-500">Delivered</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- This Week Overview -->
+        <div class="bg-gray-50 rounded-lg border border-gray-300 mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">This Week Overview</h3>
+                <p class="text-sm text-gray-500">Your performance metrics for the current week</p>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-white rounded-lg border border-gray-200 p-4">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-box text-green-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900">{{ packages_completed }}</p>
+                                <p class="text-sm text-gray-500">Packages Completed</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg border border-gray-200 p-4">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-clock text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900">{{ avg_duration }} min</p>
+                                <p class="text-sm text-gray-500">Avg Duration</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg border border-gray-200 p-4">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-clipboard-check text-yellow-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900">{{ quality_checks }}</p>
+                                <p class="text-sm text-gray-500">Quality Checks</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg border border-gray-200 p-4">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-percentage text-purple-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold text-gray-900">{{ pass_rate }}%</p>
+                                <p class="text-sm text-gray-500">Pass Rate</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quality Check Results -->
+        <div class="bg-gray-50 rounded-lg border border-gray-300 mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Quality Check Results</h3>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-check text-green-600 mr-3"></i>
+                            <span class="text-sm font-medium text-gray-900">Passed</span>
+                        </div>
+                        <span class="text-sm font-medium text-gray-900">{{ passed_checks }}</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-yellow-600 mr-3"></i>
+                            <span class="text-sm font-medium text-gray-900">Conditional</span>
+                        </div>
+                        <span class="text-sm font-medium text-gray-900">{{ conditional_checks }}</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-times text-red-600 mr-3"></i>
+                            <span class="text-sm font-medium text-gray-900">Failed</span>
+                        </div>
+                        <span class="text-sm font-medium text-gray-900">{{ failed_checks }}</span>
+                    </div>
+                </div>
+                
+                {% if not quality_checks %}
+                <div class="text-center py-8">
+                    <p class="text-gray-500">No quality check data available</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Daily Activity -->
+        <div class="bg-gray-50 rounded-lg border border-gray-300">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Daily Activity</h3>
+            </div>
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Packages</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Checks</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Time</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for day in daily_activity %}
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ day.date }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600">{{ day.packages }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600">{{ day.checks }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600">{{ day.avg_time }} min</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+                                    No activity data available
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateCurrentTime() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('en-US', { 
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+    document.getElementById('current-time').textContent = timeString;
+}
+
+function updateTodayDate() {
+    const now = new Date();
+    const dateString = now.toLocaleDateString('en-US', { 
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    document.getElementById('today-date').textContent = dateString;
+}
+
+// Update time every second
+setInterval(updateCurrentTime, 1000);
+updateCurrentTime();
+updateTodayDate();
+</script>
+{% endblock %}

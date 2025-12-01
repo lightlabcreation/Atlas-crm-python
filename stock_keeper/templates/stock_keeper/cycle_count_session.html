@@ -1,0 +1,790 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Cycle Count Task{% endblock %}
+
+{% block extrahead %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+{% csrf_token %}
+<style>
+    /* Fix z-index issues and navbar overlap */
+    .cycle-count-container {
+        position: relative;
+        z-index: 10;
+    }
+    
+    .cycle-count-header {
+        position: relative;
+        z-index: 20;
+        background: white;
+    }
+    
+    .cycle-count-content {
+        position: relative;
+        z-index: 10;
+    }
+    
+    /* Ensure proper stacking context */
+    .navbar-fix {
+        position: relative;
+        z-index: 30;
+    }
+    
+    /* Progress bar fixes */
+    .progress-container {
+        overflow: hidden;
+        border-radius: 9999px;
+    }
+    
+    .progress-bar {
+        transition: width 0.3s ease;
+        border-radius: 9999px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="w-full cycle-count-container">
+    <!-- Page Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200 mb-6 cycle-count-header">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center space-x-4">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-clipboard-list text-white text-xl"></i>
+                        </div>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-extrabold text-gray-900">
+                            CYCLE COUNT TASK - {{ task.id }}
+                        </h1>
+                        <p class="mt-1 text-lg text-gray-600">
+                            Task: {{ task.title|default:"Cycle Count" }}
+                        </p>
+                    </div>
+                </div>
+                <div class="flex flex-shrink-0 space-x-3">
+                    <a href="{% url 'stock_keeper:task_management' %}" 
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                        <i class="fas fa-tasks mr-2"></i>
+                        Back to Tasks
+                    </a>
+                    {% if task %}
+                    <a href="{% url 'stock_keeper:complete_task' task.id %}" 
+                       class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
+                        <i class="fas fa-check mr-2"></i>
+                        Complete Task
+                    </a>
+                    {% else %}
+                    <a href="{% url 'stock_keeper:cycle_count' %}" 
+                       class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Cycle Count
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 cycle-count-content">
+        <!-- Task Information -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Task Details</h3>
+                    <p class="text-sm text-gray-600">{{ task.description|default:"No description provided" }}</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Status</h3>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                        {% if task.status == 'completed' %}bg-green-100 text-green-800
+                        {% elif task.status == 'in_progress' %}bg-blue-100 text-blue-800
+                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ task.get_status_display }}
+                    </span>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Priority</h3>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                        {% if task.priority == 'high' %}bg-red-100 text-red-800
+                        {% elif task.priority == 'medium' %}bg-yellow-100 text-yellow-800
+                        {% else %}bg-green-100 text-green-800{% endif %}">
+                        {{ task.get_priority_display }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Item Count -->
+        <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-medium text-gray-900">Current Item</h2>
+            </div>
+            
+            <div class="p-6">
+                <div id="current-item-form">
+                    <!-- Warehouse and Product Selection -->
+                    <div class="mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="warehouse-select" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Select Warehouse
+                                </label>
+                                <select id="warehouse-select" 
+                                        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="" selected>Select a Warehouse</option>
+                                    {% for warehouse in warehouses %}
+                                    <option value="{{ warehouse.id }}" {% if warehouse.id == selected_warehouse and selected_warehouse != None %}selected{% endif %}>
+                                        {{ warehouse.name }} - {{ warehouse.location }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label for="product-select" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Select Product
+                                </label>
+                                <select id="product-select" 
+                                        class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                        disabled>
+                                    <option value="">Select a warehouse first...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Product Information
+                            </label>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <div id="product-info">
+                                    <p class="text-sm text-gray-600">Select a product to count...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="counted_quantity" class="block text-sm font-medium text-gray-700 mb-2">
+                                Physical Count
+                            </label>
+                            <input type="number" 
+                                   id="counted_quantity" 
+                                   name="counted_quantity" 
+                                   min="0" 
+                                   class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                   placeholder="{% trans 'Enter actual quantity found' %}">
+                            <p class="mt-1 text-sm text-gray-500">Enter the actual quantity found in this location</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <label for="condition_status" class="block text-sm font-medium text-gray-700 mb-2">
+                            Item Condition
+                        </label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <label class="flex items-center">
+                                <input type="radio" name="condition_status" value="good" checked 
+                                       class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm text-gray-700">Good</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="condition_status" value="damaged" 
+                                       class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm text-gray-700">Damaged</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="condition_status" value="defective" 
+                                       class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm text-gray-700">Defective</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="condition_status" value="missing" 
+                                       class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm text-gray-700">Missing</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <label for="count_notes" class="block text-sm font-medium text-gray-700 mb-2">
+                            Notes
+                        </label>
+                        <textarea id="count_notes" 
+                                  name="count_notes" 
+                                  rows="3" 
+                                  class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                  placeholder="{% trans 'Add any notes about this count...' %}"></textarea>
+                    </div>
+                    
+                    <div class="mt-6 flex items-center justify-between">
+                        <button type="button" id="report-issue-btn" 
+                                class="inline-flex items-center px-4 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Report Issue
+                        </button>
+                        
+                        <div class="flex space-x-3">
+                            <button type="button" id="save-count-btn" 
+                                    class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                <i class="fas fa-save mr-2"></i>
+                                Save Count
+                            </button>
+                            <button type="button" id="next-location-btn" 
+                                    class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                                <i class="fas fa-arrow-right mr-2"></i>
+                                Next Location
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Discrepancies Found -->
+        <div class="bg-white rounded-lg shadow overflow-hidden mb-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-medium text-gray-900">Discrepancies Found</h2>
+            </div>
+            
+            <div class="p-6">
+                <div id="discrepancies-list">
+                    <div class="text-center py-4">
+                        <i class="fas fa-check-circle text-green-500 text-2xl mb-2"></i>
+                        <p class="text-gray-500">No discrepancies found yet.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product List -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-medium text-gray-900">Products to Count</h2>
+            </div>
+            
+            <div class="p-6">
+                <div class="space-y-3">
+                    {% for product in products %}
+                    <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer product-item" 
+                         data-product-id="{{ product.product.id }}"
+                         data-system-quantity="{{ product.quantity }}"
+                         data-location="{{ product.location_code }}">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-shrink-0">
+                                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-box text-blue-600"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-900">{{ product.product.name_en }}</h3>
+                                <p class="text-sm text-gray-500">
+                                    System: {{ product.quantity }} | 
+                                    Location: {{ product.location_code|default:"N/A" }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                Pending
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentProduct = null;
+let discrepancies = [];
+
+// Warehouse and Product Selection
+document.getElementById('warehouse-select').addEventListener('change', function() {
+    const warehouseId = this.value;
+    const productSelect = document.getElementById('product-select');
+    
+    if (warehouseId) {
+        // Enable product select and load products for this warehouse
+        productSelect.disabled = false;
+        loadProductsForWarehouse(warehouseId);
+    } else {
+        // Disable product select
+        productSelect.disabled = true;
+        productSelect.innerHTML = '<option value="">Select a warehouse first...</option>';
+    }
+});
+
+document.getElementById('product-select').addEventListener('change', function() {
+    const productId = this.value;
+    if (productId) {
+        // Load product details and update the product info display
+        loadProductDetails(productId);
+    }
+});
+
+function loadProductsForWarehouse(warehouseId) {
+    const productSelect = document.getElementById('product-select');
+    productSelect.innerHTML = '<option value="">Loading products...</option>';
+    
+    fetch(`/stock-keeper/api/warehouse/${warehouseId}/products/`)
+    .then(response => response.json())
+    .then(data => {
+            productSelect.innerHTML = '<option value="">Select a product...</option>';
+            data.products.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product.id;
+                option.textContent = `${product.name_en} (${product.quantity} in stock)`;
+                productSelect.appendChild(option);
+            });
+    })
+    .catch(error => {
+            console.error('Error loading products:', error);
+            productSelect.innerHTML = '<option value="">Error loading products</option>';
+        });
+}
+
+function loadProductDetails(productId) {
+    const warehouseId = document.getElementById('warehouse-select').value;
+    
+    // Show loading state in product info
+    document.getElementById('product-info').innerHTML = `
+        <div class="flex items-center justify-center py-4">
+            <i class="fas fa-spinner fa-spin text-gray-400 mr-2"></i>
+            <span class="text-gray-500">Loading product details...</span>
+            </div>
+        `;
+    
+    fetch(`/stock-keeper/api/product/${productId}/warehouse/${warehouseId}/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Store current product data
+                currentProduct = {
+                    id: data.product.id,
+                    name: data.product.name_en,
+                    system_quantity: data.inventory.quantity,
+                    location: data.inventory.location_code
+                };
+                
+                // Update product info display with more details
+                document.getElementById('product-info').innerHTML = `
+                    <div class="space-y-2">
+                        <h4 class="font-medium text-gray-900">${data.product.name_en}</h4>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                                ${data.product.code || 'No Code'}
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <div>
+                                <span class="text-xs text-gray-500">System Quantity</span>
+                                <p class="text-sm font-medium text-gray-900">${data.inventory.quantity}</p>
+                    </div>
+                    <div>
+                                <span class="text-xs text-gray-500">Location</span>
+                                <p class="text-sm font-medium text-gray-900">${data.inventory.location_code || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Clear form fields
+                document.getElementById('counted_quantity').value = '';
+                document.getElementById('count_notes').value = '';
+                document.querySelector('input[name="condition_status"][value="good"]').checked = true;
+                
+                // Focus on quantity input
+                document.getElementById('counted_quantity').focus();
+            } else {
+                // Show error in product info
+                document.getElementById('product-info').innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-exclamation-circle text-red-500 text-2xl mb-2"></i>
+                        <p class="text-red-500">Error loading product details</p>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading product details:', error);
+            // Show error in product info
+            document.getElementById('product-info').innerHTML = `
+                <div class="text-center py-4">
+                    <i class="fas fa-exclamation-circle text-red-500 text-2xl mb-2"></i>
+                    <p class="text-red-500">Error loading product details</p>
+                    <p class="text-xs text-gray-500 mt-1">${error.message}</p>
+                </div>
+            `;
+        });
+}
+
+// Product selection (for backward compatibility with existing product list)
+document.querySelectorAll('.product-item').forEach(item => {
+    item.addEventListener('click', function() {
+        const productId = this.dataset.productId;
+        const systemQuantity = this.dataset.systemQuantity;
+        const location = this.dataset.location;
+        
+        // Update current product
+        currentProduct = {
+            id: productId,
+            system_quantity: systemQuantity,
+            location: location
+        };
+        
+        // Update product info display
+        document.getElementById('product-info').innerHTML = `
+            <h4 class="font-medium text-gray-900">${this.querySelector('h3').textContent}</h4>
+            <p class="text-sm text-gray-600">System Record: ${systemQuantity}</p>
+            <p class="text-sm text-gray-600">Location: ${location || 'N/A'}</p>
+        `;
+        
+        // Update form fields
+        document.getElementById('counted_quantity').value = '';
+        document.getElementById('count_notes').value = '';
+        document.querySelector('input[name="condition_status"][value="good"]').checked = true;
+        
+        // Highlight selected product
+        document.querySelectorAll('.product-item').forEach(p => p.classList.remove('bg-blue-50', 'border-blue-300'));
+        this.classList.add('bg-blue-50', 'border-blue-300');
+        
+        // Focus on quantity input
+        document.getElementById('counted_quantity').focus();
+    });
+});
+
+// Save count
+document.getElementById('save-count-btn').addEventListener('click', function() {
+    const warehouseId = document.getElementById('warehouse-select').value;
+    if (!warehouseId) {
+        showNotification('Please select a warehouse first', 'error');
+        return;
+    }
+    
+    if (!currentProduct) {
+        showNotification('Please select a product first', 'error');
+        return;
+    }
+    
+    const countedQuantity = document.getElementById('counted_quantity').value;
+    const conditionStatus = document.querySelector('input[name="condition_status"]:checked').value;
+    const countNotes = document.getElementById('count_notes').value;
+    
+    if (!countedQuantity) {
+        showNotification('Please enter the counted quantity', 'error');
+        return;
+    }
+    
+    // Record the count
+    recordCount(currentProduct.id, countedQuantity, conditionStatus, countNotes);
+});
+
+// Next location
+document.getElementById('next-location-btn').addEventListener('click', function() {
+    const warehouseId = document.getElementById('warehouse-select').value;
+    if (!warehouseId) {
+        showNotification('Please select a warehouse first', 'error');
+        return;
+    }
+    
+    if (!currentProduct) {
+        showNotification('Please select a product first', 'error');
+        return;
+    }
+    
+    // Save current count only if quantity is entered
+    const countedQuantity = document.getElementById('counted_quantity').value;
+    if (countedQuantity && countedQuantity.trim() !== '') {
+        // Save the count first
+        recordCount(currentProduct.id, countedQuantity, 
+                   document.querySelector('input[name="condition_status"]:checked').value,
+                   document.getElementById('count_notes').value);
+    }
+    
+    // Move to next product
+    const currentItem = document.querySelector('.product-item.bg-blue-50');
+    if (currentItem) {
+        const nextItem = currentItem.nextElementSibling;
+        if (nextItem && nextItem.classList.contains('product-item')) {
+            // Click on next item to select it
+            nextItem.click();
+            showNotification('Moved to next product', 'success');
+        } else {
+            // If no next item, go to first item
+            const firstItem = document.querySelector('.product-item');
+            if (firstItem) {
+                firstItem.click();
+                showNotification('Moved to first product', 'success');
+            } else {
+                showNotification('No more products to count', 'info');
+            }
+        }
+    } else {
+        // If no current item selected, select first item
+        const firstItem = document.querySelector('.product-item');
+        if (firstItem) {
+            firstItem.click();
+            showNotification('Selected first product', 'success');
+        } else {
+            showNotification('No products available', 'info');
+        }
+    }
+    
+    // Clear form for next product
+    document.getElementById('counted_quantity').value = '';
+    document.getElementById('count_notes').value = '';
+    document.querySelector('input[name="condition_status"][value="good"]').checked = true;
+    
+    // Focus on quantity input for better UX
+    setTimeout(() => {
+        document.getElementById('counted_quantity').focus();
+    }, 100);
+});
+
+// Report issue
+document.getElementById('report-issue-btn').addEventListener('click', function() {
+    const warehouseId = document.getElementById('warehouse-select').value;
+    if (!warehouseId) {
+        showNotification('Please select a warehouse first', 'error');
+        return;
+    }
+    
+    if (!currentProduct) {
+        showNotification('Please select a product first', 'error');
+        return;
+    }
+    
+    showPrompt('Report Issue', 'Please describe the issue:', '', function(issue) {
+        if (issue && issue.trim()) {
+            // Add to discrepancies
+            discrepancies.push({
+                product_id: currentProduct.id,
+                issue: issue
+            });
+            
+            updateDiscrepanciesList();
+            showNotification('Issue reported successfully', 'success');
+        }
+    });
+});
+
+function recordCount(productId, countedQuantity, conditionStatus, countNotes) {
+    const warehouseId = document.getElementById('warehouse-select').value;
+    if (!warehouseId) {
+        showNotification('Please select a warehouse first', 'error');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('product_id', productId);
+    formData.append('warehouse_id', warehouseId);
+    formData.append('counted_quantity', countedQuantity);
+    formData.append('system_quantity', currentProduct.system_quantity);
+    formData.append('location_code', currentProduct.location || '');
+    formData.append('condition_status', conditionStatus);
+    formData.append('count_notes', countNotes);
+    
+    // Get CSRF token using the getCookie function
+    const csrfToken = getCookie('csrftoken');
+    if (!csrfToken) {
+        alert('CSRF token not found. Please refresh the page and try again.');
+        return;
+    }
+    
+    // Show loading indicator
+    const saveBtn = document.getElementById('save-count-btn');
+    const originalBtnText = saveBtn.innerHTML;
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Saving...';
+    
+    fetch(`{% url 'stock_keeper:record_count' task.id|default:session_id %}`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': csrfToken
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Mark product as counted
+            const productItem = document.querySelector(`[data-product-id="${productId}"]`);
+            if (productItem) {
+                const statusSpan = productItem.querySelector('.bg-gray-100');
+                if (statusSpan) {
+                statusSpan.className = 'inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800';
+                statusSpan.textContent = 'Counted';
+                }
+            }
+            
+            // Check for variance
+            const variance = parseInt(countedQuantity) - parseInt(currentProduct.system_quantity);
+            if (variance !== 0) {
+                // Create a more descriptive reason for the variance
+                let varianceReason = '';
+                if (variance > 0) {
+                    varianceReason = `Overstock detected: ${countedQuantity} counted vs ${currentProduct.system_quantity} in system`;
+                } else {
+                    varianceReason = `Shortage detected: ${countedQuantity} counted vs ${currentProduct.system_quantity} in system`;
+                }
+                
+                // Add notes if provided
+                if (countNotes && countNotes.trim()) {
+                    varianceReason += ` (${countNotes})`;
+                }
+                
+                discrepancies.push({
+                    product_id: currentProduct.id,
+                    product_name: currentProduct.name || 'Unknown Product',
+                    variance: variance,
+                    reason: varianceReason,
+                    counted_quantity: parseInt(countedQuantity),
+                    system_quantity: parseInt(currentProduct.system_quantity),
+                    location: currentProduct.location || 'N/A',
+                    timestamp: new Date().toLocaleString()
+                });
+                updateDiscrepanciesList();
+            }
+            
+            // Clear form
+            document.getElementById('counted_quantity').value = '';
+            document.getElementById('count_notes').value = '';
+            document.querySelector('input[name="condition_status"][value="good"]').checked = true;
+            
+            // Show success notification
+            showNotification('Count recorded successfully', 'success');
+        } else {
+            // Show error notification
+            showNotification(data.message || 'Error recording count', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error recording count', 'error');
+    })
+    .finally(() => {
+        // Restore button state
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalBtnText;
+    });
+}
+
+function updateDiscrepanciesList() {
+    const container = document.getElementById('discrepancies-list');
+    
+    if (discrepancies.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-4">
+                <i class="fas fa-check-circle text-green-500 text-2xl mb-2"></i>
+                <p class="text-gray-500">No discrepancies found yet.</p>
+            </div>
+        `;
+    } else {
+        container.innerHTML = `
+            <div class="space-y-3">
+                ${discrepancies.map(d => `
+                    <div class="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <div>
+                            <p class="text-sm font-medium text-red-800">${d.reason}</p>
+                            ${d.variance ? `<p class="text-xs text-red-600">Variance: ${d.variance}</p>` : ''}
+                        </div>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            Issue
+                        </span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+}
+
+// Show notification
+function showNotification(message, type = 'success') {
+    // Create notification element
+    const notification = document.createElement('div');
+    
+    // Set colors based on type
+    let bgColor, textColor, icon;
+    switch(type) {
+        case 'success':
+            bgColor = 'bg-green-500';
+            textColor = 'text-white';
+            icon = 'check-circle';
+            break;
+        case 'error':
+            bgColor = 'bg-red-500';
+            textColor = 'text-white';
+            icon = 'exclamation-circle';
+            break;
+        case 'info':
+            bgColor = 'bg-blue-500';
+            textColor = 'text-white';
+            icon = 'info-circle';
+            break;
+        default:
+            bgColor = 'bg-gray-500';
+            textColor = 'text-white';
+            icon = 'info-circle';
+    }
+    
+    notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${bgColor} ${textColor}`;
+    notification.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas fa-${icon} mr-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Get CSRF token from cookie
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Auto-focus on first product
+document.addEventListener('DOMContentLoaded', function() {
+    const firstProduct = document.querySelector('.product-item');
+    if (firstProduct) {
+        firstProduct.click();
+    }
+});
+</script>
+{% endblock %}

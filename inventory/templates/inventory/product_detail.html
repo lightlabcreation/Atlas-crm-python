@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}Product Details - {{ product.name_en }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Clean Header -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="{% url 'inventory:products' %}" class="text-gray-500 hover:text-gray-700 mr-3">
+                        <i class="fas fa-arrow-left text-lg"></i>
+                    </a>
+                    <div>
+                        <h1 class="text-xl font-semibold text-gray-900">Product Details</h1>
+                        <p class="text-sm text-gray-500">{{ product.name_en }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="{% url 'inventory:edit_product' product_id=product.id %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium">
+                        <i class="fas fa-edit mr-2"></i>Edit Product
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Product Image -->
+            <div class="bg-white rounded border border-gray-200">
+                <div class="px-4 py-3 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Product Image</h3>
+                </div>
+                <div class="p-4">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name_en }}" class="w-full h-64 object-cover rounded">
+                    {% else %}
+                        <div class="w-full h-64 bg-gray-100 rounded flex items-center justify-center">
+                            <i class="fas fa-image text-gray-400 text-4xl"></i>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Product Information -->
+            <div class="space-y-6">
+                <!-- Basic Information -->
+                <div class="bg-white rounded border border-gray-200">
+                    <div class="px-4 py-3 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Basic Information</h3>
+                    </div>
+                    <div class="p-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-sm text-gray-500">Product Name (English)</label>
+                                <p class="text-sm text-gray-900 font-medium mt-1">{{ product.name_en }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-500">Product Name (Arabic)</label>
+                                <p class="text-sm text-gray-900 font-medium mt-1">{{ product.name_ar }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-500">SKU/Product Code</label>
+                                <p class="text-sm text-gray-900 font-medium mt-1">{{ product.code }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-500">Seller</label>
+                                <p class="text-sm text-gray-900 font-medium mt-1">{{ product.seller.get_full_name|default:"N/A" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="bg-white rounded border border-gray-200">
+                    <div class="px-4 py-3 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Description</h3>
+                    </div>
+                    <div class="p-4">
+                        <p class="text-sm text-gray-900">{{ product.description_en|default:"No description available" }}</p>
+                    </div>
+                </div>
+
+                <!-- Pricing Information -->
+                <div class="bg-white rounded border border-gray-200">
+                    <div class="px-4 py-3 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Pricing Information</h3>
+                    </div>
+                    <div class="p-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-sm text-gray-500">Selling Price</label>
+                                <p class="text-sm text-gray-900 font-medium mt-1">AED {{ product.selling_price|floatformat:2|default:"0.00" }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-500">Cost Price</label>
+                                <p class="text-sm text-gray-900 font-medium mt-1">AED {{ product.cost_price|floatformat:2|default:"0.00" }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-500">Total Stock</label>
+                                <p class="text-sm text-gray-900 font-medium mt-1">{{ total_stock|default:"0" }} units</p>
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-500">Status</label>
+                                <div class="mt-1">
+                                    {% if product.is_approved %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <i class="fas fa-check mr-1"></i>
+                                            Approved
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            Pending Approval
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Records -->
+        <div class="mt-6 bg-white rounded border border-gray-200">
+            <div class="px-4 py-3 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Inventory Records</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Warehouse</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Location</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Quantity</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for record in inventory_records %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ record.warehouse.name|default:"N/A" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ record.location.name|default:"N/A" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ record.quantity|default:"0" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ record.updated_at|date:"M d, Y H:i"|default:"N/A" }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                                No inventory records found
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

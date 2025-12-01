@@ -1,0 +1,614 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Order{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <!-- Page Header -->
+    <div class="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 fixed top-16 z-20 shadow-sm" style="left: 280px; right: 0;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex items-center space-x-3">
+                    <div class="p-3 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl shadow-lg flex-shrink-0">
+                        <i class="fas fa-edit text-white text-xl"></i>
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <h1 class="text-2xl font-bold text-slate-900">Edit Order</h1>
+                        <p class="text-slate-600 font-medium">Order #{{ order.order_code }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="{% url 'orders:detail' order.id %}" class="inline-flex items-center px-4 py-2 bg-white border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors duration-200 font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Order
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pt-24">
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Main Form Content -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Basic Information -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200/60 overflow-hidden">
+                        <div class="px-6 py-4 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-200/50">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-2 bg-amber-100 rounded-lg">
+                                    <i class="fas fa-info-circle text-amber-600"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-slate-900">Basic Information</h3>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Order Code - Read Only -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Order Code
+                                    </label>
+                                    <input type="text" value="{{ order.order_code }}" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600 cursor-not-allowed">
+                                </div>
+                                
+                                <div>
+                                    <label for="{{ form.customer.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Customer Name
+                                    </label>
+                                    {{ form.customer }}
+                                    {% if form.customer.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.customer.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                                
+                                <div>
+                                    <label for="{{ form.date.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Order Date
+                                    </label>
+                                    {{ form.date }}
+                                    {% if form.date.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.date.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                                
+                                <div>
+                                    <label for="{{ form.customer_phone.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Customer Phone
+                                    </label>
+                                    {{ form.customer_phone }}
+                                    {% if form.customer_phone.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.customer_phone.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if form.seller %}
+                                <div>
+                                    <label for="{{ form.seller.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Seller
+                                    </label>
+                                    {{ form.seller }}
+                                    {% if form.seller.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.seller.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                
+                                {% if form.agent %}
+                                <div>
+                                    <label for="{{ form.agent.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Agent
+                                    </label>
+                                    {{ form.agent }}
+                                    {% if form.agent.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.agent.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                
+                                <div>
+                                    <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Status
+                                    </label>
+                                    {{ form.status }}
+                                    {% if form.status.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.status.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Address Information -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200/60 overflow-hidden">
+                        <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200/50">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-2 bg-blue-100 rounded-lg">
+                                    <i class="fas fa-map-marker-alt text-blue-600"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-slate-900">Address Information</h3>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                                    <label for="{{ form.city.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                        City
+                                    </label>
+                                    {{ form.city }}
+                                    {% if form.city.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.city.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                                
+                                <div>
+                                    <label for="{{ form.state.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Area
+                                    </label>
+                                    {{ form.state }}
+                                    {% if form.state.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.state.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                                
+                                <div>
+                                    <label for="{{ form.street_address.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Street Address
+                                    </label>
+                                    {{ form.street_address }}
+                                    {% if form.street_address.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.street_address.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                                
+                                <div>
+                                    <label for="{{ form.country.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Country
+                                    </label>
+                                    {{ form.country }}
+                                    {% if form.country.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.country.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                                
+                                <div>
+                                    <label for="{{ form.zip_code.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                        ZIP Code
+                                    </label>
+                                    {{ form.zip_code }}
+                                    {% if form.zip_code.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.zip_code.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="md:col-span-2">
+                                    <label for="{{ form.shipping_address.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Shipping Address
+                                    </label>
+                                    {{ form.shipping_address }}
+                                    {% if form.shipping_address.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.shipping_address.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Product Information -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200/60 overflow-hidden">
+                        <div class="px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-200/50">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center space-x-3">
+                                    <div class="p-2 bg-green-100 rounded-lg">
+                                        <i class="fas fa-box text-green-600"></i>
+                                    </div>
+                                    <h3 class="text-lg font-semibold text-slate-900">Product Information</h3>
+                                </div>
+                                <button type="button" id="add-product-btn" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded text-sm font-medium transition-colors duration-200 flex items-center">
+                                    <i class="fas fa-plus mr-2"></i>
+                                    Add Product
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div id="products-container">
+                                <!-- Existing products from order items -->
+                                {% for item in order.items.all %}
+                                <div class="product-row border-b border-gray-200 pb-4 mb-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Product</label>
+                                            <select name="product_ids[]" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                                <option value="">Select Product</option>
+                                                {% for product in products %}
+                                                    <option value="{{ product.id }}" data-price="{{ product.selling_price }}" {% if product.id == item.product.id %}selected{% endif %}>
+                                                        {{ product.name_en|default:product.name_ar }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                                            <input type="number" name="quantities[]" min="1" value="{{ item.quantity }}" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 product-quantity">
+                        </div>
+                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Unit Price (AED)</label>
+                                            <input type="number" name="prices[]" min="0" step="0.01" value="{{ item.price }}" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 product-price">
+                        </div>
+                    </div>
+                                    <div class="mt-2 text-right">
+                                        <button type="button" class="remove-product text-red-600 hover:text-red-800 text-sm">
+                                            <i class="fas fa-trash mr-1"></i> Remove
+                                        </button>
+                </div>
+            </div>
+                                {% empty %}
+                                <!-- If no order items, show legacy product -->
+                                <div class="product-row border-b border-gray-200 pb-4 mb-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Product</label>
+                                            <select name="product_ids[]" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                                <option value="">Select Product</option>
+                                {% for product in products %}
+                                                    <option value="{{ product.id }}" data-price="{{ product.selling_price }}" {% if order.product and product.id == order.product.id %}selected{% endif %}>
+                                                        {{ product.name_en|default:product.name_ar }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                                            <input type="number" name="quantities[]" min="1" value="{{ order.quantity }}" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 product-quantity">
+                        </div>
+                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Unit Price (AED)</label>
+                                            <input type="number" name="prices[]" min="0" step="0.01" value="{{ order.price_per_unit }}" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 product-price">
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 text-right">
+                                        <button type="button" class="remove-product text-red-600 hover:text-red-800 text-sm" style="display: none;">
+                                            <i class="fas fa-trash mr-1"></i> Remove
+                                        </button>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                        </div>
+
+                            <div class="mt-4 text-right">
+                                <div class="text-lg font-semibold">
+                                    Total Price: <span id="total-price">AED {{ order.total_price|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                    <!-- Notes -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200/60 overflow-hidden">
+                        <div class="px-6 py-4 bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-200/50">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-2 bg-purple-100 rounded-lg">
+                                    <i class="fas fa-sticky-note text-purple-600"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-slate-900">Notes</h3>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                                    <label for="{{ form.notes.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Customer Notes
+                                    </label>
+                                    {{ form.notes }}
+                                    {% if form.notes.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.notes.errors.0 }}</p>
+                                    {% endif %}
+                        </div>
+                                
+                        <div>
+                                    <label for="{{ form.internal_notes.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Internal Notes
+                                    </label>
+                                    {{ form.internal_notes }}
+                                    {% if form.internal_notes.errors %}
+                                        <p class="mt-1 text-sm text-red-600">{{ form.internal_notes.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                <!-- Sidebar -->
+                <div class="lg:col-span-1 space-y-6">
+                    <!-- Order Summary -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200/60 overflow-hidden">
+                        <div class="px-6 py-4 bg-gradient-to-r from-purple-50 to-violet-50 border-b border-purple-200/50">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-2 bg-purple-100 rounded-lg">
+                                    <i class="fas fa-clipboard-list text-purple-600"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-slate-900">Order Summary</h3>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="space-y-4">
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-500">Order Code</span>
+                                    <span class="text-sm font-medium">{{ order.order_code }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-500">Customer</span>
+                                    <span class="text-sm font-medium">{{ order.customer }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-500">Status</span>
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                        {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                        {% elif order.status == 'processing' %}bg-orange-100 text-orange-800
+                                        {% elif order.status == 'confirmed' %}bg-blue-100 text-blue-800
+                                        {% elif order.status == 'shipped' %}bg-purple-100 text-purple-800
+                                        {% elif order.status == 'delivered' %}bg-green-100 text-green-800
+                                        {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-500">Total Amount</span>
+                                    <span class="text-sm font-semibold text-green-600">AED {{ order.total_price|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200/60 overflow-hidden">
+                        <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-200/50">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-2 bg-blue-100 rounded-lg">
+                                    <i class="fas fa-bolt text-blue-600"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-slate-900">Quick Actions</h3>
+                            </div>
+                        </div>
+                        <div class="p-6 space-y-3">
+                            <a href="{% url 'orders:detail' order.id %}" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center">
+                                <i class="fas fa-eye mr-2"></i>
+                                View Order
+                            </a>
+                            <a href="{% url 'orders:invoice' order.id %}" target="_blank" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center">
+                                <i class="fas fa-print mr-2"></i>
+                                Print Invoice
+                            </a>
+                            <a href="{% url 'orders:list' %}" class="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center">
+                                <i class="fas fa-list mr-2"></i>
+                                All Orders
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200/60 overflow-hidden">
+                        <div class="px-6 py-4 bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-200/50">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-2 bg-orange-100 rounded-lg">
+                                    <i class="fas fa-save text-orange-600"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-slate-900">Save Changes</h3>
+                            </div>
+                        </div>
+                        <div class="p-6 space-y-3">
+                            <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-3 rounded-md font-medium transition-colors duration-200 flex items-center justify-center">
+                                <i class="fas fa-save mr-2"></i>
+                                Update Order
+                        </button>
+                            <a href="{% url 'orders:detail' order.id %}" class="w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-md font-medium transition-colors duration-200 flex items-center justify-center">
+                                <i class="fas fa-times mr-2"></i>
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const productsContainer = document.getElementById('products-container');
+    const addProductBtn = document.getElementById('add-product-btn');
+    const totalPriceDisplay = document.getElementById('total-price');
+    
+    // Update prices when product is selected
+    productsContainer.addEventListener('change', function(e) {
+        if (e.target.name === 'product_ids[]') {
+            const productRow = e.target.closest('.product-row');
+            const priceInput = productRow.querySelector('.product-price');
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            
+            if (selectedOption.dataset.price) {
+                priceInput.value = selectedOption.dataset.price;
+            }
+            
+            updateTotalPrice();
+        }
+    });
+    
+    // Update total when quantity or price changes
+    productsContainer.addEventListener('input', function(e) {
+        if (e.target.classList.contains('product-quantity') || 
+            e.target.classList.contains('product-price')) {
+            updateTotalPrice();
+        }
+    });
+    
+    // Add new product row
+    addProductBtn.addEventListener('click', function() {
+        const productRows = document.querySelectorAll('.product-row');
+        const firstRow = productRows[0];
+        const newRow = firstRow.cloneNode(true);
+        
+        // Reset values
+        const selectElement = newRow.querySelector('select');
+        selectElement.selectedIndex = 0;
+        
+        newRow.querySelector('.product-quantity').value = 1;
+        newRow.querySelector('.product-price').value = '';
+        
+        // Show remove button
+        newRow.querySelector('.remove-product').style.display = 'inline-block';
+        
+        // Show remove buttons for all rows if we have more than one
+        if (productRows.length === 1) {
+            productRows[0].querySelector('.remove-product').style.display = 'inline-block';
+        }
+        
+        productsContainer.appendChild(newRow);
+        updateTotalPrice();
+    });
+    
+    // Remove product row
+    productsContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-product') || 
+            e.target.parentElement.classList.contains('remove-product')) {
+            
+            const productRows = document.querySelectorAll('.product-row');
+            if (productRows.length > 1) {
+                const row = e.target.closest('.product-row');
+                row.remove();
+                
+                // If only one row left, hide its remove button
+                if (document.querySelectorAll('.product-row').length === 1) {
+                    document.querySelector('.product-row .remove-product').style.display = 'none';
+                }
+                
+                updateTotalPrice();
+            }
+        }
+    });
+    
+    // Calculate total price
+    function updateTotalPrice() {
+        const productRows = document.querySelectorAll('.product-row');
+        let total = 0;
+        
+        productRows.forEach(row => {
+            const quantity = parseFloat(row.querySelector('.product-quantity').value) || 0;
+            const price = parseFloat(row.querySelector('.product-price').value) || 0;
+            total += quantity * price;
+        });
+        
+        totalPriceDisplay.textContent = `AED ${total.toFixed(2)}`;
+    }
+    
+    // Initialize
+    updateTotalPrice();
+    
+    // Show/hide remove buttons based on initial row count
+    const initialRows = document.querySelectorAll('.product-row');
+    if (initialRows.length > 1) {
+        initialRows.forEach(row => {
+            row.querySelector('.remove-product').style.display = 'inline-block';
+        });
+    }
+    
+    const citySelect = document.getElementById('id_city');
+    const stateSelect = document.getElementById('id_state');
+    
+    // City dropdown change handler
+    if (citySelect && stateSelect) {
+        citySelect.addEventListener('change', function() {
+            const selectedCity = this.value;
+            
+            // Load areas for selected city
+            if (selectedCity) {
+                loadAreasForCity(selectedCity);
+            } else {
+                // Clear areas if no city is selected
+                stateSelect.innerHTML = '<option value="">Select Area - Please select city first</option>';
+                stateSelect.disabled = true;
+            }
+        });
+    }
+    
+    // Function to load areas for a city
+    function loadAreasForCity(cityName) {
+        if (!cityName || !stateSelect) {
+            return;
+        }
+        
+        // Disable area select while loading
+        stateSelect.disabled = true;
+        stateSelect.innerHTML = '<option value="">Loading areas...</option>';
+        
+        // Use the city value (Arabic name) for the API call
+        fetch(`/orders/api/get-states-for-city/?city=${encodeURIComponent(cityName)}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success && data.states && data.states.length > 0) {
+                    // Clear and populate area dropdown
+                    stateSelect.innerHTML = '<option value="">Select Area</option>';
+                    
+                    data.states.forEach(state => {
+                        const option = document.createElement('option');
+                        option.value = state.value;
+                        option.textContent = state.label;
+                        stateSelect.appendChild(option);
+                    });
+                    
+                    // Enable area select
+                    stateSelect.disabled = false;
+                    
+                    // Restore previously selected area if editing
+                    {% if order.state %}
+                    const savedState = "{{ order.state }}";
+                    setTimeout(function() {
+                        const stateOption = stateSelect.querySelector('option[value="' + savedState + '"]');
+                        if (stateOption) {
+                            stateSelect.value = savedState;
+                        }
+                    }, 100);
+                    {% endif %}
+                } else {
+                    stateSelect.innerHTML = '<option value="">No areas found for this city</option>';
+                    stateSelect.disabled = true;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading areas:', error);
+                stateSelect.innerHTML = '<option value="">Error loading areas. Please try again.</option>';
+                stateSelect.disabled = true;
+            });
+    }
+    
+    // Initialize area loading if city is already selected
+    // This ensures areas are loaded when editing an existing order
+    if (citySelect && citySelect.value && stateSelect) {
+        const selectedCityValue = citySelect.value;
+        if (selectedCityValue) {
+            // Load areas for the selected city
+            loadAreasForCity(selectedCityValue);
+        } else {
+            // Disable area select if no city is selected
+            stateSelect.disabled = true;
+        }
+    } else if (stateSelect) {
+        // Disable area select initially if no city is selected
+        if (!citySelect || !citySelect.value) {
+            stateSelect.disabled = true;
+        }
+    }
+});
+</script>
+{% endblock %}

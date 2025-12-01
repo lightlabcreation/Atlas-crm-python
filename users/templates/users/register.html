@@ -1,0 +1,1153 @@
+{% extends 'users.html' %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex bg-gray-50">
+  <!-- Left Section with Image -->
+  <div class="hidden lg:flex lg:w-1/2 items-center justify-center p-8">
+    <div class="max-w-md text-center">
+      <div class="text-center">
+        <img src="https://i.ibb.co/YT4Ny4L1/10.png" alt="Atlas Service" class="h-24 w-auto mx-auto mb-8">
+        <h1 class="text-4xl font-bold text-black mb-4 leading-tight">YOUR TRUSTED PARTNER FROM<br>SOURCING TO SEAMLESS<br>DELIVERY</h1>
+      </div>
+    </div>
+  </div
+  <!-- Right Section with Form -->
+  <div class="flex-1 flex items-center justify-center p-4 sm:p-8">
+    <div class="max-w-4xl w-full space-y-8">
+      <!-- Mobile Header -->
+      <div class="lg:hidden text-center mb-8">
+        <div class="text-center">
+          <img src="https://i.ibb.co/YT4Ny4L1/10.png" alt="Atlas Service" class="h-16 w-auto mx-auto mb-6">
+          <h1 class="text-2xl font-bold text-gray-900 mb-2 leading-tight">YOUR TRUSTED PARTNER FROM<br>SOURCING TO SEAMLESS<br>DELIVERY</h1>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="text-center text-3xl font-extrabold text-gray-900">
+          Create your account
+        </h2>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="mb-8">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-medium text-gray-700" id="progress-text">Stage 1 of 3</span>
+          <span class="text-sm text-gray-500" id="progress-value">33%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div class="bg-green-600 h-2 rounded-full transition-all duration-300" id="progress-bar" style="width: 33%"></div>
+        </div>
+      </div>
+
+      {% if messages %}
+      <div class="rounded-md bg-yellow-50 p-4 border-l-4 border-yellow-400">
+        <div class="flex">
+          <div class="flex-shrink-0">
+            <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-yellow-800">
+              Attention needed
+            </h3>
+            <div class="mt-2 text-sm text-yellow-700">
+              <ul class="list-disc pl-5 space-y-1">
+                {% for message in messages %}
+                <li>{{ message }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      
+      <form class="mt-8 space-y-6" method="POST" enctype="multipart/form-data" id="registration-form">
+        {% csrf_token %}
+        
+        <!-- Stage 1: Personal Information -->
+        <div id="stage-1" class="stage-content">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            Personal Information
+          </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Full Name -->
+            <div class="relative">
+            <input 
+              id="id_full_name" 
+              name="full_name" 
+              type="text" 
+              required 
+              class="peer w-full px-0 py-3 text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-500 placeholder-transparent text-sm"
+              placeholder="Full Name"
+            >
+            <label 
+              for="id_full_name" 
+              class="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-yellow-500 peer-focus:text-sm"
+            >
+                Full Name *
+            </label>
+            {% if form.full_name.errors %}
+            <p class="mt-2 text-sm text-red-600">{{ form.full_name.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Email -->
+          <div class="relative">
+            <input 
+              id="id_email" 
+              name="email" 
+              type="email" 
+              required 
+              class="peer w-full px-0 py-3 text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-500 placeholder-transparent text-sm"
+              placeholder="Email address"
+            >
+            <label 
+              for="id_email" 
+              class="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-yellow-500 peer-focus:text-sm"
+            >
+                Email Address *
+            </label>
+            {% if form.email.errors %}
+            <p class="mt-2 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+            <!-- Phone Number -->
+          <div class="relative">
+            <input 
+              id="id_phone_number" 
+              name="phone_number" 
+              type="tel" 
+              required 
+              class="peer w-full px-0 py-3 text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-500 placeholder-transparent text-sm"
+              placeholder="Phone Number (e.g., +971501234567)"
+            >
+            <label 
+              for="id_phone_number" 
+              class="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-yellow-500 peer-focus:text-sm"
+            >
+                Phone Number *
+            </label>
+            <small class="text-gray-500 text-xs mt-1">Format: +971501234567 or 0501234567</small>
+            {% if form.phone_number.errors %}
+            <p class="mt-2 text-sm text-red-600">{{ form.phone_number.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+            <!-- Country -->
+            <div class="relative">
+              <select 
+                id="id_country" 
+                name="country" 
+                required 
+                class="peer w-full px-0 py-3 text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-500 text-sm"
+              >
+                <option value="">Select Country</option>
+                <option value="UAE">United Arab Emirates</option>
+                <option value="KSA">Saudi Arabia</option>
+                <option value="Kuwait">Kuwait</option>
+                <option value="Qatar">Qatar</option>
+                <option value="Bahrain">Bahrain</option>
+                <option value="Oman">Oman</option>
+                <option value="Jordan">Jordan</option>
+                <option value="Lebanon">Lebanon</option>
+                <option value="Egypt">Egypt</option>
+                <option value="Other">Other</option>
+              </select>
+              <label 
+                for="id_country" 
+                class="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-yellow-500 peer-focus:text-sm"
+              >
+                Country of Residence *
+              </label>
+              {% if form.country.errors %}
+              <p class="mt-2 text-sm text-red-600">{{ form.country.errors.0 }}</p>
+              {% endif %}
+            </div>
+
+            <!-- Password -->
+            <div class="relative">
+              <input 
+                id="id_password1" 
+                name="password1" 
+                type="password" 
+                required 
+                minlength="8"
+                class="peer w-full px-0 py-3 pr-10 text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-500 placeholder-transparent text-sm"
+                placeholder="Password"
+              >
+              <label 
+                for="id_password1" 
+                class="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-yellow-500 peer-focus:text-sm"
+              >
+                Password *
+              </label>
+              <button 
+                type="button" 
+                class="absolute right-0 top-3 text-gray-400 hover:text-gray-600 focus:outline-none"
+                onclick="togglePassword('id_password1', 'toggle1')"
+              >
+                <i id="toggle1" class="fas fa-eye"></i>
+              </button>
+              <small class="text-gray-500 text-xs mt-1">Minimum 8 characters, must contain uppercase, lowercase, and numbers</small>
+              {% if form.password1.errors %}
+              <p class="mt-2 text-sm text-red-600">{{ form.password1.errors.0 }}</p>
+              {% endif %}
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="relative">
+              <input 
+                id="id_password2" 
+                name="password2" 
+                type="password" 
+                required 
+                minlength="8"
+                class="peer w-full px-0 py-3 pr-10 text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-500 placeholder-transparent text-sm"
+                placeholder="Confirm Password"
+              >
+              <label 
+                for="id_password2" 
+                class="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-yellow-500 peer-focus:text-sm"
+              >
+                Confirm Password *
+              </label>
+              <button 
+                type="button" 
+                class="absolute right-0 top-3 text-gray-400 hover:text-gray-600 focus:outline-none"
+                onclick="togglePassword('id_password2', 'toggle2')"
+              >
+                <i id="toggle2" class="fas fa-eye"></i>
+              </button>
+              {% if form.password2.errors %}
+              <p class="mt-2 text-sm text-red-600">{{ form.password2.errors.0 }}</p>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- ID Images Upload -->
+          <div class="mt-8">
+            <h4 class="text-md font-medium text-gray-900 mb-4">ID Verification</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- ID Front Image -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">ID Front Image *</label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                  <div class="space-y-1 text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div class="flex text-sm text-gray-600">
+                      <label for="id_id_front_image" class="relative cursor-pointer bg-white rounded-md font-medium text-yellow-600 hover:text-yellow-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-yellow-500">
+                        <span>Upload a file</span>
+                        <input id="id_id_front_image" name="id_front_image" type="file" class="sr-only" accept="image/*" required>
+                      </label>
+                      <p class="pl-1">or drag and drop</p>
+                    </div>
+                    <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                  </div>
+                </div>
+                <div id="front-preview" class="mt-2 hidden">
+                  <img id="front-preview-img" class="w-full h-32 object-cover rounded-md">
+                </div>
+              </div>
+
+              <!-- ID Back Image -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">ID Back Image *</label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                  <div class="space-y-1 text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div class="flex text-sm text-gray-600">
+                      <label for="id_id_back_image" class="relative cursor-pointer bg-white rounded-md font-medium text-yellow-600 hover:text-yellow-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-yellow-500">
+                        <span>Upload a file</span>
+                        <input id="id_id_back_image" name="id_back_image" type="file" class="sr-only" accept="image/*" required>
+                      </label>
+                      <p class="pl-1">or drag and drop</p>
+                    </div>
+                    <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                  </div>
+                </div>
+                <div id="back-preview" class="mt-2 hidden">
+                  <img id="back-preview-img" class="w-full h-32 object-cover rounded-md">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage 2: E-commerce Store Details -->
+        <div id="stage-2" class="stage-content hidden">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            E-commerce Store Details
+          </h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Store Name -->
+          <div class="relative">
+            <input 
+                id="id_store_name" 
+                name="store_name" 
+              type="text" 
+                required 
+              class="peer w-full px-0 py-3 text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-500 placeholder-transparent text-sm"
+                placeholder="Store Name"
+            >
+            <label 
+                for="id_store_name" 
+              class="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-yellow-500 peer-focus:text-sm"
+            >
+                Store Name *
+            </label>
+              {% if form.store_name.errors %}
+              <p class="mt-2 text-sm text-red-600">{{ form.store_name.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+            <!-- Store Link -->
+            <div class="relative">
+              <input 
+                id="id_store_link" 
+                name="store_link" 
+                type="url" 
+                required 
+                class="peer w-full px-0 py-3 text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-500 placeholder-transparent text-sm"
+                placeholder="https://yourstorename.com"
+              >
+              <label 
+                for="id_store_link" 
+                class="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-yellow-500 peer-focus:text-sm"
+              >
+                Store Link *
+              </label>
+              <p class="mt-1 text-xs text-gray-500">Format: https://yourstorename.com</p>
+              {% if form.store_link.errors %}
+              <p class="mt-2 text-sm text-red-600">{{ form.store_link.errors.0 }}</p>
+              {% endif %}
+            </div>
+
+            <!-- Store Type -->
+            <div class="relative">
+              <select 
+                id="id_store_type" 
+                name="store_type" 
+                required 
+                class="peer w-full px-0 py-3 text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-500 text-sm"
+              >
+                <option value="">Select Store Type</option>
+                <option value="general">General</option>
+                <option value="specialized">Specialized</option>
+              </select>
+              <label 
+                for="id_store_type" 
+                class="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-yellow-500 peer-focus:text-sm"
+              >
+                Store Type *
+              </label>
+              {% if form.store_type.errors %}
+              <p class="mt-2 text-sm text-red-600">{{ form.store_type.errors.0 }}</p>
+              {% endif %}
+            </div>
+
+            <!-- Store Specialization (Hidden by default) -->
+            <div id="specialization-field" class="relative hidden">
+              <input 
+                id="id_store_specialization" 
+                name="store_specialization" 
+              type="text" 
+              class="peer w-full px-0 py-3 text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-500 placeholder-transparent text-sm"
+                placeholder="e.g., Electronics, Fashion, Food"
+            >
+            <label 
+                for="id_store_specialization" 
+              class="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-yellow-500 peer-focus:text-sm"
+            >
+                Store Specialization
+            </label>
+              {% if form.store_specialization.errors %}
+              <p class="mt-2 text-sm text-red-600">{{ form.store_specialization.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Expected Daily Orders -->
+          <div class="relative">
+            <input 
+              id="id_expected_daily_orders" 
+              name="expected_daily_orders" 
+              type="number" 
+              min="0" 
+              value="0"
+                required 
+              class="peer w-full px-0 py-3 text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-500 placeholder-transparent text-sm"
+              placeholder="Expected Daily Orders"
+            >
+            <label 
+              for="id_expected_daily_orders" 
+              class="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-yellow-500 peer-focus:text-sm"
+            >
+                Expected Daily Orders *
+            </label>
+            {% if form.expected_daily_orders.errors %}
+            <p class="mt-2 text-sm text-red-600">{{ form.expected_daily_orders.errors.0 }}</p>
+            {% endif %}
+            </div>
+          </div>
+
+          <!-- Marketing Platforms -->
+          <div class="mt-6">
+            <label class="block text-sm font-medium text-gray-700 mb-3">Marketing Platforms Used (Optional)</label>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+              <label class="flex items-center">
+                <input type="checkbox" name="marketing_platforms" value="instagram" class="h-4 w-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500">
+                <span class="ml-2 text-sm text-gray-700">Instagram</span>
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" name="marketing_platforms" value="facebook" class="h-4 w-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500">
+                <span class="ml-2 text-sm text-gray-700">Facebook</span>
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" name="marketing_platforms" value="tiktok" class="h-4 w-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500">
+                <span class="ml-2 text-sm text-gray-700">TikTok</span>
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" name="marketing_platforms" value="snapchat" class="h-4 w-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500">
+                <span class="ml-2 text-sm text-gray-700">Snapchat</span>
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" name="marketing_platforms" value="twitter" class="h-4 w-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500">
+                <span class="ml-2 text-sm text-gray-700">Twitter</span>
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" name="marketing_platforms" value="linkedin" class="h-4 w-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500">
+                <span class="ml-2 text-sm text-gray-700">LinkedIn</span>
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" name="marketing_platforms" value="youtube" class="h-4 w-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500">
+                <span class="ml-2 text-sm text-gray-700">YouTube</span>
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" name="marketing_platforms" value="google_ads" class="h-4 w-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500">
+                <span class="ml-2 text-sm text-gray-700">Google Ads</span>
+              </label>
+              <label class="flex items-center">
+                <input type="checkbox" name="marketing_platforms" value="other" class="h-4 w-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500">
+                <span class="ml-2 text-sm text-gray-700">Other</span>
+                  </label>
+            </div>
+                </div>
+              </div>
+
+        <!-- Stage 3: Bank Details -->
+        <div id="stage-3" class="stage-content hidden">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            Bank Details
+          </h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Bank Name -->
+                <div class="relative">
+              <input 
+                id="id_bank_name" 
+                name="bank_name" 
+                type="text" 
+                required 
+                class="peer w-full px-0 py-3 text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-500 placeholder-transparent text-sm"
+                placeholder="Bank Name"
+              >
+              <label 
+                for="id_bank_name" 
+                class="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-yellow-500 peer-focus:text-sm"
+              >
+                Bank Name *
+              </label>
+              {% if form.bank_name.errors %}
+              <p class="mt-2 text-sm text-red-600">{{ form.bank_name.errors.0 }}</p>
+              {% endif %}
+                </div>
+
+            <!-- Account Holder Name -->
+            <div class="relative">
+              <input 
+                id="id_account_holder_name" 
+                name="account_holder_name" 
+                type="text" 
+                required 
+                class="peer w-full px-0 py-3 text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-500 placeholder-transparent text-sm"
+                placeholder="Account Holder Name"
+              >
+              <label 
+                for="id_account_holder_name" 
+                class="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-yellow-500 peer-focus:text-sm"
+              >
+                Account Holder Name (as per bank) *
+              </label>
+              {% if form.account_holder_name.errors %}
+              <p class="mt-2 text-sm text-red-600">{{ form.account_holder_name.errors.0 }}</p>
+              {% endif %}
+              </div>
+
+            <!-- Account Number (IBAN) -->
+            <div class="relative">
+              <input 
+                id="id_account_number" 
+                name="account_number" 
+                type="text" 
+                required 
+                class="peer w-full px-0 py-3 text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-500 placeholder-transparent text-sm"
+                placeholder="IBAN"
+              >
+              <label 
+                for="id_account_number" 
+                class="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-yellow-500 peer-focus:text-sm"
+              >
+                Account Number (IBAN) *
+              </label>
+              {% if form.account_number.errors %}
+              <p class="mt-2 text-sm text-red-600">{{ form.account_number.errors.0 }}</p>
+              {% endif %}
+            </div>
+
+            <!-- IBAN Confirmation -->
+            <div class="relative">
+              <input 
+                id="id_iban_confirmation" 
+                name="iban_confirmation" 
+                type="text" 
+                required 
+                class="peer w-full px-0 py-3 text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-yellow-500 placeholder-transparent text-sm"
+                placeholder="Confirm IBAN"
+              >
+              <label 
+                for="id_iban_confirmation" 
+                class="absolute left-0 -top-3.5 text-gray-600 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-3.5 peer-focus:text-yellow-500 peer-focus:text-sm"
+              >
+                IBAN Confirmation *
+              </label>
+              {% if form.iban_confirmation.errors %}
+              <p class="mt-2 text-sm text-red-600">{{ form.iban_confirmation.errors.0 }}</p>
+            {% endif %}
+            </div>
+          </div>
+
+
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex justify-between items-center">
+          <button 
+            type="button" 
+            id="prev-btn" 
+            class="hidden px-6 py-2 bg-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200"
+          >
+            Previous
+          </button>
+          
+          <button 
+            type="button" 
+            id="next-btn" 
+            class="px-6 py-2 bg-yellow-600 text-white rounded-md text-sm font-medium hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-all duration-200"
+          >
+            Next
+          </button>
+          
+          <button 
+          type="submit" 
+          id="submit-btn" 
+          class="hidden px-6 py-2 bg-yellow-600 text-white rounded-md text-sm font-medium hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-all duration-200"
+        >
+          <span id="submit-text">Create Account</span>
+          <span id="submit-loading" class="hidden">
+            <i class="fas fa-spinner fa-spin mr-2"></i>
+            Creating Account...
+          </span>
+        </button>
+        </div>
+      </form>
+      
+      <!-- Login Link -->
+      <div class="text-center mt-6">
+        <p class="text-sm text-gray-600">
+          Already have an account? 
+          <a href="{% url 'users:login' %}" class="font-medium text-yellow-600 hover:text-yellow-500 transition-colors">
+            Sign in here
+          </a>
+        </p>
+      </div>
+      
+      <!-- Contact Information -->
+      <div class="text-center mt-4">
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div class="flex items-center justify-center">
+            <i class="fas fa-phone text-blue-600 mr-2"></i>
+            <p class="text-sm text-blue-800">
+              In case of any registration issues, please contact mobile number: 
+              <a href="tel:+971503565009" class="font-semibold text-blue-600 hover:text-blue-800">
+                +971503565009
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Global variables
+  let currentStage = 1;
+  const totalStages = 3;
+
+// Global submit button reference
+let submitBtn;
+
+// Prevent form submission if validation fails
+function validateForm() {
+  // Validate all stages, not just current stage
+  const allStages = document.querySelectorAll('.stage-content');
+  let isValid = true;
+  let firstInvalidField = null;
+  
+  allStages.forEach(stage => {
+    const requiredFields = stage.querySelectorAll('[required]');
+    requiredFields.forEach(field => {
+      if (field.type === 'file') {
+        // For file inputs, check if a file is selected
+        if (!field.files || field.files.length === 0) {
+          isValid = false;
+          field.classList.add('border-red-500');
+          if (!firstInvalidField) {
+            firstInvalidField = field;
+          }
+        } else {
+          field.classList.remove('border-red-500');
+        }
+      } else {
+        // For other inputs, check if value is not empty
+        if (!field.value.trim()) {
+          isValid = false;
+          field.classList.add('border-red-500');
+          if (!firstInvalidField) {
+            firstInvalidField = field;
+          }
+        } else {
+          field.classList.remove('border-red-500');
+        }
+      }
+    });
+  });
+  
+  // Additional password validation
+  const password1 = document.getElementById('id_password1');
+  const password2 = document.getElementById('id_password2');
+  
+  if (password1 && password1.value.trim()) {
+    if (password1.value.length < 8) {
+      password1.classList.add('border-red-500');
+      if (!firstInvalidField) {
+        firstInvalidField = password1;
+      }
+      isValid = false;
+    } else {
+      password1.classList.remove('border-red-500');
+    }
+  }
+  
+  if (password2 && password2.value.trim()) {
+    if (password1.value !== password2.value) {
+      password2.classList.add('border-red-500');
+      if (!firstInvalidField) {
+        firstInvalidField = password2;
+      }
+      isValid = false;
+    } else {
+      password2.classList.remove('border-red-500');
+    }
+  }
+  
+  // Phone number validation
+  const phoneField = document.getElementById('id_phone_number');
+  if (phoneField && phoneField.value.trim()) {
+    const phoneNumber = phoneField.value.trim();
+    const phonePattern = /^(\+971|971|0)?[5-9][0-9]{8}$/;
+    
+    if (!phonePattern.test(phoneNumber)) {
+      phoneField.classList.add('border-red-500');
+      if (!firstInvalidField) {
+        firstInvalidField = phoneField;
+      }
+      isValid = false;
+    } else {
+      phoneField.classList.remove('border-red-500');
+    }
+  }
+  
+  // Focus on first invalid field if any
+  if (!isValid && firstInvalidField) {
+    firstInvalidField.focus();
+    firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  
+  return isValid;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  
+  const stageContents = document.querySelectorAll('.stage-content');
+  const progressBar = document.getElementById('progress-bar');
+  const progressText = document.getElementById('progress-text');
+  const progressValue = document.getElementById('progress-value');
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+  submitBtn = document.getElementById('submit-btn');
+  const specializationField = document.getElementById('specialization-field');
+  const storeTypeSelect = document.getElementById('id_store_type');
+  
+  // Handle store type change
+  storeTypeSelect.addEventListener('change', function() {
+    if (this.value === 'specialized') {
+      specializationField.style.display = 'block';
+      document.getElementById('id_store_specialization').required = true;
+    } else {
+      specializationField.style.display = 'none';
+      document.getElementById('id_store_specialization').required = false;
+    }
+  });
+  
+  function showStage(stage) {
+    stageContents.forEach((content, index) => {
+      if (index + 1 === stage) {
+        content.classList.remove('hidden');
+      } else {
+        content.classList.add('hidden');
+      }
+    });
+    
+    const progress = (stage / totalStages) * 100;
+    progressBar.style.width = progress + '%';
+    progressValue.textContent = Math.round(progress) + '%';
+    progressText.textContent = `Stage ${stage} of ${totalStages}`;
+    
+    if (stage === 1) {
+      prevBtn.classList.add('hidden');
+      nextBtn.classList.remove('hidden');
+      submitBtn.classList.add('hidden');
+    } else if (stage === totalStages) {
+      prevBtn.classList.remove('hidden');
+      nextBtn.classList.add('hidden');
+      submitBtn.classList.remove('hidden');
+    } else {
+      prevBtn.classList.remove('hidden');
+      nextBtn.classList.remove('hidden');
+      submitBtn.classList.add('hidden');
+    }
+  }
+  
+  nextBtn.addEventListener('click', function() {
+    if (validateCurrentStage()) {
+      currentStage++;
+      showStage(currentStage);
+    }
+  });
+  
+  prevBtn.addEventListener('click', function() {
+    currentStage--;
+    showStage(currentStage);
+  });
+  
+  function validateCurrentStage() {
+    const currentStageElement = document.getElementById(`stage-${currentStage}`);
+    const requiredFields = currentStageElement.querySelectorAll('[required]');
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+      if (field.type === 'file') {
+        // For file inputs, check if a file is selected
+        if (!field.files || field.files.length === 0) {
+          field.classList.add('border-red-500');
+          isValid = false;
+        } else {
+          field.classList.remove('border-red-500');
+        }
+      } else {
+        // For other inputs, check if value is not empty
+        if (!field.value.trim()) {
+          field.classList.add('border-red-500');
+          isValid = false;
+        } else {
+          field.classList.remove('border-red-500');
+        }
+      }
+    });
+    
+    // Phone number validation for stage 1
+    if (currentStage === 1) {
+      const phoneField = document.getElementById('id_phone_number');
+      if (phoneField && phoneField.value.trim()) {
+        const phoneNumber = phoneField.value.trim();
+        const phonePattern = /^(\+971|971|0)?[5-9][0-9]{8}$/;
+        
+        if (!phonePattern.test(phoneNumber)) {
+          phoneField.classList.add('border-red-500');
+          showError('Invalid Phone Number', 'يرجى إدخال رقم هاتف صحيح للإمارات. مثال: +971501234567 أو 0501234567');
+          isValid = false;
+        } else {
+          phoneField.classList.remove('border-red-500');
+        }
+      }
+      
+      // Password validation
+      const password1 = document.getElementById('id_password1');
+      const password2 = document.getElementById('id_password2');
+      
+      if (password1 && password1.value.trim()) {
+        if (password1.value.length < 8) {
+          password1.classList.add('border-red-500');
+          showError('Password Too Short', 'كلمة المرور يجب أن تكون 8 أحرف على الأقل');
+          isValid = false;
+        } else {
+          password1.classList.remove('border-red-500');
+        }
+      }
+      
+      if (password2 && password2.value.trim()) {
+        if (password1.value !== password2.value) {
+          password2.classList.add('border-red-500');
+          showError('Password Mismatch', 'كلمة المرور وتأكيد كلمة المرور غير متطابقين');
+          isValid = false;
+        } else {
+          password2.classList.remove('border-red-500');
+        }
+      }
+    }
+    
+    if (!isValid) {
+      showError('Missing Fields', 'يرجى ملء جميع الحقول المطلوبة قبل المتابعة.');
+    }
+    
+    return isValid;
+  }
+  
+  // File upload preview handlers
+  const frontImageInput = document.getElementById('id_id_front_image');
+  const backImageInput = document.getElementById('id_id_back_image');
+  
+  if (frontImageInput) {
+    frontImageInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        // Check file size (10MB limit)
+        if (file.size > 10 * 1024 * 1024) {
+          showError('File Too Large', 'Please select an image smaller than 10MB.');
+          e.target.value = ''; // Clear the input
+          return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const previewImg = document.getElementById('front-preview-img');
+          const previewDiv = document.getElementById('front-preview');
+          if (previewImg && previewDiv) {
+            previewImg.src = e.target.result;
+            previewDiv.classList.remove('hidden');
+          }
+        };
+        reader.readAsDataURL(file);
+      } else if (file) {
+        showError('Invalid File Type', 'Please select a valid image file (PNG, JPG, GIF).');
+        e.target.value = ''; // Clear the input
+      }
+    });
+  }
+  
+  if (backImageInput) {
+    backImageInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        // Check file size (10MB limit)
+        if (file.size > 10 * 1024 * 1024) {
+          showError('File Too Large', 'Please select an image smaller than 10MB.');
+          e.target.value = ''; // Clear the input
+          return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const previewImg = document.getElementById('back-preview-img');
+          const previewDiv = document.getElementById('back-preview');
+          if (previewImg && previewDiv) {
+            previewImg.src = e.target.result;
+            previewDiv.classList.remove('hidden');
+          }
+        };
+        reader.readAsDataURL(file);
+      } else if (file) {
+        showError('Invalid File Type', 'Please select a valid image file (PNG, JPG, GIF).');
+        e.target.value = ''; // Clear the input
+      }
+    });
+  }
+  
+  // Add drag and drop functionality
+  function addDragAndDropHandlers() {
+    const frontDropZone = document.querySelector('#id_id_front_image').closest('.border-2');
+    const backDropZone = document.querySelector('#id_id_back_image').closest('.border-2');
+    
+    if (frontDropZone) {
+      frontDropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.classList.add('border-yellow-500', 'bg-yellow-50');
+      });
+      
+      frontDropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.classList.remove('border-yellow-500', 'bg-yellow-50');
+      });
+      
+      frontDropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.classList.remove('border-yellow-500', 'bg-yellow-50');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          const file = files[0];
+          if (file.type.startsWith('image/')) {
+            // Check file size (10MB limit)
+            if (file.size > 10 * 1024 * 1024) {
+              showError('File Too Large', 'Please select an image smaller than 10MB.');
+              return;
+            }
+            
+            const input = document.getElementById('id_id_front_image');
+            input.files = files;
+            
+            // Trigger the change event
+            const event = new Event('change', { bubbles: true });
+            input.dispatchEvent(event);
+          } else {
+            showError('Invalid File Type', 'Please select a valid image file (PNG, JPG, GIF).');
+          }
+        }
+      });
+    }
+    
+    if (backDropZone) {
+      backDropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.classList.add('border-yellow-500', 'bg-yellow-50');
+      });
+      
+      backDropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.classList.remove('border-yellow-500', 'bg-yellow-50');
+      });
+      
+      backDropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.classList.remove('border-yellow-500', 'bg-yellow-50');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          const file = files[0];
+          if (file.type.startsWith('image/')) {
+            // Check file size (10MB limit)
+            if (file.size > 10 * 1024 * 1024) {
+              showError('File Too Large', 'Please select an image smaller than 10MB.');
+              return;
+            }
+            
+            const input = document.getElementById('id_id_back_image');
+            input.files = files;
+            
+            // Trigger the change event
+            const event = new Event('change', { bubbles: true });
+            input.dispatchEvent(event);
+          } else {
+            showError('Invalid File Type', 'Please select a valid image file (PNG, JPG, GIF).');
+          }
+        }
+      });
+    }
+  }
+  
+  // Initialize drag and drop handlers
+  addDragAndDropHandlers();
+  
+  // Function to calculate completion percentage
+  function calculateProgress() {
+    let completedFields = 0;
+    let totalFields = 0;
+    
+    // Stage 1 fields
+    const stage1Fields = [
+      'id_full_name', 'id_email', 'id_phone_number', 'id_country',
+      'id_password1', 'id_password2', 'id_id_front_image', 'id_id_back_image'
+    ];
+    
+    // Stage 2 fields
+    const stage2Fields = [
+      'id_store_name', 'id_store_link', 'id_store_type', 'id_company_name',
+      'id_bank_name', 'id_account_holder_name', 'id_account_number', 'id_iban_confirmation'
+    ];
+    
+    // Stage 3 fields (bank details)
+    const stage3Fields = [
+      'id_bank_name', 'id_account_holder_name', 'id_account_number', 'id_iban_confirmation'
+    ];
+    
+    // Check current stage fields
+    let currentFields = [];
+    if (currentStage === 1) {
+      currentFields = stage1Fields;
+    } else if (currentStage === 2) {
+      currentFields = stage1Fields.concat(stage2Fields);
+    } else if (currentStage === 3) {
+      currentFields = stage1Fields.concat(stage2Fields).concat(stage3Fields);
+    }
+    
+    // Count completed fields
+    currentFields.forEach(fieldId => {
+      const field = document.getElementById(fieldId);
+      if (field) {
+        totalFields++;
+        if (field.value.trim() !== '') {
+          completedFields++;
+        }
+      }
+    });
+    
+    // Check marketing platforms (count as one field)
+    const marketingPlatforms = document.querySelectorAll('input[name="marketing_platforms"]:checked');
+    if (marketingPlatforms.length > 0) {
+      completedFields++;
+    }
+    totalFields++;
+    
+    // Calculate percentage
+    const percentage = totalFields > 0 ? Math.round((completedFields / totalFields) * 100) : 0;
+    return Math.min(percentage, 100);
+  }
+  
+  // Function to update progress bar
+  function updateProgress() {
+    const percentage = calculateProgress();
+    progressBar.style.width = percentage + '%';
+    progressValue.textContent = percentage + '%';
+    
+    if (percentage === 0) {
+      progressText.textContent = 'Start your registration';
+    } else if (percentage < 25) {
+      progressText.textContent = 'Getting started...';
+    } else if (percentage < 50) {
+      progressText.textContent = 'Making progress...';
+    } else if (percentage < 75) {
+      progressText.textContent = 'Almost there...';
+    } else if (percentage < 100) {
+      progressText.textContent = 'Nearly complete...';
+    } else {
+      progressText.textContent = 'Registration complete!';
+    }
+  }
+  
+  // Initialize first stage
+  showStage(1);
+  
+  // Add event listeners to all form fields for progress tracking
+  function addProgressListeners() {
+    const allFields = [
+      'id_full_name', 'id_email', 'id_phone_number', 'id_country',
+      'id_password1', 'id_password2', 'id_id_front_image', 'id_id_back_image',
+      'id_store_name', 'id_store_link', 'id_store_type', 'id_company_name',
+      'id_bank_name', 'id_account_holder_name', 'id_account_number', 'id_iban_confirmation'
+    ];
+    
+    allFields.forEach(fieldId => {
+      const field = document.getElementById(fieldId);
+      if (field) {
+        field.addEventListener('input', updateProgress);
+        field.addEventListener('change', updateProgress);
+      }
+    });
+    
+    // Add listeners for marketing platforms
+    const marketingPlatforms = document.querySelectorAll('input[name="marketing_platforms"]');
+    marketingPlatforms.forEach(checkbox => {
+      checkbox.addEventListener('change', updateProgress);
+    });
+  }
+  
+  // Initialize progress listeners
+  addProgressListeners();
+  
+  // Initial progress calculation
+  updateProgress();
+  
+  // Handle form submission with loading state
+  const form = document.getElementById('registration-form');
+  const submitText = document.getElementById('submit-text');
+  const submitLoading = document.getElementById('submit-loading');
+  
+  form.addEventListener('submit', function(e) {
+    // Prevent double submission
+    if (submitBtn.disabled) {
+      e.preventDefault();
+      return;
+    }
+    
+    // Validate form before submission
+    if (!validateForm()) {
+      e.preventDefault();
+      return false;
+    }
+    
+    // Show loading state
+    submitBtn.disabled = true;
+    submitText.classList.add('hidden');
+    submitLoading.classList.remove('hidden');
+    
+    // Add a small delay to ensure the loading state is visible
+    setTimeout(() => {
+      // Form will submit normally
+    }, 100);
+  });
+  
+  // Override the submit button click to validate first
+  submitBtn.addEventListener('click', function(e) {
+    if (!validateForm()) {
+      e.preventDefault();
+      showError('Missing Fields', 'Please fill in all required fields before submitting.');
+      return false;
+    }
+  });
+  
+  // Function to toggle password visibility
+  window.togglePassword = function(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
+    } else {
+      input.type = 'password';
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
+    }
+  };
+});
+</script>
+
+{% endblock %}

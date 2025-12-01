@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Approved - Atlas Fulfillment</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            color: #f59e0b;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .status-badge {
+            background-color: #10b981;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: bold;
+        }
+        .success-box {
+            background-color: #d1fae5;
+            border: 1px solid #10b981;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #f59e0b;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #666;
+            font-size: 14px;
+        }
+        .contact-info {
+            background-color: #e0f2fe;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Atlas Fulfillment</div>
+            <h1>Hello {{ user.full_name }}</h1>
+            <div class="status-badge">Account Approved ✅</div>
+        </div>
+
+        <div class="success-box">
+            <h3>🎉 تهانينا! تمت الموافقة على حسابك - Congratulations! Your account has been approved</h3>
+            <p>
+                <strong>عربي:</strong> تمت مراجعة طلب التسجيل الخاص بك وتمت الموافقة عليه بنجاح. يمكنك الآن الوصول إلى جميع خدمات Atlas Fulfillment.
+                <br><br>
+                <strong>English:</strong> Your registration request has been reviewed and approved successfully. You can now access all Atlas Fulfillment services.
+            </p>
+        </div>
+
+        <h3>معلومات الحساب - Account Information:</h3>
+        <ul>
+            <li><strong>الاسم / Name:</strong> {{ user.full_name }}</li>
+            <li><strong>البريد الإلكتروني / Email:</strong> {{ user.email }}</li>
+            <li><strong>اسم المتجر / Store Name:</strong> {{ user.store_name|default:"-" }}</li>
+            <li><strong>تاريخ الموافقة / Approval Date:</strong> {{ approval_date }}</li>
+            {% if approved_by %}
+            <li><strong>تمت الموافقة بواسطة / Approved by:</strong> {{ approved_by.full_name }}</li>
+            {% endif %}
+        </ul>
+
+        <h3>الخطوات التالية - Next Steps:</h3>
+        <ol>
+            <li>سجل الدخول إلى حسابك / Log in to your account</li>
+            <li>استكشف لوحة التحكم الخاصة بك / Explore your dashboard</li>
+            <li>ابدأ في إدارة طلباتك ومنتجاتك / Start managing your orders and products</li>
+        </ol>
+
+        <div style="text-align: center;">
+            <a href="{{ login_url }}" class="cta-button">Login Now</a>
+        </div>
+
+        <h3>الخدمات المتاحة - Available Services:</h3>
+        <ul>
+            <li>إدارة الطلبات والمبيعات / Order and sales management</li>
+            <li>إدارة المخزون والمنتجات / Inventory and product management</li>
+            <li>خدمات التوصيل والشحن / Delivery and shipping services</li>
+            <li>التقارير والتحليلات / Reports and analytics</li>
+            <li>دعم العملاء على مدار الساعة / 24/7 customer support</li>
+        </ul>
+
+        <div class="contact-info">
+            <h4>تحتاج مساعدة؟ - Need Help?</h4>
+            <p>
+                <strong>عربي:</strong> إذا كان لديك أي أسئلة أو تحتاج مساعدة، يرجى التواصل معنا على:
+                <br><br>
+                <strong>English:</strong> If you have any questions or need assistance, please contact us at:
+            </p>
+            <p><strong>الهاتف / Phone:</strong> <a href="tel:+971503565009">+971503565009</a></p>
+        </div>
+
+        <div class="footer">
+            <p>
+                <strong>عربي:</strong> إذا كان لديك أي أسئلة، لا تتردد في التواصل مع فريق الدعم لدينا
+                <br>
+                شكراً لاختيارك Atlas Fulfillment
+            </p>
+            <p>
+                <strong>English:</strong> If you have any questions, please don't hesitate to contact our support team
+                <br>
+                Thank you for choosing Atlas Fulfillment
+            </p>
+        </div>
+    </div>
+</body>
+</html> 

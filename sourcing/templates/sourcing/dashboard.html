@@ -1,0 +1,384 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sourcing Management{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white">
+    <!-- Clean Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-search text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">Sourcing Management</h1>
+                        <p class="mt-1 text-sm text-gray-500">Manage your product sourcing and supplier requests</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'dashboard:index' %}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-home mr-2"></i>
+                        Dashboard
+                    </a>
+                    <a href="{% url 'sourcing:comprehensive_create' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-plus mr-2"></i>
+                        New Sourcing Request
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <!-- Pending Requests -->
+            <div class="bg-white rounded border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-12 w-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-clock text-yellow-600 text-lg"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Pending Requests</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ pending_requests|default:"0" }}</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{% url 'sourcing:requests' %}?status=pending" class="text-sm text-blue-600 hover:text-blue-800">
+                        View all →
+                    </a>
+                </div>
+            </div>
+
+            <!-- Approved Requests -->
+            <div class="bg-white rounded border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-check-circle text-green-600 text-lg"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Approved Requests</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ approved_requests|default:"0" }}</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{% url 'sourcing:requests' %}?status=approved" class="text-sm text-blue-600 hover:text-blue-800">
+                        View all →
+                    </a>
+                </div>
+            </div>
+
+            <!-- Total Suppliers -->
+            <div class="bg-white rounded border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-users text-blue-600 text-lg"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Total Suppliers</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ total_suppliers|default:"0" }}</p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{% url 'sourcing:suppliers' %}" class="text-sm text-blue-600 hover:text-blue-800">
+                        View all →
+                    </a>
+                </div>
+            </div>
+
+            <!-- Processing Time -->
+            <div class="bg-white rounded border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-stopwatch text-purple-600 text-lg"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Avg. Processing Time</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ avg_processing_time|default:"N/A" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Requests and Quick Links - Full Width Layout -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Recent Requests -->
+        <div class="mt-6">
+            <div class="bg-white rounded border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-medium text-gray-900">Recent Requests</h2>
+                    <p class="text-sm text-gray-500">Latest sourcing requests and their status</p>
+                </div>
+                <div class="overflow-x-auto shadow-sm rounded-lg border border-gray-200">
+                    <table class="min-w-full divide-y divide-gray-200 bg-white">
+                        <thead class="bg-gradient-to-r from-orange-50 to-amber-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fas fa-file-alt text-orange-600"></i>
+                                        <span>Request</span>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200" style="min-width: 140px;">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <i class="fas fa-info-circle text-orange-600"></i>
+                                        <span>Status</span>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fas fa-calendar-alt text-orange-600"></i>
+                                        <span>Date</span>
+                                    </div>
+                                </th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider sticky right-0 bg-gradient-to-r from-orange-50 to-amber-50">
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <i class="fas fa-cog text-orange-600"></i>
+                                        <span>Action</span>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for request in recent_requests %}
+                            <tr class="hover:bg-gradient-to-r hover:from-orange-50 hover:to-transparent transition-all duration-200 border-b border-gray-100">
+                                <td class="px-6 py-4 whitespace-nowrap border-r border-gray-100">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="flex-shrink-0">
+                                            <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-md">
+                                                <i class="fas fa-file-alt text-white text-sm"></i>
+                                            </div>
+                                        </div>
+                                        <div class="max-w-xs">
+                                            <div class="text-sm font-bold text-gray-900 truncate">{{ request.request_number }}</div>
+                                            <div class="text-xs text-gray-500 truncate">{{ request.product_name }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center border-r border-gray-100" style="min-width: 140px; white-space: nowrap !important;">
+                                    <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap shadow-sm
+                                        {% if request.status == 'submitted' %}bg-yellow-100 text-yellow-800
+                                        {% elif request.status == 'approved' %}bg-green-100 text-green-800
+                                        {% elif request.status == 'rejected' %}bg-red-100 text-red-800
+                                        {% elif request.status == 'completed' %}bg-blue-100 text-blue-800
+                                        {% elif request.status == 'in_progress' %}bg-indigo-100 text-indigo-800
+                                        {% elif request.status == 'under_review' %}bg-purple-100 text-purple-800
+                                        {% elif request.status == 'cancelled' %}bg-gray-100 text-gray-800
+                                        {% elif request.status == 'draft' %}bg-gray-100 text-gray-600
+                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {{ request.status|title }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap border-r border-gray-100">
+                                    <div class="text-sm font-medium text-gray-900">{{ request.created_at|date:"M d, Y" }}</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center sticky right-0 bg-white">
+                                    <a href="{% url 'sourcing:request_detail' request.id %}" 
+                                       class="inline-flex items-center px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-semibold shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105" 
+                                       title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="px-6 py-12 text-center">
+                                    <div class="flex flex-col items-center">
+                                        <div class="h-20 w-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                                            <i class="fas fa-inbox text-gray-400 text-3xl"></i>
+                                        </div>
+                                        <p class="text-lg font-bold text-gray-900 mb-2">No recent requests found</p>
+                                        <p class="text-sm text-gray-500">Create your first sourcing request to get started</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if recent_requests %}
+                <div class="px-6 py-3 bg-gray-50 border-t border-gray-200 text-right">
+                    <a href="{% url 'sourcing:requests' %}" class="text-sm font-medium text-blue-600 hover:text-blue-800">
+                        View all requests →
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="mt-6">
+            <div class="bg-white rounded border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-medium text-gray-900">Quick Links</h2>
+                    <p class="text-sm text-gray-500">Access common sourcing functions</p>
+                </div>
+                <div class="divide-y divide-gray-200">
+                    <a href="{% url 'sourcing:requests' %}?status=pending" class="block px-6 py-4 hover:bg-gray-50">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clock text-yellow-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-900">Pending Requests</p>
+                                <p class="text-sm text-gray-500">View all pending sourcing requests</p>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="{% url 'sourcing:suppliers' %}" class="block px-6 py-4 hover:bg-gray-50">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-users text-blue-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-900">Manage Suppliers</p>
+                                <p class="text-sm text-gray-500">View and manage supplier details</p>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="{% url 'sourcing:comprehensive_create' %}" class="block px-6 py-4 hover:bg-gray-50">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-plus text-green-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-900">Create Request</p>
+                                <p class="text-sm text-gray-500">Create a new sourcing request</p>
+                            </div>
+                        </div>
+                    </a>
+                    <a href="#" class="block px-6 py-4 hover:bg-gray-50">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-chart-bar text-purple-600"></i>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-900">Reports</p>
+                                <p class="text-sm text-gray-500">View sourcing performance reports</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Direct access to notification dropdown elements
+        const notificationButton = document.querySelector('button[aria-label="Notifications"]');
+        const notificationDropdown = document.getElementById('notification-dropdown');
+        
+        if (notificationButton && notificationDropdown) {
+            // Reset any previous event listeners
+            const newNotificationButton = notificationButton.cloneNode(true);
+            notificationButton.parentNode.replaceChild(newNotificationButton, notificationButton);
+            
+            // Add fresh event listener
+            newNotificationButton.addEventListener('click', function(event) {
+                event.stopPropagation();
+                notificationDropdown.classList.toggle('hidden');
+                if (profileDropdown) profileDropdown.classList.add('hidden');
+            });
+        }
+        
+        // Direct access to profile dropdown elements
+        const profileButton = document.getElementById('user-menu-button');
+        const profileDropdown = document.getElementById('user-menu');
+        
+        if (profileButton && profileDropdown) {
+            // Reset any previous event listeners
+            const newProfileButton = profileButton.cloneNode(true);
+            profileButton.parentNode.replaceChild(newProfileButton, profileButton);
+            
+            // Add fresh event listener
+            newProfileButton.addEventListener('click', function(event) {
+                event.stopPropagation();
+                profileDropdown.classList.toggle('hidden');
+                if (notificationDropdown) notificationDropdown.classList.add('hidden');
+            });
+        }
+        
+        // Close dropdowns when clicking elsewhere
+        document.addEventListener('click', function(event) {
+            if (notificationDropdown && !event.target.closest('button[aria-label="Notifications"]') && 
+                !notificationDropdown.contains(event.target)) {
+                notificationDropdown.classList.add('hidden');
+            }
+            
+            if (profileDropdown && !event.target.closest('#user-menu-button') && 
+                !profileDropdown.contains(event.target)) {
+                profileDropdown.classList.add('hidden');
+            }
+        });
+    });
+</script>
+<style>
+/* Beautiful Table Styles */
+.overflow-x-auto {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #f97316 #fef3c7;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+    height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+    background: #fef3c7;
+    border-radius: 10px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+    background: linear-gradient(to right, #f97316, #fb923c);
+    border-radius: 10px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to right, #ea580c, #f97316);
+}
+
+.overflow-x-auto table thead th {
+    white-space: nowrap !important;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: linear-gradient(to right, #fff7ed, #fef3c7) !important;
+}
+
+.overflow-x-auto table tbody td {
+    white-space: nowrap !important;
+}
+
+.overflow-x-auto table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.overflow-x-auto table tbody tr:hover {
+    background: linear-gradient(to right, #fff7ed, transparent) !important;
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.1);
+}
+
+.overflow-x-auto table tbody td:last-child {
+    position: sticky;
+    right: 0;
+    background: white;
+    z-index: 5;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.overflow-x-auto table tbody tr:hover td:last-child {
+    background: linear-gradient(to right, #fff7ed, white);
+}
+</style>
+{% endblock %} 

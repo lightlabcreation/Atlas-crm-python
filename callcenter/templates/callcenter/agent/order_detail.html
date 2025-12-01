@@ -1,0 +1,1688 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Order Details #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-file-alt text-orange-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h1 class="text-2xl font-bold text-orange-500">Order Details #{{ order.id }}</h1>
+                        <p class="text-gray-600">Complete order information and management</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button onclick="openEditStatusModal()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-edit mr-2"></i>
+                        Edit Status
+                    </button>
+                    <button onclick="openEditOrderModal()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-edit mr-2"></i>
+                        Edit Order
+                    </button>
+                    <a href="{% url 'callcenter:order_status_log' order.id %}" class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-history mr-2"></i>
+                        Status Log
+                    </a>
+                    {% if not order.escalated_to_manager %}
+                    <button onclick="confirmEscalation()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        Escalate to Manager
+                    </button>
+                    {% endif %}
+                    <a href="{% url 'callcenter:agent_order_list' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Order Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Order Code Card -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-hashtag text-blue-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Order Code</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ order.order_code }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Card -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-user text-green-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Customer</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ order.customer|default:"N/A" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quantity Card -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-sort-amount-up text-purple-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Quantity</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ order.quantity }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Amount Card -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-dollar-sign text-orange-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Total Amount</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ order.total_price|floatformat:2 }} AED</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Escalation Warning -->
+        {% if order.escalated_to_manager %}
+        <div class="bg-purple-50 border-l-4 border-purple-400 p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-purple-400"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-purple-700">
+                        <strong>This order has been escalated to manager.</strong> 
+                        Only managers can modify the status now. 
+                        Escalated on {{ order.escalated_at|date:"M d, Y H:i" }} by {{ order.escalated_by.get_full_name|default:order.escalated_by.username }}.
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+            <div class="flex flex-wrap gap-4">
+                {% if order.status == 'pending' and order.workflow_status == 'seller_submitted' %}
+                <!-- Show Status Dropdown for pending orders that need approval -->
+                <div class="relative">
+                    <form method="post" action="{% url 'callcenter:agent_update_order_status' order.id %}" class="inline" id="statusForm">
+                        {% csrf_token %}
+                        <select name="status" id="statusSelect" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-md text-sm font-medium pr-8 appearance-none cursor-pointer border-0" onchange="showStatusConfirmation(this.value)">
+                            <option value="" disabled selected class="bg-green-600 text-white">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                Select Action
+                            </option>
+                            <option value="CFM" class="bg-white text-gray-900">✅ تم التأكيد (Confirmed)</option>
+                            <option value="NA1" class="bg-white text-gray-900">📞 لا يرد - محاولة أولى (No Answer 1st)</option>
+                            <option value="NA2" class="bg-white text-gray-900">📞 لا يرد - محاولة ثانية (No Answer 2nd)</option>
+                            <option value="NA3" class="bg-white text-gray-900">📞 لا يرد - محاولة أخيرة (No Answer Final)</option>
+                            <option value="CXL" class="bg-white text-gray-900">❌ Cancel من العميل (Cancelled by Customer)</option>
+                            <option value="HLD" class="bg-white text-gray-900">⏰ تأجيل (Postponed)</option>
+                            <option value="INV" class="bg-white text-gray-900">📵 رقم غير صحيح (Invalid Number)</option>
+                            <option value="CBK" class="bg-white text-gray-900">🔄 إعادة الاتصال لاحقاً (Call Back Later)</option>
+                            <option value="ESC" class="bg-white text-gray-900">⬆️ رفع للمدير (Escalate to Manager)</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                            <i class="fas fa-chevron-down text-white text-xs"></i>
+                        </div>
+                    </form>
+                </div>
+                {% elif order.status == 'confirmed' and order.workflow_status == 'callcenter_approved' %}
+                <!-- Show approved status for already approved orders -->
+                <div class="bg-green-100 text-green-800 px-6 py-2 rounded-md text-sm font-medium">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    Order Approved
+                </div>
+                {% elif order.status == 'cancelled' %}
+                <!-- Show cancelled status -->
+                <div class="bg-red-100 text-red-800 px-6 py-2 rounded-md text-sm font-medium">
+                    <i class="fas fa-times-circle mr-2"></i>
+                    Order Cancelled
+                </div>
+                {% else %}
+                <!-- Show current status for other cases -->
+                <div class="bg-gray-100 text-gray-800 px-6 py-2 rounded-md text-sm font-medium">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Status: {{ order.status|title }} ({{ order.workflow_status|title }})
+                </div>
+                {% endif %}
+                
+                <!-- Log Call button - always available -->
+                <a href="{% url 'callcenter:agent_log_call' order.id %}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md text-sm font-medium">
+                    <i class="fas fa-phone mr-2"></i>
+                    Log Call
+                </a>
+            </div>
+        </div>
+
+        <!-- Workflow Progress -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Workflow Progress</h3>
+                <p class="text-sm text-gray-500">Current order processing stage</p>
+            </div>
+            <div class="p-6">
+                <div class="flex items-center justify-between">
+                    <!-- Seller Submitted -->
+                    <div class="flex flex-col items-center">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
+                            {% if order.workflow_status == 'seller_submitted' %}bg-orange-100 text-orange-800
+                            {% elif order.workflow_status in 'callcenter_approved,pick_and_pack,stockkeeper_approved,packaging_in_progress,packaging_completed,ready_for_delivery,delivery_in_progress,delivery_completed' %}bg-green-100 text-green-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <span class="text-xs text-gray-500 mt-1">Seller Submitted</span>
+                    </div>
+                    
+                    <!-- Arrow -->
+                    <div class="flex-1 h-0.5 bg-gray-200 mx-4"></div>
+                    
+                    <!-- Call Center Approved -->
+                    <div class="flex flex-col items-center">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
+                            {% if order.workflow_status == 'callcenter_approved' %}bg-orange-100 text-orange-800
+                            {% elif order.workflow_status in 'pick_and_pack,stockkeeper_approved,packaging_in_progress,packaging_completed,ready_for_delivery,delivery_in_progress,delivery_completed' %}bg-green-100 text-green-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <span class="text-xs text-gray-500 mt-1">Call Center Approved</span>
+                    </div>
+                    
+                    <!-- Arrow -->
+                    <div class="flex-1 h-0.5 bg-gray-200 mx-4"></div>
+                    
+                    <!-- Packaging -->
+                    <div class="flex flex-col items-center">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
+                            {% if order.workflow_status in 'packaging_in_progress,packaging_completed,ready_for_delivery,delivery_in_progress,delivery_completed' %}bg-green-100 text-green-800
+                            {% elif order.workflow_status in 'pick_and_pack,stockkeeper_approved' %}bg-orange-100 text-orange-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <span class="text-xs text-gray-500 mt-1">Packaging</span>
+                    </div>
+                    
+                    <!-- Arrow -->
+                    <div class="flex-1 h-0.5 bg-gray-200 mx-4"></div>
+                    
+                    <!-- Delivery -->
+                    <div class="flex flex-col items-center">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
+                            {% if order.workflow_status in 'delivery_in_progress,delivery_completed' %}bg-orange-100 text-orange-800
+                            {% elif order.workflow_status == 'delivery_completed' %}bg-green-100 text-green-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <span class="text-xs text-gray-500 mt-1">Delivery</span>
+                    </div>
+                </div>
+                
+                <!-- Current Status -->
+                <div class="mt-6 text-center">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                        {% if order.workflow_status == 'seller_submitted' %}bg-yellow-100 text-yellow-800
+                        {% elif order.workflow_status == 'callcenter_approved' %}bg-green-100 text-green-800
+                        {% elif order.workflow_status in 'pick_and_pack,stockkeeper_approved' %}bg-blue-100 text-blue-800
+                        {% elif order.workflow_status in 'packaging_in_progress,packaging_completed' %}bg-purple-100 text-purple-800
+                        {% elif order.workflow_status in 'ready_for_delivery,delivery_in_progress' %}bg-orange-100 text-orange-800
+                        {% elif order.workflow_status == 'delivery_completed' %}bg-green-100 text-green-800
+                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Current Stage: {{ order.workflow_status|title }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Details -->
+        {% if order.product %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Product Details</h3>
+                <p class="text-sm text-gray-500">Product information for order confirmation</p>
+            </div>
+            <div class="p-6">
+                <div class="flex items-start space-x-6">
+                    <!-- Product Image -->
+                    <div class="flex-shrink-0">
+                        {% if order.product.image %}
+                        <img src="{{ order.product.image.url }}" alt="{{ order.product.name_en }}" class="w-24 h-24 object-cover rounded-lg border border-gray-200">
+                        {% else %}
+                        <div class="w-24 h-24 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                            <i class="fas fa-image text-gray-400 text-2xl"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Product Information -->
+                    <div class="flex-1">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Product Name (EN)</dt>
+                                <dd class="mt-1 text-sm text-gray-900">{{ order.product.name_en|default:"N/A" }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Product Name (AR)</dt>
+                                <dd class="mt-1 text-sm text-gray-900">{{ order.product.name_ar|default:"N/A" }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Product Code</dt>
+                                <dd class="mt-1 text-sm text-gray-900">{{ order.product.code|default:"N/A" }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">SKU</dt>
+                                <dd class="mt-1 text-sm text-gray-900">{{ order.product.sku|default:"N/A" }}</dd>
+                            </div>
+                            {% if order.product.product_variant %}
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Product Variant</dt>
+                                <dd class="mt-1 text-sm text-gray-900">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        {{ order.product.product_variant }}
+                                    </span>
+                                </dd>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Quantity</dt>
+                                <dd class="mt-1 text-sm text-gray-900">{{ order.quantity }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Unit Price</dt>
+                                <dd class="mt-1 text-sm text-gray-900">{{ order.price_per_unit|floatformat:2 }} AED</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Total Price</dt>
+                                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ order.total_price|floatformat:2 }} AED</dd>
+                            </div>
+                            {% if order.product.product_link %}
+                            <div class="md:col-span-2">
+                                <dt class="text-sm font-medium text-gray-500">Product Link</dt>
+                                <dd class="mt-1">
+                                    <div class="text-sm text-gray-600 break-all mb-2 p-2 bg-gray-50 rounded border">
+                                        {{ order.product.product_link }}
+                                    </div>
+                                    <a href="{{ order.product.product_link }}" target="_blank" rel="noopener noreferrer" 
+                                       class="inline-flex items-center px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 text-sm font-medium rounded-md border border-blue-200 transition-colors duration-200">
+                                        <i class="fas fa-external-link-alt mr-2"></i>
+                                        View Product
+                                    </a>
+                                </dd>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Product Description -->
+                        {% if order.product.description_en or order.product.description_ar %}
+                        <div class="mt-4">
+                            <dt class="text-sm font-medium text-gray-500">Description</dt>
+                            <dd class="mt-1 text-sm text-gray-900">
+                                {% if order.product.description_en %}
+                                <div class="mb-2">
+                                    <strong>EN:</strong> {{ order.product.description_en|truncatewords:20 }}
+                                </div>
+                                {% endif %}
+                                {% if order.product.description_ar %}
+                                <div>
+                                    <strong>AR:</strong> {{ order.product.description_ar|truncatewords:20 }}
+                                </div>
+                                {% endif %}
+                            </dd>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Product Actions -->
+                        <div class="mt-4 flex space-x-3">
+                            <button onclick="openProductDetailsModal('{{ order.product.id }}')" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md">
+                                <i class="fas fa-external-link-alt mr-2"></i>
+                                View Product Details
+                            </button>
+                            {% if order.product.image %}
+                            <button onclick="openProductImage('{{ order.product.image.url }}', '{{ order.product.name_en }}')" class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-md">
+                                <i class="fas fa-expand mr-2"></i>
+                                View Full Image
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <!-- No Product Information -->
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-8">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-yellow-800">
+                        No Product Information
+                    </h3>
+                    <div class="mt-2 text-sm text-yellow-700">
+                        <p>This order does not have product information linked. Please contact the seller for product details.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Order Information -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Order Information</h3>
+                <p class="text-sm text-gray-500">Complete order details and status</p>
+            </div>
+            <div class="p-6">
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Order ID</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ order.id }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Status</dt>
+                        <dd class="mt-1">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                {% elif order.status == 'processing' %}bg-blue-100 text-blue-800
+                                {% elif order.status == 'confirmed' %}bg-green-100 text-green-800
+                                {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ order.status|title }}
+                            </span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Customer Name</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ order.customer|default:"N/A" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Phone Number</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ order.customer_phone|default:"N/A" }}</dd>
+                    </div>
+                    {% if order.status == 'postponed' and order.postponed_until %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Postponed Until</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                <i class="fas fa-clock mr-1"></i>
+                                {{ order.postponed_until|date:"M d, Y H:i" }}
+                            </span>
+                        </dd>
+                    </div>
+                    {% endif %}
+                    {% if order.call_back_time %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Call Back Time</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                <i class="fas fa-phone-alt mr-1"></i>
+                                {{ order.call_back_time|date:"M d, Y H:i" }}
+                            </span>
+                        </dd>
+                    </div>
+                    {% endif %}
+                    {% if order.no_answer_time %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">No Answer Time</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                <i class="fas fa-clock mr-1"></i>
+                                {{ order.no_answer_time|date:"M d, Y H:i" }}
+                            </span>
+                        </dd>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Total Amount</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ order.total_price|floatformat:2 }} AED</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Created Date</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ order.date|date:"M d, Y H:i" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Workflow Status</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ order.workflow_status|title }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Seller</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {% if order.seller %}
+                                {{ order.seller.get_full_name|default:order.seller.email|default:"N/A" }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Shipping Information -->
+        {% if order.shipping_address or order.city or order.state or order.country %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Shipping Information</h3>
+                <p class="text-sm text-gray-500">Delivery address and location details</p>
+            </div>
+            <div class="p-6">
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+                    {% if order.shipping_address %}
+                    <div class="sm:col-span-2">
+                        <dt class="text-sm font-medium text-gray-500">Address</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ order.shipping_address }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if order.city %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">City</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ order.city }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if order.state %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">State</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ order.state }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if order.country %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Country</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ order.country }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if order.zip_code %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">ZIP Code</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ order.zip_code }}</dd>
+                    </div>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Order Notes -->
+        {% if order.notes or order.internal_notes %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Notes</h3>
+                <p class="text-sm text-gray-500">Order notes and internal comments</p>
+            </div>
+            <div class="p-6">
+                {% if order.notes %}
+                <div class="mb-4">
+                    <dt class="text-sm font-medium text-gray-500">Order Notes</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ order.notes|linebreaksbr }}</dd>
+                </div>
+                {% endif %}
+                {% if order.internal_notes %}
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Internal Notes</dt>
+                    <dd class="mt-1 text-sm text-gray-900">{{ order.internal_notes|linebreaksbr }}</dd>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Escalation Information -->
+        {% if order.escalated_to_manager %}
+        <div class="bg-red-50 rounded-lg shadow-sm border border-red-200 mb-8">
+            <div class="px-6 py-4 border-b border-red-200">
+                <h3 class="text-lg font-medium text-red-900">معلومات التصعيد</h3>
+                <p class="text-sm text-red-600">تم تصعيد هذا الطلب للمدير</p>
+            </div>
+            <div class="p-6">
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+                    <div>
+                        <dt class="text-sm font-medium text-red-700">تاريخ التصعيد</dt>
+                        <dd class="mt-1 text-sm text-red-900">{{ order.escalated_at|date:"M d, Y H:i" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-red-700">تم التصعيد بواسطة</dt>
+                        <dd class="mt-1 text-sm text-red-900">{{ order.escalated_by.get_full_name|default:order.escalated_by.email }}</dd>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <dt class="text-sm font-medium text-red-700">سبب التصعيد</dt>
+                        <dd class="mt-1 text-sm text-red-900 bg-red-100 p-3 rounded-lg">{{ order.escalation_reason|linebreaksbr }}</dd>
+                    </div>
+                    {% if order.postponed_until %}
+                    <div class="sm:col-span-2">
+                        <dt class="text-sm font-medium text-red-700">تاريخ ووقت التأجيل</dt>
+                        <dd class="mt-1 text-sm text-red-900 bg-red-100 p-3 rounded-lg">
+                            <i class="fas fa-clock mr-2"></i>
+                            {{ order.postponed_until|date:"M d, Y H:i" }}
+                        </dd>
+                    </div>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if call_logs %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">سجل الاتصالات</h3>
+                <p class="text-sm text-gray-500">تاريخ جميع الاتصالات مع العميل</p>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    {% for call in call_logs %}
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-phone text-blue-500 mr-2"></i>
+                                    <span class="font-medium text-gray-900">{{ call.get_status_display }}</span>
+                                    <span class="mx-2 text-gray-400">•</span>
+                                    <span class="text-sm text-gray-500">{{ call.call_time|date:"M d, Y H:i" }}</span>
+                </div>
+                                <p class="text-sm text-gray-600 mb-2">{{ call.notes }}</p>
+                                {% if call.duration > 0 %}
+                                <p class="text-xs text-gray-500">المدة: {{ call.duration }} ثانية</p>
+                                {% endif %}
+            </div>
+        </div>
+    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if manager_notes %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">ملاحظات المدير</h3>
+                <p class="text-sm text-gray-500">ملاحظات وتعليمات مهمة</p>
+            </div>
+            <div class="p-6">
+                <div class="space-y-4">
+                    {% for note in manager_notes %}
+                    <div class="border-l-4 border-blue-500 bg-blue-50 p-4">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-user-tie text-blue-600 mr-2"></i>
+                            <span class="font-medium text-gray-900">{{ note.manager.get_full_name|default:note.manager.email }}</span>
+                            <span class="mx-2 text-gray-400">•</span>
+                            <span class="text-sm text-gray-500">{{ note.created_at|date:"M d, Y H:i" }}</span>
+                        </div>
+                        <p class="text-sm text-gray-700">{{ note.note_text }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Product Image Modal -->
+<div id="productImageModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900" id="modalProductName">Product Image</h3>
+                <button onclick="closeProductImage()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="text-center">
+                <img id="modalProductImage" src="" alt="" class="max-w-full h-auto rounded-lg border border-gray-200">
+            </div>
+            
+            <div class="flex justify-end space-x-3 mt-6">
+                <button onclick="closeProductImage()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Status Modal -->
+<div id="editStatusModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">تعديل حالة الطلب</h3>
+                <button onclick="closeEditStatusModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Order Info Display (Always visible) -->
+            <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <h4 class="text-sm font-semibold text-blue-900 mb-2">معلومات الطلب:</h4>
+                <div class="text-sm text-blue-800 space-y-1">
+                    <p><strong>رقم الطلب:</strong> <span id="displayOrderCode">{{ order.order_code }}</span></p>
+                    <p><strong>العميل:</strong> <span id="displayCustomer">{{ order.customer }}</span></p>
+                    <p><strong>الهاتف:</strong> <span id="displayPhone">{{ order.customer_phone }}</span></p>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">الحالة الجديدة</label>
+                <select id="newStatusSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <option value="pending">في الانتظار (Pending)</option>
+                    <option value="processing">قيد المعالجة (Processing)</option>
+                    <option value="confirmed">تم التأكيد (Confirmed)</option>
+                    <option value="cancelled">ملغي (Cancelled)</option>
+                    <option value="no_answer_1st">لا يرد - محاولة أولى (No Answer 1st)</option>
+                    <option value="no_answer_2nd">لا يرد - محاولة ثانية (No Answer 2nd)</option>
+                    <option value="no_answer_final">لا يرد - محاولة أخيرة (No Answer Final)</option>
+                    <option value="postponed">تأجيل (Postponed)</option>
+                    <option value="invalid_number">رقم غير صحيح (Invalid Number)</option>
+                    <option value="call_back_later">إعادة الاتصال لاحقاً (Call Back Later)</option>
+                    <option value="escalate_manager">رفع للمدير (Escalate to Manager)</option>
+                </select>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">سبب التعديل</label>
+                <textarea id="editReason" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" rows="3" placeholder="اكتب سبب تعديل الحالة..."></textarea>
+            </div>
+            
+            <div class="mb-4" id="noAnswerTimeDiv" style="display: none;">
+                <label class="block text-sm font-medium text-gray-700 mb-2">وقت المحاولة القادمة (No Answer Time) <span class="text-red-500">*</span></label>
+                <input type="datetime-local" id="noAnswerTime" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                <p class="text-xs text-gray-500 mt-1">حدد وقت المحاولة القادمة للاتصال بالعميل</p>
+                <div id="noAnswerTimeDisplay" class="mt-2 text-sm text-blue-600 font-medium" style="display: none;"></div>
+            </div>
+            
+            <div class="mb-4" id="callBackTimeDiv" style="display: none;">
+                <label class="block text-sm font-medium text-gray-700 mb-2">وقت إعادة الاتصال (Call Back Time) <span class="text-red-500">*</span></label>
+                <input type="datetime-local" id="callBackTime" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500" required>
+                <p class="text-xs text-gray-500 mt-1">حدد وقت إعادة الاتصال بالعميل</p>
+                <div id="callBackTimeDisplay" class="mt-2 text-sm text-blue-600 font-medium" style="display: none;"></div>
+            </div>
+            
+            <div class="mb-4" id="postponedDateTimeDiv" style="display: none;">
+                <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ ووقت التأجيل</label>
+                <input type="datetime-local" id="postponedDateTime" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                <p class="text-xs text-gray-500 mt-1">اختر التاريخ والوقت المحدد للتأجيل</p>
+            </div>
+            
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeEditStatusModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+                    Cancel
+                </button>
+                <button onclick="confirmStatusEdit()" class="px-4 py-2 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-md">
+                    تأكيد التعديل
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Order Modal -->
+<div id="editOrderModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-10 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white text-gray-900" style="color-scheme: light !important;">
+        <div class="mt-3" style="color-scheme: light !important;">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900" style="color: #111827 !important;">Edit Order Details</h3>
+                <button onclick="closeEditOrderModal()" class="text-gray-400 hover:text-gray-600" style="color: #9CA3AF !important;">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="editOrderForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" style="color: #374151 !important;">Customer Name</label>
+                        <input type="text" id="editCustomer" value="{{ order.customer }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="background-color: white !important; color: #111827 !important; border-color: #D1D5DB !important;">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" style="color: #374151 !important;">Phone Number</label>
+                        <input type="text" id="editPhone" value="{{ order.customer_phone }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="background-color: white !important; color: #111827 !important; border-color: #D1D5DB !important;">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" style="color: #374151 !important;">Quantity</label>
+                        <input type="number" id="editQuantity" value="{{ order.quantity }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="background-color: white !important; color: #111827 !important; border-color: #D1D5DB !important;">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" style="color: #374151 !important;">Price (AED)</label>
+                        <input type="number" step="0.01" id="editPrice" value="{{ order.price_per_unit }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="background-color: white !important; color: #111827 !important; border-color: #D1D5DB !important;">
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" style="color: #374151 !important;">Shipping Address</label>
+                    <textarea id="editAddress" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="3" style="background-color: white !important; color: #111827 !important; border-color: #D1D5DB !important;">{{ order.shipping_address }}</textarea>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" style="color: #374151 !important;">Emirate</label>
+                        <select id="editEmirate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="background-color: white !important; color: #111827 !important; border-color: #D1D5DB !important;">
+                            <option value="">Select Emirate</option>
+                            <option value="abu_dhabi" {% if order.emirate == 'abu_dhabi' %}selected{% endif %}>Abu Dhabi</option>
+                            <option value="dubai" {% if order.emirate == 'dubai' %}selected{% endif %}>Dubai</option>
+                            <option value="sharjah" {% if order.emirate == 'sharjah' %}selected{% endif %}>Sharjah</option>
+                            <option value="ajman" {% if order.emirate == 'ajman' %}selected{% endif %}>Ajman</option>
+                            <option value="ras_al_khaimah" {% if order.emirate == 'ras_al_khaimah' %}selected{% endif %}>Ras Al Khaimah</option>
+                            <option value="fujairah" {% if order.emirate == 'fujairah' %}selected{% endif %}>Fujairah</option>
+                            <option value="umm_al_quwain" {% if order.emirate == 'umm_al_quwain' %}selected{% endif %}>Umm Al Quwain</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" style="color: #374151 !important;">Area</label>
+                        <select id="editRegion" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="background-color: white !important; color: #111827 !important; border-color: #D1D5DB !important;">
+                            <option value="">Select Area</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" style="color: #374151 !important;">City</label>
+                        <input type="text" id="editCity" value="{{ order.city }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="background-color: white !important; color: #111827 !important; border-color: #D1D5DB !important;">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" style="color: #374151 !important;">Area/الولاية</label>
+                        <input type="text" id="editState" value="{{ order.state }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="background-color: white !important; color: #111827 !important; border-color: #D1D5DB !important;">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2" style="color: #374151 !important;">Postal Code</label>
+                        <input type="text" id="editZipCode" value="{{ order.zip_code }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="background-color: white !important; color: #111827 !important; border-color: #D1D5DB !important;">
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" style="color: #374151 !important;">Additional Contact Number (Optional)</label>
+                    <input type="text" id="editAdditionalPhone" placeholder="Additional phone number for the customer" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" style="background-color: white !important; color: #111827 !important; border-color: #D1D5DB !important;">
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeEditOrderModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md" style="background-color: #F3F4F6 !important; color: #374151 !important;">
+                        Cancel
+                    </button>
+                    <button type="button" onclick="confirmOrderEdit()" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md" style="background-color: #2563EB !important; color: white !important;">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Product Details Modal -->
+<div id="productDetailsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-10 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">تفاصيل المنتج</h3>
+                <button onclick="closeProductDetailsModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div id="productDetailsContent" class="flex items-center justify-center py-8">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span class="ml-2 text-gray-600">جاري تحميل تفاصيل المنتج...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Escalate to Manager Modal -->
+<div id="escalateModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center" style="display: none;" onclick="closeEscalateModalOnOutsideClick(event)">
+    <div class="relative p-5 border w-96 shadow-lg rounded-md bg-white" onclick="event.stopPropagation()">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">تصعيد للمدير</h3>
+                <button onclick="closeEscalateModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form method="post" action="{% url 'callcenter:escalate_to_manager' order.id %}">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">سبب التصعيد *</label>
+                    <textarea name="escalation_reason" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" rows="4" placeholder="اكتب سبب تصعيد هذا الطلب للمدير..." required></textarea>
+                    <p class="text-xs text-gray-500 mt-1">يجب كتابة سبب واضح ومفصل للتصعيد</p>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ ووقت التأجيل (إذا كان السبب تأجيل)</label>
+                    <input type="datetime-local" name="postponed_datetime" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" placeholder="اختر التاريخ والوقت">
+                    <p class="text-xs text-gray-500 mt-1">اختياري - فقط إذا كان سبب التصعيد هو التأجيل</p>
+                </div>
+                
+                <div class="flex justify-end gap-3">
+                    <button type="button" onclick="closeEscalateModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+                        إلغاء
+                    </button>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md">
+                        <i class="fas fa-exclamation-triangle ml-2"></i>
+                        تصعيد للمدير
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function openProductImage(imageUrl, productName) {
+    document.getElementById('modalProductImage').src = imageUrl;
+    document.getElementById('modalProductImage').alt = productName;
+    document.getElementById('modalProductName').textContent = productName;
+    document.getElementById('productImageModal').classList.remove('hidden');
+}
+
+function closeProductImage() {
+    document.getElementById('productImageModal').classList.add('hidden');
+}
+
+function openProductDetailsModal(productId) {
+    document.getElementById('productDetailsModal').classList.remove('hidden');
+    
+    // Show loading state
+    document.getElementById('productDetailsContent').innerHTML = `
+        <div class="flex items-center justify-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span class="ml-2 text-gray-600">جاري تحميل تفاصيل المنتج...</span>
+        </div>
+    `;
+    
+    // Fetch product details
+    console.log('DEBUG: Fetching product details for ID:', productId);
+    fetch(`/products/${productId}/api/`)
+        .then(response => {
+            console.log('DEBUG: Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('DEBUG: Response data:', data);
+            if (data.success) {
+                displayProductDetails(data.product);
+            } else {
+                showError('حدث خطأ في تحميل تفاصيل المنتج: ' + (data.error || 'خطأ غير معروف'));
+            }
+        })
+        .catch(error => {
+            console.error('DEBUG: Fetch error:', error);
+            showError('حدث خطأ في الاتصال بالخادم: ' + error.message);
+        });
+}
+
+function closeProductDetailsModal() {
+    document.getElementById('productDetailsModal').classList.add('hidden');
+}
+
+function displayProductDetails(product) {
+    const content = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+                ${product.image ? `
+                    <img src="${product.image}" alt="${product.name_en}" class="w-full h-64 object-cover rounded-lg shadow-lg">
+                ` : `
+                    <div class="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-image text-gray-400 text-4xl"></i>
+                    </div>
+                `}
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <h4 class="text-xl font-bold text-gray-900">${product.name_en}</h4>
+                    ${product.name_ar ? `<p class="text-lg text-gray-600">${product.name_ar}</p>` : ''}
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">Product Code</label>
+                        <p class="text-sm text-gray-900">${product.sku || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">SKU</label>
+                        <p class="text-sm text-gray-900">${product.sku || 'N/A'}</p>
+                    </div>
+                </div>
+                
+                ${product.product_variant ? `
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Product Variant</label>
+                    <p class="text-sm text-gray-900 bg-blue-50 px-3 py-2 rounded-lg">${product.product_variant}</p>
+                </div>
+                ` : ''}
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">Quantity</label>
+                        <p class="text-sm text-gray-900">1</p>
+                    </div>
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">Unit Price</label>
+                        <p class="text-sm text-gray-900">${product.price || '0.00'} AED</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Total Price</label>
+                    <p class="text-lg font-bold text-blue-600">${product.price || '0.00'} AED</p>
+                </div>
+                
+                ${product.description ? `
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">Description</label>
+                        <p class="text-sm text-gray-900">${product.description}</p>
+                    </div>
+                ` : ''}
+                
+                ${product.category ? `
+                    <div>
+                        <label class="text-sm font-medium text-gray-500">Category</label>
+                        <p class="text-sm text-gray-900">${product.category}</p>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('productDetailsContent').innerHTML = content;
+}
+
+function showError(message) {
+    document.getElementById('productDetailsContent').innerHTML = `
+        <div class="text-center py-8">
+            <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+            <p class="text-red-600">${message}</p>
+        </div>
+    `;
+}
+
+function openEditStatusModal() {
+    document.getElementById('editStatusModal').classList.remove('hidden');
+    
+    // Reset form
+    document.getElementById('callBackTime').value = '';
+    document.getElementById('noAnswerTime').value = '';
+    document.getElementById('postponedDateTime').value = '';
+    document.getElementById('editReason').value = '';
+    document.getElementById('newStatusSelect').value = 'pending';
+    
+    // Add event listener for status change
+    const statusSelect = document.getElementById('newStatusSelect');
+    const postponedDiv = document.getElementById('postponedDateTimeDiv');
+    const noAnswerTimeDiv = document.getElementById('noAnswerTimeDiv');
+    const callBackTimeDiv = document.getElementById('callBackTimeDiv');
+    const noAnswerTimeInput = document.getElementById('noAnswerTime');
+    const callBackTimeInput = document.getElementById('callBackTime');
+    const noAnswerTimeDisplay = document.getElementById('noAnswerTimeDisplay');
+    const callBackTimeDisplay = document.getElementById('callBackTimeDisplay');
+    
+    // Remove existing listeners to avoid duplicates
+    statusSelect.removeEventListener('change', handleStatusChange);
+    statusSelect.addEventListener('change', handleStatusChange);
+    
+    function handleStatusChange() {
+        const selectedStatus = this.value;
+        
+        // Reset all fields visibility
+        postponedDiv.style.display = 'none';
+        noAnswerTimeDiv.style.display = 'none';
+        callBackTimeDiv.style.display = 'none';
+        noAnswerTimeInput.required = false;
+        callBackTimeInput.required = false;
+        noAnswerTimeInput.style.borderColor = '';
+        callBackTimeInput.style.borderColor = '';
+        
+        // Show appropriate field based on status
+        if (selectedStatus === 'postponed') {
+            postponedDiv.style.display = 'block';
+        } else if (selectedStatus === 'call_back_later') {
+            callBackTimeDiv.style.display = 'block';
+            callBackTimeInput.required = true;
+            if (!callBackTimeInput.value) {
+                callBackTimeInput.style.borderColor = '#f59e0b';
+            }
+        } else if (['no_answer_1st', 'no_answer_2nd', 'no_answer_final'].includes(selectedStatus)) {
+            noAnswerTimeDiv.style.display = 'block';
+            noAnswerTimeInput.required = true;
+            if (!noAnswerTimeInput.value) {
+                noAnswerTimeInput.style.borderColor = '#f59e0b';
+            }
+        }
+    }
+    
+    // Update no answer time display when it changes
+    noAnswerTimeInput.addEventListener('change', function() {
+        if (this.value) {
+            const date = new Date(this.value);
+            const formattedDate = date.toLocaleString('ar-EG', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            noAnswerTimeDisplay.textContent = `وقت المحاولة القادمة: ${formattedDate}`;
+            noAnswerTimeDisplay.style.display = 'block';
+            this.style.borderColor = '';
+        } else {
+            noAnswerTimeDisplay.style.display = 'none';
+        }
+    });
+    
+    // Update call back time display when it changes
+    callBackTimeInput.addEventListener('change', function() {
+        if (this.value) {
+            const date = new Date(this.value);
+            const formattedDate = date.toLocaleString('ar-EG', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            callBackTimeDisplay.textContent = `وقت إعادة الاتصال: ${formattedDate}`;
+            callBackTimeDisplay.style.display = 'block';
+            this.style.borderColor = '';
+        } else {
+            callBackTimeDisplay.style.display = 'none';
+        }
+    });
+}
+
+function closeEditStatusModal() {
+    document.getElementById('editStatusModal').classList.add('hidden');
+}
+
+function openEditOrderModal() {
+    document.getElementById('editOrderModal').classList.remove('hidden');
+}
+
+function closeEditOrderModal() {
+    document.getElementById('editOrderModal').classList.add('hidden');
+}
+
+function confirmEscalation() {
+    if (confirm('هل أنت متأكد من رفع للمدير؟')) {
+        openEscalateModal();
+    }
+}
+
+function openEscalateModal() {
+    const modal = document.getElementById('escalateModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+    }
+}
+
+function closeEscalateModal() {
+    const modal = document.getElementById('escalateModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        const form = modal.querySelector('form');
+        if (form) {
+            form.reset();
+        }
+        const statusSelect = document.getElementById('statusSelect');
+        if (statusSelect) {
+            statusSelect.selectedIndex = 0;
+        }
+    }
+}
+
+function closeEscalateModalOnOutsideClick(event) {
+    if (event.target.id === 'escalateModal') {
+        closeEscalateModal();
+    }
+}
+
+// Emirates and regions data - Complete list from official government data
+const emiratesData = {
+    'abu_dhabi': [
+        'Al Shawamekh', 'Al Wathba North', 'Al Wathba South', 'Baniyas', 'Al Mafraq', 'Al Mafraq Industrial',
+        'Bawabat Al Sharq', 'Sir Baniyas Island', 'Al Nahda Military', 'Al Shamkha', 'Al Shamkha East',
+        'Al Shamkha South', 'Al Reef', 'Al Adla', 'Rawdat Al Reef', 'Al Faya', 'Al Haffar', 'Al Me-Rad',
+        'Al Dhafra Air Base', 'Icad', 'Icad Residential City', 'Mbz', 'Mina Zayed', 'Mohammed Bin Zayed City (Mbz)',
+        'Mussafah', 'Mahwi', 'Esnaad', 'Khalifa City', 'Abu Dhabi International Airport', 'Al Forsan Village',
+        'Al Raha Beach', 'Al Raha Gardens', 'Yas Island', 'Al Muneera', 'Al Matar', 'Masdar City', 'Taweelah',
+        'Abu Al Habel Island', 'Al Bandar', 'Al Jubail Island', 'Al Lissaily', 'Al Rayyana', 'Al Seef',
+        'Al Zeina', 'Fahid Island', 'Golf Gardens', 'Watani Villas', 'Al Buteen', 'Al Khalidiyah', 'Corniche',
+        'Saadiyat Island', 'Al Hosn', 'Al Khubeirah', 'Al Manhal', 'Al Zahraa', 'Dolphin Island', 'Lulu Island',
+        'Qasr Al Amouage', 'Al Baladiya', 'Al Danah (Madinat Zayed)', 'Al Muroor', 'Al Nahyan', 'Al Mina',
+        'Madinat Zayed', 'Al Reem Island', 'Al Reem Island East', 'Al Maryah Island', 'Al Markaziyah', 'Al Dana',
+        'Al Dhafrah', 'Al Zahiyah (Tourist Club)', 'Al Gurm', 'Al Wahdah', 'Zayed City', 'Al Aman', 'Al Ittihad',
+        'Sas Al Nakhl', 'Sas Al Nakhl Village', 'Al Karamah', 'Al Mushrif', 'Al Madina Al Riyadiya',
+        'Abu Dhabi Gate City', 'Al Maqta - Abu Dhabi City', 'Al Rowdah', 'Al Safarat', 'Zayed Military City',
+        'Qasr Al Shatie', 'Al Hudayriat Island', 'Al Mazoon', 'Al Mussala', 'Al Rehhan', 'Al Tabbiyah',
+        'Hadbat Al Zaafran', 'Mangrove Village', 'Seashore Villas'
+    ],
+    'dubai': [
+        'Abu Baker Al Siddique Road', 'Abu Hail', 'Acacia Avenues', 'Ain Khatt', 'Akoya', 'Akoya Oxygen',
+        'Al Aweer', 'Al Badaa', 'Al Baraha', 'Al Barsha', 'Al Barsha South 1', 'Al Barsha South 2',
+        'Al Barsha South 3', 'Al Buteen', 'Al Daghaya', 'Al Diyafah Street', 'Al Falaj Villas', 'Al Fahidi',
+        'Al Furjan', 'Al Garhoud', 'Al Ghurair', 'Al Habtoor City', 'Al Hamriya', 'Al Hudaiba', 'Al Jaddaf',
+        'Al Jafiliya', 'Al Juwais', 'Al Karama', 'Al Khabaisi', 'Al Khail Gate', 'Al Khawaneej', 'Al Kifaf',
+        'Al Lisaili', 'Al Mafyar', 'Al Mahra', 'Al Majara', 'Al Maktoum Road', 'Al Mamzar', 'Al Manara',
+        'Al Mankhool', 'Al Marjan Island', 'Al Mizhar', 'Al Murar', 'Al Muteena', 'Al Nahda', 'Al Qarah',
+        'Al Qudra', 'Al Qusais', 'Al Qusais Industrial Area', 'Al Quoz', 'Al Raffa', 'Al Ras', 'Al Rashidiya',
+        'Al Rigga', 'Al Ruwayyah', 'Al Sabkha', 'Al Safa', 'Al Sall', 'Al Satwa', 'Al Shindagha',
+        'Al Souq Al Kabeer', 'Al Sufouh', 'Al Taween', 'Al Twar', 'Al Warqa', 'Al Wasl', 'Al Wuheida',
+        'Al Zahra', 'Arabian Ranches', 'Barsha Heights', 'Bluewaters Island', 'Bur Dubai', 'Burj Khalifa',
+        'Business Bay', 'Cedre Villas', 'City Walk', 'Corniche Al Qawasim', 'Damac Hills', 'Deira',
+        'Discovery Gardens', 'Dubai Academic City', 'Dubai Airport Free Zone', 'Dubai Creek Harbour',
+        'Dubai Design District', 'Dubai Healthcare City', 'Dubai Hills Estate', 'Dubai Industrial City',
+        'Dubai International Airport', 'Dubai International Financial Centre', 'Dubai Investment Park',
+        'Dubai Internet City', 'Dubai Knowledge Village', 'Dubai Land', 'Dubai Marina', 'Dubai Maritime City',
+        'Dubai Media City', 'Dubai Motor City', 'Dubai Outsource City', 'Dubai Silicon Oasis', 'Dubai South',
+        'Dubai Sports City', 'Dubai Studio City', 'Emirates Hills', 'Emirates Road', 'Expo', 'Festival City',
+        'Green Community', 'Hatta', 'International City', 'Jebel Ali', 'Jumeirah', 'Jumeirah Golf Estates',
+        'Jumeirah Islands', 'Jumeirah Lakes Towers', 'Jumeirah Park', 'Jumeirah Village Circle', 'Karama',
+        'Khalifa Bin Zayed City', 'Mall of the Emirates', 'Meydan', 'Mirdif', 'Mohammed Bin Rashid City',
+        'Muhaisnah', 'Nad Al Hammar', 'Nad Al Sheba', 'Palm Jumeirah', 'Port Rashid', 'Ras Al Khor', 'Remraam',
+        'Sheikh Zayed Road', 'Silicon Oasis', 'Springs', 'Tecom', 'Tilal Al Ghaf', 'Trade Centre', 'Umm Hurair',
+        'Umm Ramool', 'Umm Suqeim', 'Warsan', 'Zaabeel'
+    ],
+    'sharjah': [
+        'Al noor island', 'Abu Shagara', 'Abu Tina', 'Al Abar', 'Al Atain', 'Al Azra', 'Al Badea',
+        'Al Badea Palace', 'Al Bateen', 'Al Barashi', 'Al Bataeh', 'Al Bedi Suburb', 'Al Falaj', 'Al Fayha',
+        'Al Fisht', 'Al Ghafiya', 'Al Ghubaibah', 'Al Goaz', 'Al Hazana', 'Al Heerah Suburb', 'Al Jazeera',
+        'Al Jazat', 'Al Juraina', 'Al Khaledia', 'Al Khalid Sea Port', 'Al Khezamia', 'Al Layyah', 'Al Majaz',
+        'Al Majarrah', 'Al Mamsha', 'Al Mamzar', 'Al Manakh', 'Al Manazel', 'Al Mareija', 'Al Mirgab',
+        'Al Mowafjah', 'Al Muweilah', 'Al Munay', 'Al Nahda', 'Al Nasserya', 'Al Nekhailat', 'Al Noof',
+        'Al Qasba', 'Al Qulayaa', 'Al Qusais', 'Al Ramla', 'Al Ramtha', 'Al Rifaah', 'Al Rolla', 'Al Sabkha',
+        'Al Sajaa', 'Al Seef', 'Al Shuwaihen', 'Al Soor', 'Al Souq Al Kabeer', 'Al Taawun', 'Al Talaa',
+        'Al Tarfa', 'Al Turfah', 'Al Wahda', 'Al Zahra', 'Al Zubair', 'Al Zubair Suburb', 'Al Zuhour',
+        'Al Majaz Waterfront', 'Al Majaz Island', 'Al Majaz 1', 'Al Majaz 2', 'Al Majaz 3', 'Al Majaz 4',
+        'Al Majaz 5', 'Al Majaz 6', 'Al Majaz 7', 'Al Majaz 8', 'Al Majaz 9', 'Al Majaz 10', 'Al Majaz 11',
+        'Al Majaz 12', 'Al Majaz 13', 'Al Majaz 14', 'Al Majaz 15', 'Al Majaz 16', 'Al Majaz 17', 'Al Majaz 18',
+        'Al Majaz 19', 'Al Majaz 20', 'Al Majaz 21', 'Al Majaz 22', 'Al Majaz 23', 'Al Majaz 24', 'Al Majaz 25',
+        'Al Majaz 26', 'Al Majaz 27', 'Al Majaz 28', 'Al Majaz 29', 'Al Majaz 30', 'Al Majaz 31', 'Al Majaz 32',
+        'Al Majaz 33', 'Al Majaz 34', 'Al Majaz 35', 'Al Majaz 36', 'Al Majaz 37', 'Al Majaz 38', 'Al Majaz 39',
+        'Al Majaz 40', 'Al Majaz 41', 'Al Majaz 42', 'Al Majaz 43', 'Al Majaz 44', 'Al Majaz 45', 'Al Majaz 46',
+        'Al Majaz 47', 'Al Majaz 48', 'Al Majaz 49', 'Al Majaz 50', 'Al Majaz 51', 'Al Majaz 52', 'Al Majaz 53',
+        'Al Majaz 54', 'Al Majaz 55', 'Al Majaz 56', 'Al Majaz 57', 'Al Majaz 58', 'Al Majaz 59', 'Al Majaz 60',
+        'Al Majaz 61', 'Al Majaz 62', 'Al Majaz 63', 'Al Majaz 64', 'Al Majaz 65', 'Al Majaz 66', 'Al Majaz 67',
+        'Al Majaz 68', 'Al Majaz 69', 'Al Majaz 70', 'Al Majaz 71', 'Al Majaz 72', 'Al Majaz 73', 'Al Majaz 74',
+        'Al Majaz 75', 'Al Majaz 76', 'Al Majaz 77', 'Al Majaz 78', 'Al Majaz 79', 'Al Majaz 80', 'Al Majaz 81',
+        'Al Majaz 82', 'Al Majaz 83', 'Al Majaz 84', 'Al Majaz 85', 'Al Majaz 86', 'Al Majaz 87', 'Al Majaz 88',
+        'Al Majaz 89', 'Al Majaz 90', 'Al Majaz 91', 'Al Majaz 92', 'Al Majaz 93', 'Al Majaz 94', 'Al Majaz 95',
+        'Al Majaz 96', 'Al Majaz 97', 'Al Majaz 98', 'Al Majaz 99', 'Al Majaz 100'
+    ],
+    'ajman': [
+        'Ajman Beach', 'Ajman Free Zone (AFZA)', 'Ajman Industrial 1', 'Ajman Industrial 2', 'Ajman Port',
+        'Ajman Uptown', 'Al Alya', 'Al Amera', 'Al Bahya', 'Al Bustan', 'Al Hamidiyah 1', 'Al Hamidiyah 2',
+        'Al Hamrya', 'Al Helio 1', 'Al Helio 2', 'Al Jurf', 'Al Manama', 'Al Muntazi 1', 'Al Muntazi 2',
+        'Al Muwaihat 1', 'Al Muwaihat 2', 'Al Muwaihat 3', 'Al Raqaib 1', 'Al Raqaib 2', 'Al Rashidiya 1',
+        'Al Rashidiya 2', 'Al Rashidiya 3', 'Al Rawdha 1', 'Al Rawdha 2', 'Al Rawdha 3', 'Al Rumailah 1',
+        'Al Rumailah 2', 'Al Rumailah 3', 'Al Safia', 'Al Safya Island', 'Al Tallah 1', 'Al Tallah 2',
+        'Al Yasmeen', 'Al Zahya', 'Al Zora', 'Ammar Street', 'Asyad Tower', 'China Mall', 'Corniche Ajman',
+        'Emirates City', 'King Faisal Street', 'Liwara', 'Mushairef', 'Nakheel 1', 'Nakheel 2', 'Nuaimeya 1',
+        'Nuaimeya 2', 'Nuaimeya 3', 'One Tower'
+    ],
+    'ras_al_khaimah': [
+        'Adhen Village', 'Ain Khatt', 'Airport Road', 'Al Batah', 'Al Burairat', 'Al Daith B', 'Al Dar Al Bayda',
+        'Al Darbijaniyah', 'Al Dhait North', 'Al Dhait South', 'Al Dhait South A', 'Al Dhait South B',
+        'Al Dhait South C', 'Al Dhait South D', 'Al Dhait South E', 'Al Driwyzah', 'Al Duhaisah', 'Al Fahlain',
+        'Al Filayah', 'Al Ghail', 'Al Ghail East Free Zone', 'Al Ghail Free Zone', 'Al Ghail Industrial Zone',
+        'Al Ghubb', 'Al Hanya', 'Al Harf', 'Al Hayl', 'Al Hudaibah', 'Al Ijeli', 'Al Jeer', 'Al Juwais',
+        'Al Jazirah Al Hamra', 'Al Jazirah Industrial', 'Al Mafyar', 'Al Mairid', 'New Al Maireed', 'Al Mamourah',
+        'Al Marjan Island', 'Al Mataf', 'Al Mushah', 'Al Nadiyah', 'Al Nakheel', 'Al Nudood', 'Al Qarah',
+        'Al Qorm', 'Al Qusaidat', 'Al Rahba', 'Ar Rams', 'Al Riffa', 'Al Sall', 'Al Seer', 'Al Seeh',
+        'Al Sharishah', 'Al Soor', 'Al Taween', 'Al Turfah', 'Al Uraibi', 'Al Zahra', 'Aswaq Julfar',
+        'As Saadi', 'AZZAN', 'Bani Zayed', 'Corniche Al Qawasim', 'Corniche Street', 'Dafan Al Khor',
+        'Dafan Al Nakheel', 'Dahan', 'Dhahiyyah', 'Dibba Al Hisn', 'Dibba Al Hisn Industrial', 'Dibba Al Hisn Port',
+        'Dibba Al Hisn Port Industrial', 'Dibba Al Hisn Port Industrial 1', 'Dibba Al Hisn Port Industrial 2',
+        'Dibba Al Hisn Port Industrial 3', 'Dibba Al Hisn Port Industrial 4', 'Dibba Al Hisn Port Industrial 5',
+        'Dibba Al Hisn Port Industrial 6', 'Dibba Al Hisn Port Industrial 7', 'Dibba Al Hisn Port Industrial 8',
+        'Dibba Al Hisn Port Industrial 9', 'Dibba Al Hisn Port Industrial 10', 'Dibba Al Hisn Port Industrial 11',
+        'Dibba Al Hisn Port Industrial 12', 'Dibba Al Hisn Port Industrial 13', 'Dibba Al Hisn Port Industrial 14',
+        'Dibba Al Hisn Port Industrial 15', 'Dibba Al Hisn Port Industrial 16', 'Dibba Al Hisn Port Industrial 17',
+        'Dibba Al Hisn Port Industrial 18', 'Dibba Al Hisn Port Industrial 19', 'Dibba Al Hisn Port Industrial 20',
+        'Dibba Al Hisn Port Industrial 21', 'Dibba Al Hisn Port Industrial 22', 'Dibba Al Hisn Port Industrial 23',
+        'Dibba Al Hisn Port Industrial 24', 'Dibba Al Hisn Port Industrial 25', 'Dibba Al Hisn Port Industrial 26',
+        'Dibba Al Hisn Port Industrial 27', 'Dibba Al Hisn Port Industrial 28', 'Dibba Al Hisn Port Industrial 29',
+        'Dibba Al Hisn Port Industrial 30', 'Dibba Al Hisn Port Industrial 31', 'Dibba Al Hisn Port Industrial 32',
+        'Dibba Al Hisn Port Industrial 33', 'Dibba Al Hisn Port Industrial 34', 'Dibba Al Hisn Port Industrial 35',
+        'Dibba Al Hisn Port Industrial 36', 'Dibba Al Hisn Port Industrial 37', 'Dibba Al Hisn Port Industrial 38',
+        'Dibba Al Hisn Port Industrial 39', 'Dibba Al Hisn Port Industrial 40', 'Dibba Al Hisn Port Industrial 41',
+        'Dibba Al Hisn Port Industrial 42', 'Dibba Al Hisn Port Industrial 43', 'Dibba Al Hisn Port Industrial 44',
+        'Dibba Al Hisn Port Industrial 45', 'Dibba Al Hisn Port Industrial 46', 'Dibba Al Hisn Port Industrial 47',
+        'Dibba Al Hisn Port Industrial 48', 'Dibba Al Hisn Port Industrial 49', 'Dibba Al Hisn Port Industrial 50',
+        'Dibba Al Hisn Port Industrial 51', 'Dibba Al Hisn Port Industrial 52', 'Dibba Al Hisn Port Industrial 53',
+        'Dibba Al Hisn Port Industrial 54', 'Dibba Al Hisn Port Industrial 55', 'Dibba Al Hisn Port Industrial 56',
+        'Dibba Al Hisn Port Industrial 57', 'Dibba Al Hisn Port Industrial 58', 'Dibba Al Hisn Port Industrial 59',
+        'Dibba Al Hisn Port Industrial 60', 'Dibba Al Hisn Port Industrial 61', 'Dibba Al Hisn Port Industrial 62',
+        'Dibba Al Hisn Port Industrial 63', 'Dibba Al Hisn Port Industrial 64', 'Dibba Al Hisn Port Industrial 65',
+        'Dibba Al Hisn Port Industrial 66', 'Dibba Al Hisn Port Industrial 67', 'Dibba Al Hisn Port Industrial 68',
+        'Dibba Al Hisn Port Industrial 69', 'Dibba Al Hisn Port Industrial 70', 'Dibba Al Hisn Port Industrial 71',
+        'Dibba Al Hisn Port Industrial 72', 'Dibba Al Hisn Port Industrial 73', 'Dibba Al Hisn Port Industrial 74',
+        'Dibba Al Hisn Port Industrial 75', 'Dibba Al Hisn Port Industrial 76', 'Dibba Al Hisn Port Industrial 77',
+        'Dibba Al Hisn Port Industrial 78', 'Dibba Al Hisn Port Industrial 79', 'Dibba Al Hisn Port Industrial 80',
+        'Dibba Al Hisn Port Industrial 81', 'Dibba Al Hisn Port Industrial 82', 'Dibba Al Hisn Port Industrial 83',
+        'Dibba Al Hisn Port Industrial 84', 'Dibba Al Hisn Port Industrial 85', 'Dibba Al Hisn Port Industrial 86',
+        'Dibba Al Hisn Port Industrial 87', 'Dibba Al Hisn Port Industrial 88', 'Dibba Al Hisn Port Industrial 89',
+        'Dibba Al Hisn Port Industrial 90', 'Dibba Al Hisn Port Industrial 91', 'Dibba Al Hisn Port Industrial 92',
+        'Dibba Al Hisn Port Industrial 93', 'Dibba Al Hisn Port Industrial 94', 'Dibba Al Hisn Port Industrial 95',
+        'Dibba Al Hisn Port Industrial 96', 'Dibba Al Hisn Port Industrial 97', 'Dibba Al Hisn Port Industrial 98',
+        'Dibba Al Hisn Port Industrial 99', 'Dibba Al Hisn Port Industrial 100'
+    ],
+    'fujairah': [
+        'Aqqa', 'Akamya', 'Al Abadilah', 'Al Badiyah', 'Al Barady - Kalba', 'Al Baraha - Kalba', 'Al Faseel',
+        'Al Ghub', 'Al Ghurfah', 'Al Ghadf', 'Al Ghamrah', 'Al Gissemari', 'Al Hala', 'Al Hanyah',
+        'Al Hayl Industrial Area', 'Al Heel', 'Al Hisn - Kalba', 'Al Khalabiya', 'Al Mahatta - Kalba',
+        'Al Manzafah', 'Al Muhalab', 'Al Musalla - Kalba', 'Al Nighala - Kalba', 'Al Qadisia - Kalba',
+        'Al Qasar', 'Al Raheeb', 'Al Raghelat', 'Al Siji', 'Al Seih', 'Al Uwaid', 'Asimah', 'Bithnah',
+        'Bulaidha', 'Corniche', 'Dadna', 'Dibba Al Fujairah', 'Dibba Al Hisn', 'Didna', 'Diftah',
+        'Emiri Divan', 'Farfar', 'Fujairah City', 'Fujairah Free Zone', 'Fujairah International Airport',
+        'Fujairah Port', 'Fujairah Rural', 'Haleefat', 'Hamad St (شارع)', 'Hayl', 'Industrial Area',
+        'Isfay', 'Jazeerat Al Marjan', 'Kalba', 'Khor Kalba', 'Khorfakkan', 'Kirat', 'Madhab', 'Maduk',
+        'Maidaq', 'Mamduh', 'Manama', 'Marbad', 'Masafi', 'Mirbah', 'Municipality', 'Murashid', 'Nahwa',
+        'Old Fujairah', 'Qidfa', 'Qurrayah', 'Ras Al Khaimah', 'Ras Al Khaimah Industrial', 'Ras Al Khaimah Port',
+        'Ras Al Khaimah Port Industrial', 'Ras Al Khaimah Port Industrial 1', 'Ras Al Khaimah Port Industrial 2',
+        'Ras Al Khaimah Port Industrial 3', 'Ras Al Khaimah Port Industrial 4', 'Ras Al Khaimah Port Industrial 5',
+        'Ras Al Khaimah Port Industrial 6', 'Ras Al Khaimah Port Industrial 7', 'Ras Al Khaimah Port Industrial 8',
+        'Ras Al Khaimah Port Industrial 9', 'Ras Al Khaimah Port Industrial 10', 'Ras Al Khaimah Port Industrial 11',
+        'Ras Al Khaimah Port Industrial 12', 'Ras Al Khaimah Port Industrial 13', 'Ras Al Khaimah Port Industrial 14',
+        'Ras Al Khaimah Port Industrial 15', 'Ras Al Khaimah Port Industrial 16', 'Ras Al Khaimah Port Industrial 17',
+        'Ras Al Khaimah Port Industrial 18', 'Ras Al Khaimah Port Industrial 19', 'Ras Al Khaimah Port Industrial 20',
+        'Ras Al Khaimah Port Industrial 21', 'Ras Al Khaimah Port Industrial 22', 'Ras Al Khaimah Port Industrial 23',
+        'Ras Al Khaimah Port Industrial 24', 'Ras Al Khaimah Port Industrial 25', 'Ras Al Khaimah Port Industrial 26',
+        'Ras Al Khaimah Port Industrial 27', 'Ras Al Khaimah Port Industrial 28', 'Ras Al Khaimah Port Industrial 29',
+        'Ras Al Khaimah Port Industrial 30', 'Ras Al Khaimah Port Industrial 31', 'Ras Al Khaimah Port Industrial 32',
+        'Ras Al Khaimah Port Industrial 33', 'Ras Al Khaimah Port Industrial 34', 'Ras Al Khaimah Port Industrial 35',
+        'Ras Al Khaimah Port Industrial 36', 'Ras Al Khaimah Port Industrial 37', 'Ras Al Khaimah Port Industrial 38',
+        'Ras Al Khaimah Port Industrial 39', 'Ras Al Khaimah Port Industrial 40', 'Ras Al Khaimah Port Industrial 41',
+        'Ras Al Khaimah Port Industrial 42', 'Ras Al Khaimah Port Industrial 43', 'Ras Al Khaimah Port Industrial 44',
+        'Ras Al Khaimah Port Industrial 45', 'Ras Al Khaimah Port Industrial 46', 'Ras Al Khaimah Port Industrial 47',
+        'Ras Al Khaimah Port Industrial 48', 'Ras Al Khaimah Port Industrial 49', 'Ras Al Khaimah Port Industrial 50',
+        'Ras Al Khaimah Port Industrial 51', 'Ras Al Khaimah Port Industrial 52', 'Ras Al Khaimah Port Industrial 53',
+        'Ras Al Khaimah Port Industrial 54', 'Ras Al Khaimah Port Industrial 55', 'Ras Al Khaimah Port Industrial 56',
+        'Ras Al Khaimah Port Industrial 57', 'Ras Al Khaimah Port Industrial 58', 'Ras Al Khaimah Port Industrial 59',
+        'Ras Al Khaimah Port Industrial 60', 'Ras Al Khaimah Port Industrial 61', 'Ras Al Khaimah Port Industrial 62',
+        'Ras Al Khaimah Port Industrial 63', 'Ras Al Khaimah Port Industrial 64', 'Ras Al Khaimah Port Industrial 65',
+        'Ras Al Khaimah Port Industrial 66', 'Ras Al Khaimah Port Industrial 67', 'Ras Al Khaimah Port Industrial 68',
+        'Ras Al Khaimah Port Industrial 69', 'Ras Al Khaimah Port Industrial 70', 'Ras Al Khaimah Port Industrial 71',
+        'Ras Al Khaimah Port Industrial 72', 'Ras Al Khaimah Port Industrial 73', 'Ras Al Khaimah Port Industrial 74',
+        'Ras Al Khaimah Port Industrial 75', 'Ras Al Khaimah Port Industrial 76', 'Ras Al Khaimah Port Industrial 77',
+        'Ras Al Khaimah Port Industrial 78', 'Ras Al Khaimah Port Industrial 79', 'Ras Al Khaimah Port Industrial 80',
+        'Ras Al Khaimah Port Industrial 81', 'Ras Al Khaimah Port Industrial 82', 'Ras Al Khaimah Port Industrial 83',
+        'Ras Al Khaimah Port Industrial 84', 'Ras Al Khaimah Port Industrial 85', 'Ras Al Khaimah Port Industrial 86',
+        'Ras Al Khaimah Port Industrial 87', 'Ras Al Khaimah Port Industrial 88', 'Ras Al Khaimah Port Industrial 89',
+        'Ras Al Khaimah Port Industrial 90', 'Ras Al Khaimah Port Industrial 91', 'Ras Al Khaimah Port Industrial 92',
+        'Ras Al Khaimah Port Industrial 93', 'Ras Al Khaimah Port Industrial 94', 'Ras Al Khaimah Port Industrial 95',
+        'Ras Al Khaimah Port Industrial 96', 'Ras Al Khaimah Port Industrial 97', 'Ras Al Khaimah Port Industrial 98',
+        'Ras Al Khaimah Port Industrial 99', 'Ras Al Khaimah Port Industrial 100'
+    ],
+    'umm_al_quwain': [
+        'Al Abraq 1', 'Al Abraq 2', 'Al Athaib', 'Al Benaider', 'Al Bustan', 'Al Dar Al Bayda', 'Al Door 1',
+        'Al Door 2', 'Al Ghafat', 'Al Hadeetha', 'Al Hamra', 'Al Hamriya', 'Al Harmala', 'Al Heerah',
+        'Al Hoboob 1', 'Al Hoboob 2', 'Al Humaidi', 'Al Jurf 1', 'Al Jurf 2', 'Al Jurf Industrial 1',
+        'Al Jurf Industrial 2', 'Al Jurf Industrial 3', 'Al Khor', 'Al Madr 1', 'Al Madr 2', 'Al Madr 3',
+        'Al Maqta-a 1', 'Al Maqta-a 2', 'Al Maqta-a 3', 'Al Medfeq', 'Al Meidan', 'Al Morgbat', 'Al Nabgghah',
+        'Al Nakheilah', 'Al Neefah', 'Al Qarayen 1', 'Al Qarayen 2', 'Al Raas', 'Al Rahail', 'Al Ramlah 1',
+        'Al Ramlah 2', 'Al Ramlah 3', 'Al Ras 1', 'Al Ras 2', 'Al Rawdha', 'Al Reqqah', 'Al Salamah',
+        'Al Serra', 'Al Shareiah', 'Al Shebeakah', 'Al Shes', 'Al Sow', 'Al Suaihat 1', 'Al Suaihat 2',
+        'Al Tayebah', 'Al Thaniyah', 'Batha Al Ali', 'Emirates Modern Industrial Area (Umm Al Thuoob)',
+        'Falaj Al Mualla', 'Falaj Al Sheikh', 'Green Belt', 'Hamriyah Free Zone Phase 1 (HFZA)',
+        'Hamriyah Free Zone Phase 2', 'Old Umm Al Quwain', 'Oud Al Owaid', 'Ras Al Khaimah',
+        'Ras Al Khaimah Industrial', 'Ras Al Khaimah Port', 'Ras Al Khaimah Port Industrial',
+        'Ras Al Khaimah Port Industrial 1', 'Ras Al Khaimah Port Industrial 2', 'Ras Al Khaimah Port Industrial 3',
+        'Ras Al Khaimah Port Industrial 4', 'Ras Al Khaimah Port Industrial 5', 'Ras Al Khaimah Port Industrial 6',
+        'Ras Al Khaimah Port Industrial 7', 'Ras Al Khaimah Port Industrial 8', 'Ras Al Khaimah Port Industrial 9',
+        'Ras Al Khaimah Port Industrial 10', 'Ras Al Khaimah Port Industrial 11', 'Ras Al Khaimah Port Industrial 12',
+        'Ras Al Khaimah Port Industrial 13', 'Ras Al Khaimah Port Industrial 14', 'Ras Al Khaimah Port Industrial 15',
+        'Ras Al Khaimah Port Industrial 16', 'Ras Al Khaimah Port Industrial 17', 'Ras Al Khaimah Port Industrial 18',
+        'Ras Al Khaimah Port Industrial 19', 'Ras Al Khaimah Port Industrial 20', 'Ras Al Khaimah Port Industrial 21',
+        'Ras Al Khaimah Port Industrial 22', 'Ras Al Khaimah Port Industrial 23', 'Ras Al Khaimah Port Industrial 24',
+        'Ras Al Khaimah Port Industrial 25', 'Ras Al Khaimah Port Industrial 26', 'Ras Al Khaimah Port Industrial 27',
+        'Ras Al Khaimah Port Industrial 28', 'Ras Al Khaimah Port Industrial 29', 'Ras Al Khaimah Port Industrial 30',
+        'Ras Al Khaimah Port Industrial 31', 'Ras Al Khaimah Port Industrial 32', 'Ras Al Khaimah Port Industrial 33',
+        'Ras Al Khaimah Port Industrial 34', 'Ras Al Khaimah Port Industrial 35', 'Ras Al Khaimah Port Industrial 36',
+        'Ras Al Khaimah Port Industrial 37', 'Ras Al Khaimah Port Industrial 38', 'Ras Al Khaimah Port Industrial 39',
+        'Ras Al Khaimah Port Industrial 40', 'Ras Al Khaimah Port Industrial 41', 'Ras Al Khaimah Port Industrial 42',
+        'Ras Al Khaimah Port Industrial 43', 'Ras Al Khaimah Port Industrial 44', 'Ras Al Khaimah Port Industrial 45',
+        'Ras Al Khaimah Port Industrial 46', 'Ras Al Khaimah Port Industrial 47', 'Ras Al Khaimah Port Industrial 48',
+        'Ras Al Khaimah Port Industrial 49', 'Ras Al Khaimah Port Industrial 50', 'Ras Al Khaimah Port Industrial 51',
+        'Ras Al Khaimah Port Industrial 52', 'Ras Al Khaimah Port Industrial 53', 'Ras Al Khaimah Port Industrial 54',
+        'Ras Al Khaimah Port Industrial 55', 'Ras Al Khaimah Port Industrial 56', 'Ras Al Khaimah Port Industrial 57',
+        'Ras Al Khaimah Port Industrial 58', 'Ras Al Khaimah Port Industrial 59', 'Ras Al Khaimah Port Industrial 60',
+        'Ras Al Khaimah Port Industrial 61', 'Ras Al Khaimah Port Industrial 62', 'Ras Al Khaimah Port Industrial 63',
+        'Ras Al Khaimah Port Industrial 64', 'Ras Al Khaimah Port Industrial 65', 'Ras Al Khaimah Port Industrial 66',
+        'Ras Al Khaimah Port Industrial 67', 'Ras Al Khaimah Port Industrial 68', 'Ras Al Khaimah Port Industrial 69',
+        'Ras Al Khaimah Port Industrial 70', 'Ras Al Khaimah Port Industrial 71', 'Ras Al Khaimah Port Industrial 72',
+        'Ras Al Khaimah Port Industrial 73', 'Ras Al Khaimah Port Industrial 74', 'Ras Al Khaimah Port Industrial 75',
+        'Ras Al Khaimah Port Industrial 76', 'Ras Al Khaimah Port Industrial 77', 'Ras Al Khaimah Port Industrial 78',
+        'Ras Al Khaimah Port Industrial 79', 'Ras Al Khaimah Port Industrial 80', 'Ras Al Khaimah Port Industrial 81',
+        'Ras Al Khaimah Port Industrial 82', 'Ras Al Khaimah Port Industrial 83', 'Ras Al Khaimah Port Industrial 84',
+        'Ras Al Khaimah Port Industrial 85', 'Ras Al Khaimah Port Industrial 86', 'Ras Al Khaimah Port Industrial 87',
+        'Ras Al Khaimah Port Industrial 88', 'Ras Al Khaimah Port Industrial 89', 'Ras Al Khaimah Port Industrial 90',
+        'Ras Al Khaimah Port Industrial 91', 'Ras Al Khaimah Port Industrial 92', 'Ras Al Khaimah Port Industrial 93',
+        'Ras Al Khaimah Port Industrial 94', 'Ras Al Khaimah Port Industrial 95', 'Ras Al Khaimah Port Industrial 96',
+        'Ras Al Khaimah Port Industrial 97', 'Ras Al Khaimah Port Industrial 98', 'Ras Al Khaimah Port Industrial 99',
+        'Ras Al Khaimah Port Industrial 100'
+    ]
+};
+
+function updateRegions() {
+    const emirateSelect = document.getElementById('editEmirate');
+    const regionSelect = document.getElementById('editRegion');
+    
+    // Clear existing options
+    regionSelect.innerHTML = '<option value="">Select Area</option>';
+    
+    const selectedEmirate = emirateSelect.value;
+    if (selectedEmirate && emiratesData[selectedEmirate]) {
+        emiratesData[selectedEmirate].forEach(region => {
+            const option = document.createElement('option');
+            option.value = region;
+            option.textContent = region;
+            regionSelect.appendChild(option);
+        });
+    }
+}
+
+function confirmOrderEdit() {
+    const formData = {
+        customer: document.getElementById('editCustomer').value,
+        customer_phone: document.getElementById('editPhone').value,
+        quantity: document.getElementById('editQuantity').value,
+        price_per_unit: document.getElementById('editPrice').value,
+        shipping_address: document.getElementById('editAddress').value,
+        city: document.getElementById('editCity').value,
+        state: document.getElementById('editState').value,
+        zip_code: document.getElementById('editZipCode').value,
+        emirate: document.getElementById('editEmirate').value,
+        region: document.getElementById('editRegion').value,
+        additional_phone: document.getElementById('editAdditionalPhone').value
+    };
+    
+    // Send AJAX request to update order
+    fetch(`/callcenter/agent/orders/{{ order.id }}/edit/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('تم تحديث بيانات الطلب بنجاح', 'success');
+            location.reload();
+        } else {
+            showNotification('حدث خطأ في تحديث البيانات: ' + (data.error || 'خطأ غير معروف'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('حدث خطأ في الاتصال بالخادم', 'error');
+    });
+    
+    closeEditOrderModal();
+}
+
+function confirmStatusEdit() {
+    const newStatus = document.getElementById('newStatusSelect').value;
+    const reason = document.getElementById('editReason').value;
+    const postponedDateTime = document.getElementById('postponedDateTime').value;
+    const callBackTime = document.getElementById('callBackTime').value;
+    const noAnswerTime = document.getElementById('noAnswerTime').value;
+    
+    if (!reason.trim()) {
+        alert('يرجى كتابة سبب التعديل');
+        return;
+    }
+    
+    // Check if time is required before confirming
+    if (newStatus === 'postponed' && !postponedDateTime) {
+        alert('يرجى تحديد تاريخ ووقت التأجيل');
+        document.getElementById('postponedDateTime').focus();
+        return;
+    }
+    
+    if (newStatus === 'call_back_later' && !callBackTime) {
+        alert('يرجى تحديد وقت إعادة الاتصال أولاً قبل تأكيد تغيير الحالة');
+        document.getElementById('callBackTime').focus();
+        document.getElementById('callBackTime').style.borderColor = '#ef4444';
+        return;
+    }
+    
+    if (['no_answer_1st', 'no_answer_2nd', 'no_answer_final'].includes(newStatus) && !noAnswerTime) {
+        alert('يرجى تحديد وقت المحاولة أولاً قبل تأكيد تغيير الحالة');
+        document.getElementById('noAnswerTime').focus();
+        document.getElementById('noAnswerTime').style.borderColor = '#ef4444';
+        return;
+    }
+    
+    // Show confirmation with order info
+    const orderCode = document.getElementById('displayOrderCode').textContent;
+    const customer = document.getElementById('displayCustomer').textContent;
+    const phone = document.getElementById('displayPhone').textContent;
+    
+    let confirmMessage = `تأكيد تغيير الحالة:\n\n` +
+        `رقم الطلب: ${orderCode}\n` +
+        `العميل: ${customer}\n` +
+        `الهاتف: ${phone}\n`;
+    
+    if (callBackTime) {
+        const date = new Date(callBackTime);
+        const formattedDate = date.toLocaleString('ar-EG', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        confirmMessage += `وقت إعادة الاتصال: ${formattedDate}\n`;
+    }
+    
+    if (noAnswerTime) {
+        const date = new Date(noAnswerTime);
+        const formattedDate = date.toLocaleString('ar-EG', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        confirmMessage += `وقت المحاولة القادمة: ${formattedDate}\n`;
+    }
+    
+    if (postponedDateTime) {
+        const date = new Date(postponedDateTime);
+        const formattedDate = date.toLocaleString('ar-EG', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        confirmMessage += `تاريخ التأجيل: ${formattedDate}\n`;
+    }
+    
+    confirmMessage += `\nهل تريد المتابعة؟`;
+    
+    if (!confirm(confirmMessage)) {
+        return;
+    }
+    
+    // Prepare data
+    const data = {
+        status: newStatus,
+        reason: reason
+    };
+    
+    // Add postponed datetime if status is postponed
+    if (newStatus === 'postponed' && postponedDateTime) {
+        data.postponed_datetime = postponedDateTime;
+    }
+    
+    // Add call back time only for call_back_later
+    if (newStatus === 'call_back_later' && callBackTime) {
+        data.call_back_time = callBackTime;
+    }
+    
+    // Add no answer time for no_answer statuses
+    if (['no_answer_1st', 'no_answer_2nd', 'no_answer_final'].includes(newStatus) && noAnswerTime) {
+        data.no_answer_time = noAnswerTime;
+    }
+    
+    // Send AJAX request to update status
+    fetch(`/callcenter/agent/orders/{{ order.id }}/update-status/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('تم تعديل حالة الطلب بنجاح', 'success');
+            location.reload();
+        } else {
+            showNotification('حدث خطأ في تعديل الحالة: ' + (data.error || 'خطأ غير معروف'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('حدث خطأ في الاتصال بالخادم', 'error');
+    });
+    
+    closeEditStatusModal();
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const productImageModal = document.getElementById('productImageModal');
+    const productDetailsModal = document.getElementById('productDetailsModal');
+    const editModal = document.getElementById('editStatusModal');
+    const editOrderModal = document.getElementById('editOrderModal');
+    const escalateModal = document.getElementById('escalateModal');
+    if (event.target === productImageModal) {
+        closeProductImage();
+    }
+    if (event.target === productDetailsModal) {
+        closeProductDetailsModal();
+    }
+    if (event.target === editModal) {
+        closeEditStatusModal();
+    }
+    if (event.target === editOrderModal) {
+        closeEditOrderModal();
+    }
+    if (event.target === escalateModal) {
+        closeEscalateModal();
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 px-6 py-3 rounded-md text-white z-50 ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    }`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        document.body.removeChild(notification);
+    }, 3000);
+}
+
+// Status confirmation functionality
+function showStatusConfirmation(statusCode) {
+    if (!statusCode) return;
+    
+    const statusMessages = {
+        'CFM': 'تأكيد الطلبية',
+        'NA1': 'لا يرد - محاولة أولى',
+        'NA2': 'لا يرد - محاولة ثانية', 
+        'NA3': 'لا يرد - محاولة أخيرة',
+        'CXL': 'إلغاء الطلبية',
+        'HLD': 'تأجيل الطلبية',
+        'INV': 'رقم غير صحيح',
+        'CBK': 'إعادة الاتصال لاحقاً',
+        'ESC': 'رفع للمدير'
+    };
+    
+    const message = statusMessages[statusCode] || 'تحديث حالة الطلبية';
+    
+    if (statusCode === 'ESC') {
+        if (confirm(`هل أنت متأكد من ${message}؟`)) {
+            openEscalateModal();
+        } else {
+            document.getElementById('statusSelect').selectedIndex = 0;
+        }
+    } else {
+    if (confirm(`هل أنت متأكد من ${message}؟`)) {
+        document.getElementById('statusForm').submit();
+    } else {
+        document.getElementById('statusSelect').selectedIndex = 0;
+        }
+    }
+}
+
+// Initialize emirates functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const emirateSelect = document.getElementById('editEmirate');
+    if (emirateSelect) {
+        emirateSelect.addEventListener('change', updateRegions);
+        // Load regions for current emirate if any
+        if (emirateSelect.value) {
+            updateRegions();
+            // Set current region if exists
+            const regionSelect = document.getElementById('editRegion');
+            const currentRegion = '{{ order.region }}';
+            if (currentRegion) {
+                regionSelect.value = currentRegion;
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Change Seller - {{ order.order_code }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-4xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="{% url 'orders:detail' order.id %}" class="text-sm px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 inline-flex items-center mr-4">
+                        <i class="fas fa-arrow-left mr-1"></i> Back to Order
+                    </a>
+                    <h1 class="text-xl font-semibold text-gray-900">Change Seller</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div class="p-6">
+                <!-- Order Info -->
+                <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Order Information</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <span class="font-medium text-gray-700">Order Code:</span>
+                            <span class="text-gray-900">{{ order.order_code }}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-700">Customer:</span>
+                            <span class="text-gray-900">{{ order.customer }}</span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-700">Current Seller:</span>
+                            <span class="text-gray-900">
+                                {% if order.seller %}
+                                    {{ order.seller.get_full_name|default:order.seller_email|default:"No Seller" }}
+                                {% else %}
+                                    No Seller
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="font-medium text-gray-700">Status:</span>
+                            <span class="text-gray-900">{{ order.get_status_display }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Change Seller Form -->
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label for="new_seller" class="block text-sm font-medium text-gray-700 mb-2">Select New Seller</label>
+                            <select name="new_seller" id="new_seller" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">-- Select Seller --</option>
+                                {% for seller in sellers %}
+                                <option value="{{ seller.id }}">{{ seller.get_full_name|default:seller.email }} ({{ seller.email }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 flex justify-end space-x-3">
+                        <a href="{% url 'orders:detail' order.id %}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                            Cancel
+                        </a>
+                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-exchange-alt mr-2"></i> Change Seller
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,498 @@
+{% extends 'base.html' %}
+{% block title %}Order Detail - {{ order.order_code }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 pt-16">
+    <!-- Page Header -->
+    <div class="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 sticky top-16 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-amber-100 rounded-lg">
+                        <i class="fas fa-shopping-cart text-amber-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">Order Details</h1>
+                        <p class="text-slate-600 mt-1">Order #{{ order.order_code }}</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'sellers:orders' %}" class="inline-flex items-center px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-md">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Orders
+                    </a>
+                    <a href="{% url 'sellers:order_update' order.id %}" class="inline-flex items-center px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-md shadow-sm">
+                        <i class="fas fa-edit mr-2"></i>Edit Order
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Order Information Card -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Order Status Banner -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200/60 overflow-hidden">
+                    <div class="px-6 py-4 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-200/50">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="p-2 bg-amber-100 rounded-lg">
+                                    <i class="fas fa-info-circle text-amber-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-slate-900">Order Status</h3>
+                                    <p class="text-slate-600 text-sm">Current order information</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                                    <i class="fas fa-circle text-amber-500 mr-2 text-xs"></i>{{ order.status|title }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="text-sm font-medium text-slate-500">Order Code</label>
+                                    <p class="mt-1 text-lg font-mono text-slate-900 bg-slate-50 px-3 py-2 rounded-lg">{{ order.order_code }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-slate-500">Order Date</label>
+                                    <p class="mt-1 text-lg text-slate-900">{{ order.date|date:"M d, Y H:i" }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-slate-500">Quantity</label>
+                                    <p class="mt-1 text-lg font-semibold text-slate-900">{{ order.quantity }}</p>
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="text-sm font-medium text-slate-500">Price Per Unit</label>
+                                    <p class="mt-1 text-lg font-semibold text-green-600">AED {{ order.price_per_unit|floatformat:2 }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-slate-500">Total Price</label>
+                                    <p class="mt-1 text-2xl font-bold text-green-600">AED {{ order.total_price|floatformat:2 }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-slate-500">Status</label>
+                                    <p class="mt-1">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                                            {{ order.status|title }}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Information Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200/60 overflow-hidden">
+                    <div class="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-200/50">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 bg-blue-100 rounded-lg">
+                                <i class="fas fa-user text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-slate-900">Customer Information</h3>
+                                <p class="text-slate-600 text-sm">Customer details and contact information</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label class="text-sm font-medium text-slate-500">Customer Name</label>
+                                <p class="mt-1 text-lg font-semibold text-slate-900">{{ order.customer }}</p>
+                            </div>
+                            {% if order.customer_phone %}
+                            <div>
+                                <label class="text-sm font-medium text-slate-500">Phone Number</label>
+                                <p class="mt-1 text-lg text-slate-900">
+                                    <a href="tel:{{ order.customer_phone }}" class="text-blue-600 hover:text-blue-700 hover:underline">
+                                        <i class="fas fa-phone mr-2"></i>{{ order.customer_phone }}
+                                    </a>
+                                </p>
+                            </div>
+                            {% endif %}
+                            {% if order.customer_email %}
+                            <div>
+                                <label class="text-sm font-medium text-slate-500">Email Address</label>
+                                <p class="mt-1 text-lg text-slate-900">
+                                    <a href="mailto:{{ order.customer_email }}" class="text-blue-600 hover:text-blue-700 hover:underline">
+                                        <i class="fas fa-envelope mr-2"></i>{{ order.customer_email }}
+                                    </a>
+                                </p>
+                            </div>
+                            {% endif %}
+                            <div class="sm:col-span-2">
+                                <label class="text-sm font-medium text-slate-500">Shipping Address</label>
+                                <p class="mt-1 text-lg text-slate-900">
+                                    <i class="fas fa-map-marker-alt text-blue-600 mr-2"></i>
+                                    {% if order.shipping_address %}
+                                        {{ order.shipping_address }}
+                                    {% else %}
+                                        <span class="text-gray-500 italic">No shipping address provided</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            {% if order.notes %}
+                            <div class="sm:col-span-2">
+                                <label class="text-sm font-medium text-slate-500">Order Notes</label>
+                                <p class="mt-1 text-lg text-slate-900 bg-slate-50 px-4 py-3 rounded-lg">{{ order.notes }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Information Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200/60 overflow-hidden">
+                    <div class="px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-200/50">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 bg-green-100 rounded-lg">
+                                <i class="fas fa-box text-green-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-slate-900">Product Information</h3>
+                                <p class="text-slate-600 text-sm">Product details and specifications</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-start space-x-6">
+                            <!-- Product Image -->
+                            <div class="flex-shrink-0">
+                                <div class="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200 overflow-hidden">
+                                    {% if order.product.image %}
+                                        <img src="{{ order.product.image.url }}" alt="{{ order.product.name_en|default:order.product }}" class="w-full h-full object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity" onclick="openProductDetail({{ order.product.id }})">
+                                    {% else %}
+                                        <i class="fas fa-image text-gray-400 text-3xl cursor-pointer hover:text-gray-600 transition-colors" onclick="openProductDetail({{ order.product.id }})"></i>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Product Details -->
+                            <div class="flex-1 min-w-0">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="text-sm font-medium text-slate-500">Product Name</label>
+                                        <p class="mt-1 text-lg font-semibold text-slate-900 cursor-pointer hover:text-green-600 transition-colors" onclick="openProductDetail({{ order.product.id }})">
+                                            {{ order.product.name_en|default:order.product }}
+                                            <i class="fas fa-external-link-alt text-xs ml-2"></i>
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label class="text-sm font-medium text-slate-500">Product SKU</label>
+                                        <p class="mt-1 text-lg font-mono text-slate-900 bg-slate-50 px-3 py-2 rounded-lg">{{ order.product.code|default:"N/A" }}</p>
+                                    </div>
+                                    {% if order.product.description %}
+                                    <div class="sm:col-span-2">
+                                        <label class="text-sm font-medium text-slate-500">Description</label>
+                                        <p class="mt-1 text-lg text-slate-900 bg-slate-50 px-4 py-3 rounded-lg">{{ order.product.description }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Click to view details button -->
+                                <div class="mt-4">
+                                    <button onclick="openProductDetail({{ order.product.id }})" class="inline-flex items-center px-4 py-2 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-md">
+                                        <i class="fas fa-eye mr-2"></i>
+                                        View Product Details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Information -->
+            <div class="space-y-6">
+                <!-- Seller Information Card - Hidden for sellers -->
+                {% if user.has_role_admin or user.is_superuser %}
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200/60 overflow-hidden">
+                    <div class="px-6 py-4 bg-gradient-to-r from-purple-50 to-violet-50 border-b border-purple-200/50">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 bg-purple-100 rounded-lg">
+                                <i class="fas fa-store text-purple-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-slate-900">Seller Information</h3>
+                                <p class="text-slate-600 text-sm">Seller details and contact</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-sm font-medium text-slate-500">Seller Name</label>
+                                <p class="mt-1 text-lg font-semibold text-slate-900">{{ order.seller.get_full_name|default:order.seller.email }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-slate-500">Seller Email</label>
+                                <p class="mt-1 text-lg text-slate-900">
+                                    <a href="mailto:{{ order.seller.email }}" class="text-purple-600 hover:text-purple-700 hover:underline">
+                                        <i class="fas fa-envelope mr-2"></i>{{ order.seller.email }}
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Agent Information Card -->
+                {% if order.agent %}
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200/60 overflow-hidden">
+                    <div class="px-6 py-4 bg-gradient-to-r from-teal-50 to-cyan-50 border-b border-teal-200/50">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 bg-teal-100 rounded-lg">
+                                <i class="fas fa-user-tie text-teal-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-slate-900">Agent Information</h3>
+                                <p class="text-slate-600 text-sm">Sales agent details</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-sm font-medium text-slate-500">Agent Name</label>
+                                <p class="mt-1 text-lg font-semibold text-slate-900">{{ order.agent.get_full_name|default:order.agent.email }}</p>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-slate-500">Agent Email</label>
+                                <p class="mt-1 text-lg text-slate-900">
+                                    <a href="mailto:{{ order.agent.email }}" class="text-teal-600 hover:text-teal-700 hover:underline">
+                                        <i class="fas fa-envelope mr-2"></i>{{ order.agent.email }}
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Order Timeline Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200/60 overflow-hidden">
+                    <div class="px-6 py-4 bg-gradient-to-r from-slate-50 to-gray-50 border-b border-slate-200/50">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 bg-slate-100 rounded-lg">
+                                <i class="fas fa-clock text-slate-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-slate-900">Order Timeline</h3>
+                                <p class="text-slate-600 text-sm">Order progress and updates</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-3">
+                                <div class="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-check text-green-600 text-sm"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-slate-900">Order Created</p>
+                                    <p class="text-sm text-slate-500">{{ order.date|date:"M d, Y H:i" }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="flex-shrink-0 w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-clock text-amber-600 text-sm"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-slate-900">Current Status</p>
+                                    <p class="text-sm text-slate-500">{{ order.status|title }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Product Detail Modal -->
+<div id="productModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900" id="modalProductName">Product Details</h3>
+                <button onclick="closeProductModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div id="modalProductContent" class="space-y-6">
+                <!-- Product content will be loaded here -->
+            </div>
+            
+            <div class="flex justify-end space-x-3 mt-6">
+                <button onclick="closeProductModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openProductDetail(productId) {
+    // Show loading state
+    document.getElementById('modalProductContent').innerHTML = `
+        <div class="flex items-center justify-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+            <span class="ml-2 text-gray-600">Loading product details...</span>
+        </div>
+    `;
+    
+    // Show modal
+    document.getElementById('productModal').classList.remove('hidden');
+    
+    // Fetch product details from API
+    console.log('DEBUG: Fetching product details for ID:', productId);
+    fetch('/products/' + productId + '/api/')
+        .then(response => {
+            console.log('DEBUG: Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('DEBUG: Response data:', data);
+            // Check if there's an error in the response
+            if (!data.success) {
+                throw new Error(data.error || 'Unknown error');
+            }
+            // Update modal content with product data
+            const product = data.product;
+            document.getElementById('modalProductName').textContent = product.name_en || 'Product Details';
+            
+            const imageHtml = product.image_url ? 
+                `<img src="${product.image_url}" alt="${product.name_en}" class="w-full h-full object-cover rounded-lg">` :
+                `<i class="fas fa-image text-gray-400 text-6xl"></i>`;
+            
+            document.getElementById('modalProductContent').innerHTML = `
+                <div class="flex items-start space-x-6">
+                    <div class="flex-shrink-0">
+                        <div class="w-48 h-48 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200 overflow-hidden">
+                            ${imageHtml}
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Product Name (EN)</dt>
+                                <dd class="mt-1 text-xl font-semibold text-gray-900">${product.name_en || 'N/A'}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Product Name (AR)</dt>
+                                <dd class="mt-1 text-xl font-semibold text-gray-900">${product.name_ar || 'N/A'}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Product Code</dt>
+                                <dd class="mt-1 text-lg text-gray-900 font-mono bg-gray-50 px-3 py-2 rounded-lg">${product.code || 'N/A'}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">SKU</dt>
+                                <dd class="mt-1 text-lg text-gray-900 font-mono bg-gray-50 px-3 py-2 rounded-lg">${product.sku || 'N/A'}</dd>
+                            </div>
+                            ${product.product_variant ? `
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Product Variant</dt>
+                                <dd class="mt-1 text-lg text-gray-900 bg-blue-50 px-3 py-2 rounded-lg">${product.product_variant}</dd>
+                            </div>
+                            ` : ''}
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Selling Price</dt>
+                                <dd class="mt-1 text-lg font-semibold text-green-600">AED ${product.selling_price ? product.selling_price.toFixed(2) : '0.00'}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Purchase Price</dt>
+                                <dd class="mt-1 text-lg font-semibold text-blue-600">AED ${product.purchase_price ? product.purchase_price.toFixed(2) : '0.00'}</dd>
+                            </div>
+                            ${product.category ? `
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Category</dt>
+                                <dd class="mt-1 text-lg text-gray-900">${product.category}</dd>
+                            </div>
+                            ` : ''}
+                            ${product.brand ? `
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Brand</dt>
+                                <dd class="mt-1 text-lg text-gray-900">${product.brand}</dd>
+                            </div>
+                            ` : ''}
+                            ${product.stock_quantity !== null ? `
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Stock Quantity</dt>
+                                <dd class="mt-1 text-lg font-semibold ${product.stock_quantity > 0 ? 'text-green-600' : 'text-red-600'}">${product.stock_quantity}</dd>
+                            </div>
+                            ` : ''}
+                            ${product.weight ? `
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Weight</dt>
+                                <dd class="mt-1 text-lg text-gray-900">${product.weight} kg</dd>
+                            </div>
+                            ` : ''}
+                            ${product.dimensions ? `
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Dimensions</dt>
+                                <dd class="mt-1 text-lg text-gray-900">${product.dimensions}</dd>
+                            </div>
+                            ` : ''}
+                            <div class="md:col-span-2">
+                                <dt class="text-sm font-medium text-gray-500">Status</dt>
+                                <dd class="mt-1">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${product.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                        <i class="fas fa-circle text-xs mr-2"></i>
+                                        ${product.is_active ? 'Active' : 'Inactive'}
+                                    </span>
+                                </dd>
+                            </div>
+                            ${product.description ? `
+                            <div class="md:col-span-2">
+                                <dt class="text-sm font-medium text-gray-500">Description</dt>
+                                <dd class="mt-1 text-lg text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">${product.description}</dd>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        })
+        .catch(error => {
+            console.error('Error loading product details:', error);
+            document.getElementById('modalProductContent').innerHTML = `
+                <div class="text-center py-8">
+                    <i class="fas fa-exclamation-triangle text-red-400 text-4xl mb-4"></i>
+                    <p class="text-lg font-medium text-gray-900 mb-2">Error Loading Product</p>
+                    <p class="text-sm text-gray-500">Unable to load product details. Please try again.</p>
+                </div>
+            `;
+        });
+}
+
+function closeProductModal() {
+    document.getElementById('productModal').classList.add('hidden');
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('productModal');
+    if (event.target === modal) {
+        closeProductModal();
+    }
+}
+</script>
+{% endblock %} 

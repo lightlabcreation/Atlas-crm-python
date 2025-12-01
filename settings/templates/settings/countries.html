@@ -1,0 +1,535 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Countries Management - Atlas Fulfillment{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Page Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-globe text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">Countries Management</h1>
+                        <p class="mt-1 text-sm text-gray-500">Manage supported countries and their settings</p>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <button onclick="openAddCountryModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 font-medium">
+                <i class="fas fa-plus mr-2"></i>
+                Add Country
+            </button>
+                    <a href="{% url 'settings:dashboard' %}" class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200 font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Settings
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-globe text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Total Countries</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ total_countries }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Active Countries</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ active_countries }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-flag text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Regions</p>
+                        <p class="text-2xl font-semibold text-gray-900">6</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-clock text-purple-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase">Time Zones</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ timezones_count }}</p>
+                    </div>
+                </div>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Search Countries</h3>
+                <p class="text-sm text-gray-500 mt-1">Find specific countries quickly</p>
+            </div>
+            <div class="p-6">
+                <form method="get" class="flex gap-4">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                        <input type="text" name="search" value="{{ search_query }}" placeholder="Search by name or code..." 
+                                   class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        </div>
+                    </div>
+                    <button type="submit" class="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 font-medium">
+                        <i class="fas fa-search mr-2"></i>
+                        Search
+                    </button>
+                </form>
+        </div>
+    </div>
+
+    <!-- Countries Table -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                <h3 class="text-lg font-medium text-gray-900">Countries List</h3>
+                <p class="text-sm text-gray-500 mt-1">Manage all supported countries</p>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <i class="fas fa-flag mr-2"></i>Name (EN)
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <i class="fas fa-flag mr-2"></i>Name (AR)
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <i class="fas fa-code mr-2"></i>Code
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <i class="fas fa-dollar-sign mr-2"></i>Currency
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <i class="fas fa-clock mr-2"></i>Timezone
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <i class="fas fa-toggle-on mr-2"></i>Status
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <i class="fas fa-cog mr-2"></i>Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for country in page_obj %}
+                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-flag text-blue-600"></i>
+                                    </div>
+                                    <div class="text-sm font-medium text-gray-900">{{ country.name_en }}</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ country.name_ar }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    {{ country.code }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <div class="flex items-center">
+                                    <i class="fas fa-dollar-sign text-green-600 mr-2"></i>
+                                {{ country.currency }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <div class="flex items-center">
+                                    <i class="fas fa-clock text-purple-600 mr-2"></i>
+                                {{ country.timezone }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if country.is_active %}
+                                <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                    Active
+                                </span>
+                                {% else %}
+                                <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                    <i class="fas fa-times-circle mr-1"></i>
+                                    Inactive
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex items-center space-x-3">
+                                    <button onclick="editCountry({{ country.id }})" class="text-blue-600 hover:text-blue-900 transition-colors duration-200 flex items-center">
+                                        <i class="fas fa-edit mr-1"></i>
+                                        Edit
+                                    </button>
+                                    <button onclick="deleteCountry({{ country.id }}, '{{ country.name_en }}')" class="text-red-600 hover:text-red-900 transition-colors duration-200 flex items-center">
+                                        <i class="fas fa-trash mr-1"></i>
+                                        Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="px-6 py-12 text-center">
+                                <div class="flex flex-col items-center">
+                                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                        <i class="fas fa-globe text-2xl text-gray-400"></i>
+                                    </div>
+                                    <h3 class="text-lg font-medium text-gray-900 mb-2">No countries found</h3>
+                                    <p class="text-gray-500 mb-4">Get started by adding your first country</p>
+                                    <button onclick="openAddCountryModal()" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 font-medium">
+                                        <i class="fas fa-plus mr-2"></i>
+                                        Add Country
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+        <div class="mt-8">
+            <div class="bg-white px-6 py-3 flex items-center justify-between border border-gray-200 rounded-lg shadow-sm">
+            <div class="flex-1 flex justify-between sm:hidden">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50">
+                    Previous
+                </a>
+                {% endif %}
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50">
+                    Next
+                </a>
+                {% endif %}
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                        <p class="text-sm text-gray-700">
+                        Showing <span class="font-medium">{{ page_obj.start_index }}</span> to <span class="font-medium">{{ page_obj.end_index }}</span> of <span class="font-medium">{{ page_obj.paginator.count }}</span> results
+                    </p>
+                </div>
+                <div>
+                        <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px" aria-label="Pagination">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="relative inline-flex items-center px-2 py-2 rounded-l-lg border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <span class="sr-only">Previous</span>
+                            <i class="fas fa-chevron-left h-5 w-5"></i>
+                        </a>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <span class="relative inline-flex items-center px-4 py-2 border border-blue-500 bg-blue-50 text-sm font-medium text-blue-600">
+                                {{ num }}
+                            </span>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                {{ num }}
+                            </a>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}" class="relative inline-flex items-center px-2 py-2 rounded-r-lg border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <span class="sr-only">Next</span>
+                            <i class="fas fa-chevron-right h-5 w-5"></i>
+                        </a>
+                        {% endif %}
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    </div>
+</div>
+
+<!-- Add Country Modal -->
+<div id="addCountryModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-lg bg-white">
+        <div class="mt-3">
+            <div class="flex items-center mb-4">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-plus text-blue-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Add New Country</h3>
+            </div>
+            <form id="addCountryForm" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add">
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Name (English)</label>
+                        <input type="text" name="name_en" required class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Name (Arabic)</label>
+                        <input type="text" name="name_ar" required class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Country Code</label>
+                        <select name="code" required class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Select Country Code</option>
+                            <option value="AE">AE - United Arab Emirates</option>
+                            <option value="SA">SA - Saudi Arabia</option>
+                            <option value="KW">KW - Kuwait</option>
+                            <option value="QA">QA - Qatar</option>
+                            <option value="BH">BH - Bahrain</option>
+                            <option value="OM">OM - Oman</option>
+                            <option value="EG">EG - Egypt</option>
+                            <option value="JO">JO - Jordan</option>
+                            <option value="LB">LB - Lebanon</option>
+                            <option value="SY">SY - Syria</option>
+                            <option value="IQ">IQ - Iraq</option>
+                            <option value="IR">IR - Iran</option>
+                            <option value="TR">TR - Turkey</option>
+                            <option value="US">US - United States</option>
+                            <option value="GB">GB - United Kingdom</option>
+                            <option value="DE">DE - Germany</option>
+                            <option value="FR">FR - France</option>
+                            <option value="IT">IT - Italy</option>
+                            <option value="ES">ES - Spain</option>
+                            <option value="CA">CA - Canada</option>
+                            <option value="AU">AU - Australia</option>
+                            <option value="JP">JP - Japan</option>
+                            <option value="CN">CN - China</option>
+                            <option value="IN">IN - India</option>
+                            <option value="BR">BR - Brazil</option>
+                            <option value="MX">MX - Mexico</option>
+                            <option value="RU">RU - Russia</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Currency Code</label>
+                        <select name="currency" required class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Select Currency Code</option>
+                            <option value="AED">AED - UAE Dirham</option>
+                            <option value="SAR">SAR - Saudi Riyal</option>
+                            <option value="KWD">KWD - Kuwaiti Dinar</option>
+                            <option value="QAR">QAR - Qatari Riyal</option>
+                            <option value="BHD">BHD - Bahraini Dinar</option>
+                            <option value="OMR">OMR - Omani Rial</option>
+                            <option value="EGP">EGP - Egyptian Pound</option>
+                            <option value="JOD">JOD - Jordanian Dinar</option>
+                            <option value="LBP">LBP - Lebanese Pound</option>
+                            <option value="SYP">SYP - Syrian Pound</option>
+                            <option value="IQD">IQD - Iraqi Dinar</option>
+                            <option value="IRR">IRR - Iranian Rial</option>
+                            <option value="TRY">TRY - Turkish Lira</option>
+                            <option value="USD">USD - US Dollar</option>
+                            <option value="GBP">GBP - British Pound</option>
+                            <option value="EUR">EUR - Euro</option>
+                            <option value="CAD">CAD - Canadian Dollar</option>
+                            <option value="AUD">AUD - Australian Dollar</option>
+                            <option value="JPY">JPY - Japanese Yen</option>
+                            <option value="CNY">CNY - Chinese Yuan</option>
+                            <option value="INR">INR - Indian Rupee</option>
+                            <option value="BRL">BRL - Brazilian Real</option>
+                            <option value="MXN">MXN - Mexican Peso</option>
+                            <option value="RUB">RUB - Russian Ruble</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
+                        <select name="timezone" required class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Select Timezone</option>
+                            <option value="Asia/Dubai">Asia/Dubai (UTC+4)</option>
+                            <option value="Asia/Riyadh">Asia/Riyadh (UTC+3)</option>
+                            <option value="Asia/Kuwait">Asia/Kuwait (UTC+3)</option>
+                            <option value="Asia/Qatar">Asia/Qatar (UTC+3)</option>
+                            <option value="Asia/Bahrain">Asia/Bahrain (UTC+3)</option>
+                            <option value="Asia/Muscat">Asia/Muscat (UTC+4)</option>
+                            <option value="Africa/Cairo">Africa/Cairo (UTC+2)</option>
+                            <option value="Asia/Amman">Asia/Amman (UTC+2)</option>
+                            <option value="Asia/Beirut">Asia/Beirut (UTC+2)</option>
+                            <option value="Asia/Damascus">Asia/Damascus (UTC+2)</option>
+                            <option value="Asia/Baghdad">Asia/Baghdad (UTC+3)</option>
+                            <option value="Asia/Tehran">Asia/Tehran (UTC+3:30)</option>
+                            <option value="Europe/Istanbul">Europe/Istanbul (UTC+3)</option>
+                            <option value="America/New_York">America/New_York (UTC-5)</option>
+                            <option value="America/Los_Angeles">America/Los_Angeles (UTC-8)</option>
+                            <option value="Europe/London">Europe/London (UTC+0)</option>
+                            <option value="Europe/Berlin">Europe/Berlin (UTC+1)</option>
+                            <option value="Europe/Paris">Europe/Paris (UTC+1)</option>
+                            <option value="Europe/Rome">Europe/Rome (UTC+1)</option>
+                            <option value="Europe/Madrid">Europe/Madrid (UTC+1)</option>
+                            <option value="America/Toronto">America/Toronto (UTC-5)</option>
+                            <option value="Australia/Sydney">Australia/Sydney (UTC+10)</option>
+                            <option value="Asia/Tokyo">Asia/Tokyo (UTC+9)</option>
+                            <option value="Asia/Shanghai">Asia/Shanghai (UTC+8)</option>
+                            <option value="Asia/Kolkata">Asia/Kolkata (UTC+5:30)</option>
+                            <option value="America/Sao_Paulo">America/Sao_Paulo (UTC-3)</option>
+                            <option value="America/Mexico_City">America/Mexico_City (UTC-6)</option>
+                            <option value="Europe/Moscow">Europe/Moscow (UTC+3)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex items-center justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+                    <button type="button" onclick="closeAddCountryModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors duration-200 font-medium">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 font-medium">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Country
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteCountryModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-lg bg-white">
+        <div class="mt-3">
+            <div class="flex items-center mb-4">
+                <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                    <i class="fas fa-trash text-red-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Delete Country</h3>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Are you sure you want to delete <span id="countryName" class="font-semibold text-red-600"></span>? This action cannot be undone.</p>
+            
+            <form id="deleteCountryForm" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="country_id" id="countryId">
+                
+                <div class="flex items-center justify-end space-x-3">
+                    <button type="button" onclick="closeDeleteCountryModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors duration-200 font-medium">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 font-medium">
+                        <i class="fas fa-trash mr-2"></i>
+                        Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Country to Currency and Timezone mapping
+const countryMappings = {
+    'AE': { currency: 'AED', timezone: 'Asia/Dubai' },
+    'SA': { currency: 'SAR', timezone: 'Asia/Riyadh' },
+    'KW': { currency: 'KWD', timezone: 'Asia/Kuwait' },
+    'QA': { currency: 'QAR', timezone: 'Asia/Qatar' },
+    'BH': { currency: 'BHD', timezone: 'Asia/Bahrain' },
+    'OM': { currency: 'OMR', timezone: 'Asia/Muscat' },
+    'EG': { currency: 'EGP', timezone: 'Africa/Cairo' },
+    'JO': { currency: 'JOD', timezone: 'Asia/Amman' },
+    'LB': { currency: 'LBP', timezone: 'Asia/Beirut' },
+    'SY': { currency: 'SYP', timezone: 'Asia/Damascus' },
+    'IQ': { currency: 'IQD', timezone: 'Asia/Baghdad' },
+    'IR': { currency: 'IRR', timezone: 'Asia/Tehran' },
+    'TR': { currency: 'TRY', timezone: 'Europe/Istanbul' },
+    'US': { currency: 'USD', timezone: 'America/New_York' },
+    'GB': { currency: 'GBP', timezone: 'Europe/London' },
+    'DE': { currency: 'EUR', timezone: 'Europe/Berlin' },
+    'FR': { currency: 'EUR', timezone: 'Europe/Paris' },
+    'IT': { currency: 'EUR', timezone: 'Europe/Rome' },
+    'ES': { currency: 'EUR', timezone: 'Europe/Madrid' },
+    'CA': { currency: 'CAD', timezone: 'America/Toronto' },
+    'AU': { currency: 'AUD', timezone: 'Australia/Sydney' },
+    'JP': { currency: 'JPY', timezone: 'Asia/Tokyo' },
+    'CN': { currency: 'CNY', timezone: 'Asia/Shanghai' },
+    'IN': { currency: 'INR', timezone: 'Asia/Kolkata' },
+    'BR': { currency: 'BRL', timezone: 'America/Sao_Paulo' },
+    'MX': { currency: 'MXN', timezone: 'America/Mexico_City' },
+    'RU': { currency: 'RUB', timezone: 'Europe/Moscow' }
+};
+
+function openAddCountryModal() {
+    document.getElementById('addCountryModal').classList.remove('hidden');
+}
+
+function closeAddCountryModal() {
+    document.getElementById('addCountryModal').classList.add('hidden');
+    document.getElementById('addCountryForm').reset();
+}
+
+function deleteCountry(countryId, countryName) {
+    document.getElementById('countryId').value = countryId;
+    document.getElementById('countryName').textContent = countryName;
+    document.getElementById('deleteCountryModal').classList.remove('hidden');
+}
+
+function closeDeleteCountryModal() {
+    document.getElementById('deleteCountryModal').classList.add('hidden');
+}
+
+function editCountry(countryId) {
+    // TODO: Implement edit functionality
+    alert('Edit functionality will be implemented soon!');
+}
+
+// Auto-fill currency and timezone based on country selection
+document.addEventListener('DOMContentLoaded', function() {
+    const countrySelect = document.querySelector('select[name="code"]');
+    const currencySelect = document.querySelector('select[name="currency"]');
+    const timezoneSelect = document.querySelector('select[name="timezone"]');
+    
+    if (countrySelect && currencySelect && timezoneSelect) {
+        countrySelect.addEventListener('change', function() {
+            const selectedCountry = this.value;
+            if (countryMappings[selectedCountry]) {
+                // Set currency
+                currencySelect.value = countryMappings[selectedCountry].currency;
+                
+                // Set timezone
+                timezoneSelect.value = countryMappings[selectedCountry].timezone;
+            } else {
+                // Reset to default if no mapping found
+                currencySelect.value = '';
+                timezoneSelect.value = '';
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 

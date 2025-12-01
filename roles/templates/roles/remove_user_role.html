@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Remove User Role - {{ user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-4xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="{% url 'users:user_detail' user.id %}" class="text-sm px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 inline-flex items-center mr-4">
+                        <i class="fas fa-arrow-left mr-1"></i> Back to User Details
+                    </a>
+                    <h1 class="text-xl font-semibold text-gray-900">Remove User Role</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Form -->
+    <div class="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div class="p-6">
+                <div class="mb-6">
+                    <h2 class="text-lg font-medium text-gray-900 mb-2">User Information</h2>
+                    <p class="text-sm text-gray-600">{{ user.get_full_name }} ({{ user.email }})</p>
+                </div>
+
+                <div class="mb-6">
+                    <h2 class="text-lg font-medium text-gray-900 mb-2">Role to Remove</h2>
+                    <p class="text-sm text-gray-900 bg-gray-50 px-3 py-2 rounded-md">{{ role.name }}</p>
+                </div>
+
+                <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-yellow-800">Warning</h3>
+                            <div class="mt-2 text-sm text-yellow-700">
+                                <p>Are you sure you want to remove the "{{ role.name }}" role from {{ user.get_full_name }}? This action cannot be undone.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <div class="flex justify-end space-x-3">
+                        <a href="{% url 'users:user_detail' user.id %}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                            Cancel
+                        </a>
+                        <button type="submit" class="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors">
+                            <i class="fas fa-trash mr-2"></i> Remove Role
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Example Page - Atlas Fulfillment{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <h1 class="text-2xl font-bold text-gray-900 mb-4">Example Page</h1>
+            <p class="text-gray-600 mb-4">{{ message }}</p>
+            
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h2 class="text-lg font-semibold text-blue-800 mb-2">Testing Permission System</h2>
+                <p class="text-blue-700 text-sm">
+                    This page demonstrates the permission system. You can test the permission denied page by visiting:
+                    <a href="{% url 'dashboard:test_permission_denied' %}" class="underline font-medium">Test Permission Denied</a>
+                </p>
+            </div>
+            
+            <div class="mt-6">
+                <a href="{% url 'dashboard:index' %}" class="btn-primary">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

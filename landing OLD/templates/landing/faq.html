@@ -1,0 +1,448 @@
+{% extends 'landing/base_landing.html' %}
+{% load static %}
+
+{% block title %}FAQ - Atlas Fulfillment{% endblock %}
+
+{% block extra_css %}
+<style>
+    .faq-hero {
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+    }
+    
+    .faq-item {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .faq-item:hover {
+        border-color: #FFD700;
+        box-shadow: 0 10px 25px rgba(255, 215, 0, 0.1);
+    }
+    
+    .faq-question {
+        transition: all 0.3s ease;
+    }
+    
+    .faq-item.active .faq-question {
+        color: #FF8C00;
+    }
+    
+    .faq-answer {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+    }
+    
+    .faq-item.active .faq-answer {
+        max-height: 500px;
+    }
+    
+    .faq-icon {
+        transition: transform 0.3s ease;
+    }
+    
+    .faq-item.active .faq-icon {
+        transform: rotate(180deg);
+    }
+    
+    .floating-element {
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    .pulse-glow {
+        animation: pulse-glow 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes pulse-glow {
+        from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
+        to { box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="faq-hero text-white py-20 relative overflow-hidden">
+    <div class="absolute inset-0">
+        <div class="absolute top-10 left-10 w-32 h-32 bg-white opacity-10 rounded-full floating-element"></div>
+        <div class="absolute top-32 right-20 w-24 h-24 bg-white opacity-15 rounded-full floating-element" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-20 left-1/4 w-16 h-16 bg-white opacity-20 rounded-full floating-element" style="animation-delay: 4s;"></div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center">
+            <h1 class="text-5xl md:text-6xl font-bold mb-6">Frequently Asked Questions</h1>
+            <p class="text-xl md:text-2xl text-yellow-100 max-w-4xl mx-auto">
+                Find answers to common questions about our services and how we can help your business grow
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Categories -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Browse by Category</h2>
+            <p class="text-lg text-gray-600">Select a category to find relevant questions and answers</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <button class="faq-category-btn bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-yellow-500" data-category="general">
+                <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">General</h3>
+                <p class="text-sm text-gray-600">Basic questions about our services</p>
+            </button>
+            
+            <button class="faq-category-btn bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-yellow-500" data-category="sourcing">
+                <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Sourcing</h3>
+                <p class="text-sm text-gray-600">Product sourcing and suppliers</p>
+            </button>
+            
+            <button class="faq-category-btn bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-yellow-500" data-category="shipping">
+                <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Shipping</h3>
+                <p class="text-sm text-gray-600">Delivery and logistics</p>
+            </button>
+            
+            <button class="faq-category-btn bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-yellow-500" data-category="pricing">
+                <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2">Pricing</h3>
+                <p class="text-sm text-gray-600">Costs and payment</p>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Items -->
+<section class="py-20 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">Common Questions</h2>
+            <p class="text-xl text-gray-600">Find answers to the most frequently asked questions</p>
+        </div>
+        
+        <div class="space-y-4">
+            <!-- General Questions -->
+            <div class="faq-category" data-category="general">
+                <div class="faq-item bg-white rounded-xl shadow-lg mb-4">
+                    <button class="faq-question w-full text-left p-6 flex items-center justify-between">
+                        <span class="text-lg font-semibold text-gray-900">How can I start working with Atlas Fulfillment?</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="px-6 pb-6">
+                            <p class="text-gray-600">
+                                Getting started is simple! Just register on our website, complete your business profile, and connect your e-commerce platform. Our team will guide you through the onboarding process and help you set up your first shipment within 24 hours.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="faq-item bg-white rounded-xl shadow-lg mb-4">
+                    <button class="faq-question w-full text-left p-6 flex items-center justify-between">
+                        <span class="text-lg font-semibold text-gray-900">What countries do you serve?</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="px-6 pb-6">
+                            <p class="text-gray-600">
+                                We currently serve 9+ countries across the Middle East, Africa, and Asia, including UAE, Saudi Arabia, Kuwait, Qatar, Bahrain, Oman, Morocco, India, and Senegal. We're continuously expanding our network to serve more regions.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="faq-item bg-white rounded-xl shadow-lg mb-4">
+                    <button class="faq-question w-full text-left p-6 flex items-center justify-between">
+                        <span class="text-lg font-semibold text-gray-900">Do you offer customer support?</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="px-6 pb-6">
+                            <p class="text-gray-600">
+                                Yes! We provide 24/7 customer support in multiple languages. Our dedicated support team is available via phone, email, and live chat to help you with any questions or issues you may have.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sourcing Questions -->
+            <div class="faq-category hidden" data-category="sourcing">
+                <div class="faq-item bg-white rounded-xl shadow-lg mb-4">
+                    <button class="faq-question w-full text-left p-6 flex items-center justify-between">
+                        <span class="text-lg font-semibold text-gray-900">Can I import from any country?</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="px-6 pb-6">
+                            <p class="text-gray-600">
+                                Yes, we help you import products from global markets including China, Dubai, Europe, and many other countries. Our extensive supplier network spans across 50+ countries, giving you access to a wide range of products and suppliers.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="faq-item bg-white rounded-xl shadow-lg mb-4">
+                    <button class="faq-question w-full text-left p-6 flex items-center justify-between">
+                        <span class="text-lg font-semibold text-gray-900">How do you ensure product quality?</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="px-6 pb-6">
+                            <p class="text-gray-600">
+                                We have a rigorous quality assurance process that includes supplier verification, product inspection, and quality testing. All our suppliers are pre-vetted and we conduct regular audits to ensure they meet our quality standards.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="faq-item bg-white rounded-xl shadow-lg mb-4">
+                    <button class="faq-question w-full text-left p-6 flex items-center justify-between">
+                        <span class="text-lg font-semibold text-gray-900">Can you help with product sourcing?</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="px-6 pb-6">
+                            <p class="text-gray-600">
+                                Absolutely! Our sourcing team can help you find the right products and suppliers for your business. We provide market research, supplier recommendations, and negotiation support to help you get the best deals.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Shipping Questions -->
+            <div class="faq-category hidden" data-category="shipping">
+                <div class="faq-item bg-white rounded-xl shadow-lg mb-4">
+                    <button class="faq-question w-full text-left p-6 flex items-center justify-between">
+                        <span class="text-lg font-semibold text-gray-900">What are your delivery times?</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="px-6 pb-6">
+                            <p class="text-gray-600">
+                                Delivery times vary by destination and service level. We offer same-day delivery within major cities, next-day delivery for regional areas, and 2-5 business days for international shipments. You can track your shipments in real-time through our platform.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="faq-item bg-white rounded-xl shadow-lg mb-4">
+                    <button class="faq-question w-full text-left p-6 flex items-center justify-between">
+                        <span class="text-lg font-semibold text-gray-900">How do you handle customs clearance?</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="px-6 pb-6">
+                            <p class="text-gray-600">
+                                Our expert team handles all customs documentation, duty calculations, and compliance requirements. We ensure smooth cross-border transactions and keep you updated throughout the process. You don't need to worry about customs procedures.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="faq-item bg-white rounded-xl shadow-lg mb-4">
+                    <button class="faq-question w-full text-left p-6 flex items-center justify-between">
+                        <span class="text-lg font-semibold text-gray-900">Can I track my shipments?</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="px-6 pb-6">
+                            <p class="text-gray-600">
+                                Yes! You can track all your shipments in real-time through our online platform or mobile app. You'll receive automatic updates via email and SMS, and you can also check the status anytime through our tracking system.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pricing Questions -->
+            <div class="faq-category hidden" data-category="pricing">
+                <div class="faq-item bg-white rounded-xl shadow-lg mb-4">
+                    <button class="faq-question w-full text-left p-6 flex items-center justify-between">
+                        <span class="text-lg font-semibold text-gray-900">How do you calculate shipping costs?</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="px-6 pb-6">
+                            <p class="text-gray-600">
+                                Shipping costs are calculated based on package weight, dimensions, destination, and service level. We offer competitive rates and bulk discounts for high-volume shippers. You can get instant quotes through our platform.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="faq-item bg-white rounded-xl shadow-lg mb-4">
+                    <button class="faq-question w-full text-left p-6 flex items-center justify-between">
+                        <span class="text-lg font-semibold text-gray-900">Do you offer COD (Cash on Delivery)?</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="px-6 pb-6">
+                            <p class="text-gray-600">
+                                Yes, we offer COD services in most of our service areas. We collect payments from customers and transfer the funds to you efficiently through our streamlined financial system. COD fees are clearly displayed upfront.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="faq-item bg-white rounded-xl shadow-lg mb-4">
+                    <button class="faq-question w-full text-left p-6 flex items-center justify-between">
+                        <span class="text-lg font-semibold text-gray-900">Are there any hidden fees?</span>
+                        <svg class="faq-icon w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <div class="px-6 pb-6">
+                            <p class="text-gray-600">
+                                No hidden fees! We believe in transparent pricing. All costs are clearly displayed upfront, including shipping, customs duties, and any additional services. You'll see the total cost before confirming any shipment.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact CTA -->
+<section class="py-20 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-3xl font-bold text-gray-900 mb-6">Still Have Questions?</h2>
+        <p class="text-lg text-gray-600 mb-8">
+            Can't find the answer you're looking for? Our support team is here to help.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'landing:contact' %}" class="bg-yellow-500 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-yellow-600 transition-all duration-300 shadow-lg">
+                Contact Support
+            </a>
+            <a href="tel:+971501234567" class="border-2 border-yellow-500 text-yellow-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-yellow-500 hover:text-white transition-all duration-300">
+                Call Us
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-4xl font-bold mb-6">Ready to Get Started?</h2>
+        <p class="text-xl mb-8 max-w-3xl mx-auto">
+            Join thousands of successful businesses that trust Atlas Fulfillment for their logistics needs.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{% url 'users:register' %}" class="bg-white text-orange-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-all duration-300 shadow-lg">
+                Get Started Today
+            </a>
+            <a href="{% url 'landing:contact' %}" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-orange-600 transition-all duration-300">
+                Contact Sales
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // FAQ Toggle Functionality
+    const faqItems = document.querySelectorAll('.faq-item');
+    
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        
+        question.addEventListener('click', () => {
+            // Close other open items
+            faqItems.forEach(otherItem => {
+                if (otherItem !== item) {
+                    otherItem.classList.remove('active');
+                }
+            });
+            
+            // Toggle current item
+            item.classList.toggle('active');
+        });
+    });
+    
+    // FAQ Category Filter
+    const categoryBtns = document.querySelectorAll('.faq-category-btn');
+    const categories = document.querySelectorAll('.faq-category');
+    
+    categoryBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const category = btn.getAttribute('data-category');
+            
+            // Update active button
+            categoryBtns.forEach(b => b.classList.remove('bg-yellow-500', 'text-white'));
+            categoryBtns.forEach(b => b.classList.add('bg-white'));
+            btn.classList.remove('bg-white');
+            btn.classList.add('bg-yellow-500', 'text-white');
+            
+            // Show selected category
+            categories.forEach(cat => {
+                if (cat.getAttribute('data-category') === category) {
+                    cat.classList.remove('hidden');
+                } else {
+                    cat.classList.add('hidden');
+                }
+            });
+        });
+    });
+    
+    // Set default category to general
+    const generalBtn = document.querySelector('[data-category="general"]');
+    if (generalBtn) {
+        generalBtn.click();
+    }
+});
+</script>
+{% endblock %}

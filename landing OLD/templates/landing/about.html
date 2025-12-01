@@ -1,0 +1,343 @@
+{% extends 'landing/base_landing.html' %}
+{% load static %}
+{% load i18n %}
+{% block title %}About Us - Atlas Fulfillment{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-hero {
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        transition: all 0.3s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(255, 215, 0, 0.3);
+    }
+    
+    .team-card {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .team-card:hover {
+        transform: translateY(-10px);
+        border-color: #FFD700;
+        box-shadow: 0 25px 50px rgba(255, 215, 0, 0.2);
+    }
+    
+    .floating-element {
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    .pulse-glow {
+        animation: pulse-glow 2s ease-in-out infinite alternate;
+    }
+    
+    @keyframes pulse-glow {
+        from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
+        to { box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="about-hero text-white py-20 relative overflow-hidden">
+    <div class="absolute inset-0">
+        <div class="absolute top-10 left-10 w-32 h-32 bg-white opacity-10 rounded-full floating-element"></div>
+        <div class="absolute top-32 right-20 w-24 h-24 bg-white opacity-15 rounded-full floating-element" style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-20 left-1/4 w-16 h-16 bg-white opacity-20 rounded-full floating-element" style="animation-delay: 4s;"></div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="text-center">
+            <h1 class="text-5xl md:text-6xl font-bold mb-6">About Atlas Fulfillment</h1>
+            <p class="text-xl md:text-2xl text-yellow-100 max-w-4xl mx-auto">
+                Your trusted partner for end-to-end logistics, warehousing, and e-commerce fulfillment across the Middle East and beyond.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Company Overview -->
+<section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+                <h2 class="text-4xl font-bold text-gray-900 mb-6">Our Story</h2>
+                <p class="text-lg text-gray-600 mb-6">
+                    Founded with a vision to revolutionize logistics in the Middle East, Atlas Fulfillment has grown from a small startup to a leading logistics provider serving businesses across 9+ countries.
+                </p>
+                <p class="text-lg text-gray-600 mb-6">
+                    We understand the challenges of e-commerce businesses in the region and have built comprehensive solutions that address every aspect of the supply chain, from sourcing to delivery.
+                </p>
+                <p class="text-lg text-gray-600 mb-8">
+                    Our mission is to enable every business to scale globally while maintaining the highest standards of service and reliability.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="{% url 'landing:services' %}" class="bg-yellow-500 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-yellow-600 transition-all duration-300 shadow-lg">
+                        Our Services
+                    </a>
+                    <a href="{% url 'landing:contact' %}" class="border-2 border-yellow-500 text-yellow-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-yellow-500 hover:text-white transition-all duration-300">
+                        Contact Us
+                    </a>
+                </div>
+            </div>
+            
+            <div class="relative">
+                <div class="absolute -inset-4 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-2xl opacity-20 blur-xl"></div>
+                <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                         alt="Atlas Fulfillment Warehouse" 
+                         class="w-full h-96 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">State-of-the-Art Facilities</h3>
+                        <p class="text-gray-600">Modern warehouses equipped with advanced technology for efficient operations.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div class="text-center">
+                <div class="stats-card w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 pulse-glow">
+                    <span class="text-3xl font-bold text-white">9+</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Countries</h3>
+                <p class="text-gray-600">Global presence</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="stats-card w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 pulse-glow">
+                    <span class="text-3xl font-bold text-white">17+</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Warehouses</h3>
+                <p class="text-gray-600">Strategic locations</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="stats-card w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 pulse-glow">
+                    <span class="text-3xl font-bold text-white">20k+</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Satisfied Clients</h3>
+                <p class="text-gray-600">Happy customers</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="stats-card w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 pulse-glow">
+                    <span class="text-3xl font-bold text-white">10k+</span>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Daily Orders</h3>
+                <p class="text-gray-600">Processed daily</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Mission & Vision -->
+<section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <!-- Mission -->
+            <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-8">
+                <div class="w-16 h-16 bg-yellow-500 rounded-full flex items-center justify-center mb-6">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-3xl font-bold text-gray-900 mb-4">Our Mission</h3>
+                <p class="text-lg text-gray-700 mb-6">
+                    To enable every business to scale globally by providing comprehensive, reliable, and cost-effective logistics solutions that simplify the complexities of international trade and e-commerce.
+                </p>
+                <ul class="space-y-3">
+                    <li class="flex items-start">
+                        <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                            <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <span class="text-gray-700">Simplify global logistics</span>
+                    </li>
+                    <li class="flex items-start">
+                        <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                            <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <span class="text-gray-700">Deliver exceptional service</span>
+                    </li>
+                    <li class="flex items-start">
+                        <div class="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                            <svg class="w-3 h-3 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <span class="text-gray-700">Drive business growth</span>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- Vision -->
+            <div class="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-2xl p-8">
+                <div class="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mb-6">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-3xl font-bold text-gray-900 mb-4">Our Vision</h3>
+                <p class="text-lg text-gray-700 mb-6">
+                    To become the leading logistics and fulfillment partner in the Middle East and Africa, empowering businesses to reach customers worldwide with seamless, efficient, and sustainable supply chain solutions.
+                </p>
+                <ul class="space-y-3">
+                    <li class="flex items-start">
+                        <div class="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                            <svg class="w-3 h-3 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <span class="text-gray-700">Regional market leadership</span>
+                    </li>
+                    <li class="flex items-start">
+                        <div class="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                            <svg class="w-3 h-3 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <span class="text-gray-700">Sustainable operations</span>
+                    </li>
+                    <li class="flex items-start">
+                        <div class="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center mr-3 mt-1">
+                            <svg class="w-3 h-3 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <span class="text-gray-700">Global connectivity</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Values Section -->
+<section class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">Our Values</h2>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                The principles that guide everything we do
+            </p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="bg-white rounded-xl p-8 shadow-lg text-center">
+                <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Reliability</h3>
+                <p class="text-gray-600">
+                    We deliver on our promises with consistent, dependable service that our clients can count on.
+                </p>
+            </div>
+            
+            <div class="bg-white rounded-xl p-8 shadow-lg text-center">
+                <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Innovation</h3>
+                <p class="text-gray-600">
+                    We continuously improve our processes and adopt cutting-edge technology to stay ahead of the curve.
+                </p>
+            </div>
+            
+            <div class="bg-white rounded-xl p-8 shadow-lg text-center">
+                <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Partnership</h3>
+                <p class="text-gray-600">
+                    We build long-term relationships with our clients, working as an extension of their team.
+                </p>
+            </div>
+            
+            <div class="bg-white rounded-xl p-8 shadow-lg text-center">
+                <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Excellence</h3>
+                <p class="text-gray-600">
+                    We strive for the highest standards in everything we do, from customer service to operational efficiency.
+                </p>
+            </div>
+            
+            <div class="bg-white rounded-xl p-8 shadow-lg text-center">
+                <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Integrity</h3>
+                <p class="text-gray-600">
+                    We conduct business with honesty, transparency, and ethical practices in all our interactions.
+                </p>
+            </div>
+            
+            <div class="bg-white rounded-xl p-8 shadow-lg text-center">
+                <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-4">Growth</h3>
+                <p class="text-gray-600">
+                    We are committed to continuous improvement and helping our clients achieve their growth objectives.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-20 bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="text-4xl font-bold mb-6">Ready to Partner with Us?</h2>
+        <p class="text-xl mb-8 max-w-3xl mx-auto">
+            Join thousands of successful businesses that trust Atlas Fulfillment for their logistics needs.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/users/register/" class="bg-white text-orange-600 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-all duration-300 shadow-lg">
+                Get Started Today
+            </a>
+            <a href="{% url 'landing:contact' %}" class="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-orange-600 transition-all duration-300">
+                Contact Us
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

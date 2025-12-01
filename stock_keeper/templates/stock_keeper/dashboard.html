@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard - Stock Keeper{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <div class="flex">
+        <!-- Main Content -->
+        <div class="flex-1">
+            <div class="p-8">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-8">
+                    <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+                    <button class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-calendar-alt mr-2"></i>
+                        Select Period
+                    </button>
+                </div>
+
+                {% if no_warehouse %}
+                <!-- No Warehouse Warning -->
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-6 mb-8 rounded-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-amber-500 text-2xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-semibold text-amber-800">No Active Warehouse</h3>
+                            <div class="mt-2 text-sm text-amber-700">
+                                <p>You need to have an active warehouse assigned to access stock keeper functions.</p>
+                                <p class="mt-1">Total warehouses in system: {{ warehouses_count }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <!-- Total Products -->
+                    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Total Products</p>
+                                <p class="text-3xl font-bold text-gray-900">{{ warehouse_stats.total_products|default:2547 }}</p>
+                            </div>
+                            <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-box text-blue-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Total Pieces -->
+                    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Total Pieces</p>
+                                <p class="text-3xl font-bold text-gray-900">{{ total_items|default:45892|floatformat:0 }}</p>
+                            </div>
+                            <div class="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-cubes text-green-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Warehouses -->
+                    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Warehouses</p>
+                                <p class="text-3xl font-bold text-gray-900">{{ warehouse_stats.total_warehouses|default:8 }}</p>
+                            </div>
+                            <div class="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-warehouse text-orange-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Near Expiry -->
+                    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Near Expiry</p>
+                                <p class="text-3xl font-bold text-gray-900">{{ near_expiry_items|default:0 }}</p>
+                            </div>
+                            <div class="w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-exclamation-triangle text-yellow-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Out of Stock -->
+                    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Out of Stock</p>
+                                <p class="text-3xl font-bold text-gray-900">{{ warehouse_stats.out_of_stock_items|default:0 }}</p>
+                            </div>
+                            <div class="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-times-circle text-red-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Orders Awaiting Pick -->
+                    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600 mb-1">Orders Awaiting Pick</p>
+                                <p class="text-3xl font-bold text-gray-900">{{ orders_awaiting_preparation|default:0 }}</p>
+                            </div>
+                            <div class="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clipboard-list text-purple-600 text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Charts Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Stock Status Pie Chart -->
+                    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Stock Status</h3>
+                        <div class="flex items-center justify-center h-48 relative">
+                            <div class="relative" style="width: 180px; height: 180px;">
+                                <canvas id="stockStatusChart" width="180" height="180"></canvas>
+                                <div id="chartCenterText" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <div class="text-center">
+                                        <p class="text-xl font-bold text-gray-900">{{ total_inventory_count|default:0 }}</p>
+                                        <p class="text-xs text-gray-600">Total Items</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-center gap-6 mt-4 flex-wrap">
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 bg-green-500 rounded-full mr-2"></div>
+                                <span class="text-sm text-gray-600">Available ({{ stock_status.available_percent|default:0|floatformat:1 }}%)</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 bg-orange-500 rounded-full mr-2"></div>
+                                <span class="text-sm text-gray-600">Low ({{ stock_status.low_percent|default:0|floatformat:1 }}%)</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-4 h-4 bg-red-500 rounded-full mr-2"></div>
+                                <span class="text-sm text-gray-600">Out of Stock ({{ stock_status.out_of_stock_percent|default:0|floatformat:1 }}%)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quantities by Warehouse Bar Chart -->
+                    <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Quantities by Warehouse</h3>
+                        {% if warehouses_data %}
+                        <div class="h-64 flex items-end justify-around gap-2" id="warehouseChart">
+                            {% for wh_data in warehouses_data %}
+                            <div class="flex flex-col items-center flex-1 warehouse-bar" data-quantity="{{ wh_data.total }}" data-max="{{ max_warehouse_quantity }}" data-name="{{ wh_data.name }}">
+                                <div class="w-full bg-blue-500 rounded-t mb-2 transition-all hover:bg-blue-600 flex items-end justify-center" style="min-height: 5px;" title="{{ wh_data.total|floatformat:0 }} units">
+                                    <div class="text-white text-xs font-semibold text-center py-1 w-full">{{ wh_data.total|floatformat:0 }}</div>
+                                </div>
+                                <span class="text-xs text-gray-600 text-center truncate w-full" title="{{ wh_data.name }}">{{ wh_data.name|truncatewords:2 }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="h-64 flex items-center justify-center">
+                            <div class="text-center text-gray-500">
+                                <i class="fas fa-warehouse text-4xl mb-2"></i>
+                                <p>No warehouse data available</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+// Stock Status Pie Chart
+const stockStatusCtx = document.getElementById('stockStatusChart');
+if (stockStatusCtx) {
+    // Use actual counts instead of percentages for better accuracy
+    const availableCount = {{ stock_status.available_count|default:0 }};
+    const lowCount = {{ stock_status.low_count|default:0 }};
+    const outOfStockCount = {{ stock_status.out_of_stock_count|default:0 }};
+    const totalCount = availableCount + lowCount + outOfStockCount;
+    
+    // If no data, show empty chart
+    const chartData = totalCount > 0 ? [availableCount, lowCount, outOfStockCount] : [1];
+    const chartColors = totalCount > 0 ? ['#10b981', '#f59e0b', '#ef4444'] : ['#e5e7eb'];
+    const chartLabels = totalCount > 0 ? ['Available', 'Low Stock', 'Out of Stock'] : ['No Data'];
+    
+    new Chart(stockStatusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: chartLabels,
+            datasets: [{
+                data: chartData,
+                backgroundColor: chartColors,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return label + ': ' + value + ' (' + percentage + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Quantities by Warehouse Bar Chart
+const warehouseBars = document.querySelectorAll('.warehouse-bar');
+if (warehouseBars.length > 0) {
+    warehouseBars.forEach(bar => {
+        const quantity = parseFloat(bar.dataset.quantity) || 0;
+        const max = parseFloat(bar.dataset.max) || 1;
+        const heightPercent = (quantity / max) * 100;
+        const barElement = bar.querySelector('.bg-blue-500');
+        if (barElement) {
+            barElement.style.height = Math.max(heightPercent, 5) + '%';
+        }
+    });
+}
+</script>
+{% endblock %}

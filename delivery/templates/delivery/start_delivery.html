@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Start Delivery{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-shipping-fast text-teal-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-teal-600">Start Delivery</h1>
+                        <p class="mt-1 text-sm text-gray-500">Order #{{ order.order_code }}</p>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'orders:detail' order.id %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Order
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Order Information -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Order Information</h3>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Order Code</label>
+                        <p class="mt-1 text-lg font-semibold text-gray-900">{{ order.order_code }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Customer</label>
+                        <p class="mt-1 text-lg font-semibold text-gray-900">{{ order.customer|default:"N/A" }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Phone</label>
+                        <p class="mt-1 text-lg font-semibold text-gray-900">{{ order.customer_phone|default:"N/A" }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Total Amount</label>
+                        <p class="mt-1 text-lg font-semibold text-green-600">AED {{ order.total_price|floatformat:2 }}</p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-500">Shipping Address</label>
+                        <p class="mt-1 text-sm text-gray-900">{{ order.shipping_address|default:"N/A" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Packaging Information -->
+        {% if order.packaging %}
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Packaging Information</h3>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% if order.packaging.barcode %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Package Barcode</label>
+                        <p class="mt-1 text-lg font-semibold text-gray-900 font-mono">{{ order.packaging.barcode }}</p>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Package Type</label>
+                        <p class="mt-1 text-sm text-gray-900">{{ order.packaging.get_package_type_display|default:"N/A" }}</p>
+                    </div>
+                    {% if order.packaging.package_weight %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Package Weight</label>
+                        <p class="mt-1 text-sm text-gray-900">{{ order.packaging.package_weight }} kg</p>
+                    </div>
+                    {% endif %}
+                    {% if order.packaging.dimensions %}
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Dimensions</label>
+                        <p class="mt-1 text-sm text-gray-900">{{ order.packaging.dimensions }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Delivery Confirmation -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Confirm Delivery Start</h3>
+            </div>
+            <div class="p-6">
+                <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-yellow-800">
+                                Important Notice
+                            </h3>
+                            <div class="mt-2 text-sm text-yellow-700">
+                                <p>Starting delivery will change the order status to 'Shipped' and begin the delivery process. Make sure you have all necessary information before proceeding.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h4 class="text-sm font-medium text-gray-900 mb-2">Delivery Details</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">Delivery Agent</label>
+                                    <p class="mt-1 text-sm text-gray-900">{{ request.user.get_full_name|default:request.user.username }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500">Start Time</label>
+                                    <p class="mt-1 text-sm text-gray-900" id="current-time"></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-end space-x-3">
+                            <a href="{% url 'orders:detail' order.id %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                Cancel
+                            </a>
+                            <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                <i class="fas fa-shipping-fast mr-2"></i>
+                                Start Delivery
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Update current time
+function updateTime() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('en-US', {
+        hour12: true,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+    document.getElementById('current-time').textContent = timeString;
+}
+
+// Update time every second
+setInterval(updateTime, 1000);
+updateTime();
+</script>
+{% endblock %}

@@ -1,0 +1,704 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load order_filters %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200">
+    <!-- Enhanced Page Header -->
+    <div class="relative overflow-hidden bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-b border-amber-500/20 shadow-2xl">
+        <div class="absolute inset-0 bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-amber-500/10"></div>
+        <div class="relative max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-amber-500/25">
+                        <i class="fas fa-edit text-3xl text-slate-900"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 bg-clip-text text-transparent">
+            {% if form.instance.pk %}
+                Edit Order
+            {% else %}
+                Add New Order
+            {% endif %}
+        </h1>
+                        <p class="mt-2 text-lg text-slate-300 font-medium">Update order information and details</p>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                    <a href="{% url 'orders:list' %}" class="inline-flex items-center px-6 py-3 bg-slate-800/50 hover:bg-slate-700/50 text-amber-400 hover:text-amber-300 border border-slate-600/50 hover:border-amber-500/50 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                        <i class="fas fa-arrow-left mr-2"></i>
+            Back to Orders
+        </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-8">
+        <!-- Enhanced Role-based Information Display -->
+        {% if user.has_role_seller %}
+        <div class="bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 border border-blue-200/50 rounded-2xl p-6 shadow-lg animate-slide-up">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
+                    <i class="fas fa-user-tie text-white text-lg"></i>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-lg font-semibold text-blue-800">Seller Account Detected</h4>
+                    <p class="text-blue-700 mt-1">
+                        As a seller, you can only modify basic order details.
+                        <span class="font-semibold bg-blue-100 px-2 py-1 rounded-full">Seller</span> and <span class="font-semibold bg-blue-100 px-2 py-1 rounded-full">Status</span>
+                        are automatically set and cannot be changed.
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% elif user.has_role_callcenter_agent %}
+        <div class="bg-gradient-to-r from-green-50 via-green-100 to-green-50 border border-green-200/50 rounded-2xl p-6 shadow-lg animate-slide-up">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
+                    <i class="fas fa-headset text-white text-lg"></i>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-lg font-semibold text-green-800">Call Center Agent Account Detected</h4>
+                    <p class="text-green-700 mt-1">
+                        As a call center agent, you can update order details and customer information.
+                        <span class="font-semibold bg-green-100 px-2 py-1 rounded-full">Status</span> and <span class="font-semibold bg-green-100 px-2 py-1 rounded-full">Notes</span>
+                        can be modified to track customer interactions.
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% elif user.has_role_admin or user.is_superuser %}
+        <div class="bg-gradient-to-r from-purple-50 via-purple-100 to-purple-50 border border-purple-200/50 rounded-2xl p-6 shadow-lg animate-slide-up">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
+                    <i class="fas fa-shield-alt text-white text-lg"></i>
+                </div>
+                <div class="flex-1">
+                    <h4 class="text-lg font-semibold text-purple-800">Admin Account Detected</h4>
+                    <p class="text-purple-700 mt-1">
+                        As an admin, you can modify all fields including
+                        <span class="font-semibold bg-purple-100 px-2 py-1 rounded-full">Seller</span> and <span class="font-semibold bg-purple-100 px-2 py-1 rounded-full">Status</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        {% endif %}
+
+        <form method="post" class="space-y-8">
+            {% csrf_token %}
+            
+            <!-- Order Information Card -->
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden animate-slide-up">
+                <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-shopping-cart text-slate-900 text-lg"></i>
+                        </div>
+                    <div>
+                            <h3 class="text-xl font-bold text-white">Order Information</h3>
+                            <p class="text-slate-300 text-sm">Basic order details and customer information</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Order Code -->
+                        <div class="space-y-3">
+                            <label for="{{ form.order_code.id_for_label }}" class="block text-sm font-semibold text-slate-700">
+                            Order Code
+                        </label>
+                            <div class="relative">
+                                <i class="fas fa-hashtag absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                        {{ form.order_code }}
+                        {% if form.order_code.errors %}
+                                    <p class="mt-2 text-sm text-red-600 flex items-center">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        {{ form.order_code.errors.0 }}
+                                    </p>
+                        {% endif %}
+                            </div>
+                    </div>
+
+                        <!-- Customer -->
+                        <div class="space-y-3">
+                            <label for="{{ form.customer.id_for_label }}" class="block text-sm font-semibold text-slate-700">
+                            Customer
+                        </label>
+                            <div class="relative">
+                                <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                        {{ form.customer }}
+                        {% if form.customer.errors %}
+                                    <p class="mt-2 text-sm text-red-600 flex items-center">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        {{ form.customer.errors.0 }}
+                                    </p>
+                        {% endif %}
+                            </div>
+                    </div>
+
+                        <!-- Order Date -->
+                        <div class="space-y-3">
+                            <label for="{{ form.date.id_for_label }}" class="block text-sm font-semibold text-slate-700">
+                            Order Date
+                        </label>
+                            <div class="relative">
+                                <i class="fas fa-calendar absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                                {% if request.user|is_seller %}
+                                <!-- For sellers, show date as read-only -->
+                                <div class="w-full px-4 py-3 pl-10 bg-slate-100 border border-slate-200 rounded-xl text-slate-600 cursor-not-allowed">
+                                    {{ form.date.value|date:"d/m/Y"|default:"" }}
+                                </div>
+                                <!-- Hidden field to ensure date is submitted -->
+                                <input type="hidden" name="date" value="{{ form.date.value|date:'Y-m-d H:i:s'|default:'' }}" id="hidden_date_field">
+                                <p class="mt-1 text-xs text-slate-500">Date is automatically set to today</p>
+                                {% else %}
+                                <!-- For admins, show normal date input -->
+                                {{ form.date }}
+                                {% endif %}
+                        {% if form.date.errors %}
+                                    <p class="mt-2 text-sm text-red-600 flex items-center">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        {{ form.date.errors.0 }}
+                                    </p>
+                        {% endif %}
+                            </div>
+                    </div>
+
+                        <!-- Status - Only show for non-sellers -->
+                        {% if not request.user|is_seller %}
+                        <div class="space-y-3">
+                            <label for="{{ form.status.id_for_label }}" class="block text-sm font-semibold text-slate-700">
+                            Status
+                        </label>
+                            <div class="relative">
+                                <i class="fas fa-flag absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                        {{ form.status }}
+                        {% if form.status.errors %}
+                                    <p class="mt-2 text-sm text-red-600 flex items-center">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        {{ form.status.errors.0 }}
+                                    </p>
+                        {% endif %}
+                    </div>
+                </div>
+                        {% else %}
+                        <!-- For sellers, show status as read-only display -->
+                        <div class="space-y-3">
+                            <label class="block text-sm font-semibold text-slate-700">
+                                Status
+                            </label>
+                            <div class="relative">
+                                <i class="fas fa-flag absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                                <div class="w-full px-4 py-3 pl-10 bg-slate-100 border border-slate-200 rounded-xl text-slate-600">
+                                    Pending
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-500">Status will be set to Pending automatically</p>
+                        </div>
+                        {% endif %}
+
+                        <!-- Seller -->
+                        <div class="space-y-3">
+                            <label for="{{ form.seller.id_for_label }}" class="block text-sm font-semibold text-slate-700">
+                            Seller
+                        </label>
+                            <div class="relative">
+                                <i class="fas fa-store absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                        {{ form.seller }}
+                        {% if form.seller.errors %}
+                                    <p class="mt-2 text-sm text-red-600 flex items-center">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        {{ form.seller.errors.0 }}
+                                    </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                        <!-- Product -->
+                        <div class="space-y-3">
+                            <label for="{{ form.product.id_for_label }}" class="block text-sm font-semibold text-slate-700">
+                            Product
+                        </label>
+                            <div class="relative">
+                                <i class="fas fa-box absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                        {{ form.product }}
+                        {% if form.product.errors %}
+                                    <p class="mt-2 text-sm text-red-600 flex items-center">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        {{ form.product.errors.0 }}
+                                    </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                        <!-- Quantity -->
+                        <div class="space-y-3">
+                            <label for="{{ form.quantity.id_for_label }}" class="block text-sm font-semibold text-slate-700">
+                                Quantity
+                        </label>
+                            <div class="relative">
+                                <i class="fas fa-sort-numeric-up absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                                {{ form.quantity }}
+                                {% if form.quantity.errors %}
+                                    <p class="mt-2 text-sm text-red-600 flex items-center">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        {{ form.quantity.errors.0 }}
+                                    </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                        <!-- Unit Price -->
+                        <div class="space-y-3">
+                            <label for="{{ form.price_per_unit.id_for_label }}" class="block text-sm font-semibold text-slate-700">
+                                Unit Price
+                            </label>
+                            <div class="relative">
+                                <i class="fas fa-dollar-sign absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                                {{ form.price_per_unit }}
+                                {% if form.price_per_unit.errors %}
+                                    <p class="mt-2 text-sm text-red-600 flex items-center">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        {{ form.price_per_unit.errors.0 }}
+                                    </p>
+                            {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Agent Assignment -->
+                        <div class="space-y-3">
+                            <label for="{{ form.agent.id_for_label }}" class="block text-sm font-semibold text-slate-700">
+                                Call Center Agent
+                                <span class="ml-2 text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">Optional</span>
+                            </label>
+                            <div class="relative">
+                                <i class="fas fa-headset absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                                {{ form.agent }}
+                                {% if form.agent.errors %}
+                                    <p class="mt-2 text-sm text-red-600 flex items-center">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        {{ form.agent.errors.0 }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                            <p class="mt-1 text-xs text-slate-500">
+                                <i class="fas fa-info-circle mr-1 text-blue-600"></i>
+                                Agent can be assigned or changed by call center managers
+                            </p>
+                            <!-- Debug info -->
+                            {% if debug %}
+                            <div class="mt-2 p-2 bg-gray-100 rounded text-xs">
+                                <strong>Debug Info:</strong><br>
+                                Current Agent: {{ order.agent|default:"None" }}<br>
+                                Agent ID: {{ order.agent.id|default:"None" }}<br>
+                                Form Agent Value: {{ form.agent.value|default:"None" }}<br>
+                                Form Agent Choices: {{ form.agent.field.choices|length }} choices<br>
+                                User Role: {{ user.primary_role.name|default:"No role" }}<br>
+                                Form Method: {{ form.method|default:"GET" }}<br>
+                                Form Action: {{ form.action|default:"No action" }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Enhanced Total Price Display -->
+                        <div class="space-y-3">
+                            <label class="block text-sm font-semibold text-slate-700">
+                                Total Price
+                                <span class="ml-2 text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">Auto-calculated</span>
+                            </label>
+                            <div class="relative">
+                                <i class="fas fa-calculator absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 z-10"></i>
+                                <input type="text" id="total-price" readonly 
+                                       class="w-full px-4 py-3 pl-10 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl text-green-700 font-bold text-lg text-center relative">
+                                <div class="mt-2 text-center">
+                                    <span class="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        Quantity × Unit Price
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                        </div>
+
+            <!-- Enhanced Pricing Summary Card -->
+            <div class="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200/50 rounded-2xl p-6 shadow-lg animate-slide-up">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-receipt text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold text-green-800">Pricing Summary</h4>
+                            <p class="text-green-700 text-sm">Order cost breakdown and calculations</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold text-green-700" id="total-price-display">$0.00</div>
+                        <div class="text-sm text-green-600">Total Amount</div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white/60 rounded-xl p-4 text-center">
+                        <div class="text-sm text-slate-600">Quantity</div>
+                        <div class="text-xl font-bold text-slate-800" id="summary-quantity">0</div>
+                    </div>
+                    <div class="bg-white/60 rounded-xl p-4 text-center">
+                        <div class="text-sm text-slate-600">Unit Price</div>
+                        <div class="text-xl font-bold text-slate-800" id="summary-unit-price">$0.00</div>
+                    </div>
+                    <div class="bg-white/60 rounded-xl p-4 text-center">
+                        <div class="text-sm text-slate-600">Total</div>
+                        <div class="text-xl font-bold text-green-700" id="summary-total">$0.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Information Card -->
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden animate-slide-up">
+                <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-info-circle text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Additional Information</h3>
+                            <p class="text-slate-300 text-sm">Additional order details and notes</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Notes -->
+                        <div class="col-span-1 md:col-span-2">
+                            <label for="{{ form.notes.id_for_label }}" class="block text-sm font-semibold text-slate-700 mb-3">
+                                Notes
+                                {% if user.has_role_callcenter_agent %}
+                                <span class="ml-2 text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">Customer Interaction Notes</span>
+                                {% endif %}
+                            </label>
+                            <div class="relative">
+                                <i class="fas fa-sticky-note absolute left-3 top-3 text-slate-400"></i>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                                    <p class="mt-2 text-sm text-red-600 flex items-center">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        {{ form.notes.errors.0 }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                            {% if user.has_role_callcenter_agent %}
+                            <p class="mt-2 text-xs text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
+                                <i class="fas fa-lightbulb mr-1"></i>
+                                Use this field to record customer calls, concerns, or special requests
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4 animate-slide-up">
+                <a href="{% url 'orders:list' %}" class="inline-flex items-center justify-center px-8 py-4 bg-slate-600 hover:bg-slate-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancel
+                </a>
+                <button type="submit" id="submit-btn" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-900 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                    <i class="fas fa-save mr-2" id="submit-icon"></i>
+                    <span id="submit-text">
+                    {% if form.instance.pk %}
+                        Update Order
+                    {% else %}
+                        Create Order
+                    {% endif %}
+                    </span>
+                    <div id="submit-spinner" class="hidden ml-2">
+                        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-slate-900"></div>
+                    </div>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Enhanced Form Styling -->
+<style>
+    /* Enhanced form field styling */
+    input[type="text"], input[type="number"], input[type="email"], input[type="date"], input[type="datetime-local"],
+    select, textarea {
+        @apply w-full px-4 py-3 pl-10 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200;
+    }
+    
+    /* Select field specific styling */
+    select {
+        @apply appearance-none;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 0.75rem center;
+        background-repeat: no-repeat;
+        background-size: 1.25em 1.25em;
+        padding-right: 2.75rem;
+        cursor: pointer;
+    }
+    
+    /* Enhanced select field hover and focus states */
+    select:hover {
+        @apply border-slate-300 bg-slate-100;
+    }
+    
+    /* Custom select field styling for better visual hierarchy */
+    select option {
+        @apply bg-white text-slate-700 py-2 px-3;
+    }
+    
+    select option:hover {
+        @apply bg-amber-50 text-amber-700;
+    }
+    
+    /* Textarea specific styling */
+    textarea {
+        @apply resize-none;
+        min-height: 120px;
+    }
+    
+    /* Focus states */
+    input:focus, select:focus, textarea:focus {
+        @apply outline-none ring-2 ring-amber-500 border-amber-500;
+    }
+    
+    /* Placeholder styling */
+    input::placeholder, textarea::placeholder {
+        @apply text-slate-400;
+    }
+    
+    /* Enhanced animations */
+    @keyframes slide-up {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate-slide-up {
+        animation: slide-up 0.5s ease-out;
+    }
+    
+    /* Role-based field styling */
+    .seller-field {
+        @apply bg-blue-50 border-blue-200 text-blue-700;
+    }
+    
+    .agent-field {
+        @apply bg-green-50 border-green-200 text-green-700;
+    }
+    
+    .admin-field {
+        @apply bg-purple-50 border-purple-200 text-purple-700;
+    }
+    
+    /* Enhanced field states for better user experience */
+    .seller-field:focus {
+        @apply ring-blue-500 border-blue-500;
+    }
+    
+    .agent-field:focus {
+        @apply ring-green-500 border-green-500;
+    }
+    
+    .admin-field:focus {
+        @apply ring-purple-500 border-purple-500;
+    }
+    
+    /* Enhanced total price styling */
+    #total-price {
+        @apply text-2xl font-bold;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    /* Ensure icon is properly positioned and visible */
+    #total-price + .fas.fa-calculator {
+        pointer-events: none;
+        z-index: 10;
+    }
+    
+    /* Better icon positioning for total price field */
+    .relative .fas.fa-calculator {
+        pointer-events: none;
+        z-index: 10;
+    }
+    
+    /* Enhanced total price input styling */
+    #total-price {
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Ensure proper icon alignment */
+    .relative:has(#total-price) .fas.fa-calculator {
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        left: 12px !important;
+    }
+    
+    /* Responsive improvements */
+    @media (max-width: 640px) {
+        .grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .col-span-1.md\:col-span-2 {
+            grid-column: span 1;
+        }
+    }
+</style>
+
+<script>
+    // Enhanced auto-calculate total price with real-time updates
+    document.addEventListener('DOMContentLoaded', function() {
+        const quantityInput = document.getElementById('{{ form.quantity.id_for_label }}');
+        const unitPriceInput = document.getElementById('{{ form.price_per_unit.id_for_label }}');
+        const totalPriceInput = document.getElementById('total-price');
+        const totalPriceDisplay = document.getElementById('total-price-display');
+        const summaryQuantity = document.getElementById('summary-quantity');
+        const summaryUnitPrice = document.getElementById('summary-unit-price');
+        const summaryTotal = document.getElementById('summary-total');
+        
+        function calculateTotal() {
+            const quantity = parseFloat(quantityInput.value) || 0;
+            const unitPrice = parseFloat(unitPriceInput.value) || 0;
+            const total = quantity * unitPrice;
+            
+            // Update all total price displays
+            const formattedTotal = total.toFixed(2);
+            totalPriceInput.value = formattedTotal;
+            totalPriceDisplay.textContent = `$${formattedTotal}`;
+            summaryTotal.textContent = `$${formattedTotal}`;
+            
+            // Update summary fields
+            summaryQuantity.textContent = quantity;
+            summaryUnitPrice.textContent = `$${unitPrice.toFixed(2)}`;
+            
+            // Add visual feedback
+            if (total > 0) {
+                totalPriceInput.classList.add('animate-pulse');
+                setTimeout(() => {
+                    totalPriceInput.classList.remove('animate-pulse');
+                }, 500);
+            }
+        }
+        
+        if (quantityInput && unitPriceInput) {
+            quantityInput.addEventListener('input', calculateTotal);
+            unitPriceInput.addEventListener('input', calculateTotal);
+            calculateTotal(); // Calculate initial total
+        }
+        
+        // Add role-based field highlighting based on user role
+        const userRole = '{{ user.user_roles.first.role.name|default:"" }}';
+        
+        if (userRole === 'Seller') {
+            document.querySelectorAll('input, select, textarea').forEach(field => {
+                if (field.name === 'seller' || field.name === 'status') {
+                    field.classList.add('seller-field');
+                    field.setAttribute('readonly', true);
+                }
+            });
+        } else if (userRole === 'Call Center Agent') {
+            document.querySelectorAll('input, select, textarea').forEach(field => {
+                if (field.name === 'agent') {
+                    field.classList.add('agent-field');
+                }
+            });
+        }
+        
+        // Enhanced form submission with loading state
+        const form = document.querySelector('form');
+        const submitBtn = document.getElementById('submit-btn');
+        const submitIcon = document.getElementById('submit-icon');
+        const submitText = document.getElementById('submit-text');
+        const submitSpinner = document.getElementById('submit-spinner');
+        
+        if (form && submitBtn) {
+            form.addEventListener('submit', function(e) {
+        // Show loading state
+        submitBtn.disabled = true;
+        submitIcon.classList.add('hidden');
+        submitText.textContent = 'Processing...';
+        submitSpinner.classList.remove('hidden');
+        
+        // Add loading animation to button
+        submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            });
+        }
+        
+        // Enhanced select field interactions
+        document.querySelectorAll('select').forEach(select => {
+            select.addEventListener('change', function() {
+                // Add visual feedback when selection changes
+                this.classList.add('ring-2', 'ring-amber-300');
+                setTimeout(() => {
+                    this.classList.remove('ring-2', 'ring-amber-300');
+                }, 300);
+                
+                // Special handling for seller and agent fields
+                if (this.name === 'seller') {
+                    // You can add additional logic here if needed
+                } else if (this.name === 'agent') {
+                    // You can add additional logic here if needed
+                }
+            });
+        });
+        
+        // Add real-time validation for seller and agent fields
+        const sellerField = document.querySelector('select[name="seller"]');
+        const agentField = document.querySelector('select[name="agent"]');
+        
+        if (sellerField) {
+            sellerField.addEventListener('change', function() {
+                // Add success indicator
+                this.classList.add('border-green-500', 'bg-green-50');
+                setTimeout(() => {
+                    this.classList.remove('border-green-500', 'bg-green-50');
+                }, 1000);
+            });
+        }
+        
+        if (agentField) {
+            agentField.addEventListener('change', function() {
+                // Add success indicator
+                this.classList.add('border-green-500', 'bg-green-50');
+                setTimeout(() => {
+                    this.classList.remove('border-green-500', 'bg-green-50');
+                }, 1000);
+            });
+        }
+    });
+    
+    // Ensure date is set for sellers
+    {% if request.user|is_seller %}
+    document.addEventListener('DOMContentLoaded', function() {
+        const hiddenDateField = document.getElementById('hidden_date_field');
+        if (hiddenDateField && !hiddenDateField.value) {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            hiddenDateField.value = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        }
+    });
+    {% endif %}
+</script>
+{% endblock %} 

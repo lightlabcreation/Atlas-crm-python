@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Log Call - Order #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-phone text-orange-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h1 class="text-2xl font-bold text-orange-500">Log Call - Order #{{ order.id }}</h1>
+                        <p class="text-gray-600">Record call details and customer interaction</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'callcenter:agent_order_detail' order.id %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Order
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Order Summary -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Order Summary</h3>
+                <p class="text-sm text-gray-500">Customer and order details</p>
+            </div>
+            <div class="p-6">
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Customer</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ order.customer|default:"N/A" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Phone</dt>
+                        <dd class="mt-1">
+                            <div class="text-3xl font-bold text-blue-600 bg-blue-50 px-4 py-3 rounded-lg border-2 border-blue-200 text-center">
+                                <i class="fas fa-phone mr-2"></i>
+                                {{ order.customer_phone|default:"N/A" }}
+                            </div>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Current Status</dt>
+                        <dd class="mt-1">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                {% elif order.status == 'processing' %}bg-blue-100 text-blue-800
+                                {% elif order.status == 'confirmed' %}bg-green-100 text-green-800
+                                {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ order.status|title }}
+                            </span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Total Amount</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ order.total_price|floatformat:2 }} AED</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Call Timer and Controls -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Call Timer</h3>
+                <p class="text-sm text-gray-500">Start and stop call timer</p>
+            </div>
+            <div class="p-6">
+                <div class="text-center">
+                    <div class="mb-6">
+                        <div id="timer-display" class="text-4xl font-mono font-bold text-gray-900 mb-2">00:00:00</div>
+                        <p class="text-sm text-gray-500">Call Duration</p>
+                    </div>
+                    <div class="flex justify-center space-x-4">
+                        <button id="start-timer" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-md text-sm font-medium">
+                            <i class="fas fa-play mr-2"></i>
+                            Start Call
+                        </button>
+                        <button id="stop-timer" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-md text-sm font-medium" disabled>
+                            <i class="fas fa-stop mr-2"></i>
+                            End Call
+                        </button>
+                        <button id="reset-timer" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-md text-sm font-medium">
+                            <i class="fas fa-undo mr-2"></i>
+                            Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call Details Form -->
+        <form method="post" class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Call Details</h3>
+                <p class="text-sm text-gray-500">Record the call outcome and notes</p>
+            </div>
+            <div class="p-6">
+                {% csrf_token %}
+                <div class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+                    <div>
+                        <label for="call_status" class="block text-sm font-medium text-gray-700">Call Status *</label>
+                        <select name="call_status" id="call_status" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
+                            <option value="">Select status</option>
+                            <option value="completed">Completed</option>
+                            <option value="no_answer">No Answer</option>
+                            <option value="busy">Busy</option>
+                            <option value="wrong_number">Wrong Number</option>
+                            <option value="voicemail">Voicemail</option>
+                            <option value="call_back">Call Back Requested</option>
+                            <option value="escalated">Escalated</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="resolution_status" class="block text-sm font-medium text-gray-700">Resolution Status</label>
+                        <select name="resolution_status" id="resolution_status" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
+                            <option value="">Select resolution</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="pending">Pending</option>
+                            <option value="escalated">Escalated</option>
+                            <option value="follow_up_required">Follow Up Required</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="satisfaction" class="block text-sm font-medium text-gray-700">Customer Satisfaction</label>
+                        <select name="satisfaction" id="satisfaction" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
+                            <option value="">Select rating</option>
+                            <option value="5">Excellent (5)</option>
+                            <option value="4">Good (4)</option>
+                            <option value="3">Average (3)</option>
+                            <option value="2">Poor (2)</option>
+                            <option value="1">Very Poor (1)</option>
+                        </select>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label for="notes" class="block text-sm font-medium text-gray-700">Call Notes</label>
+                        <textarea name="notes" id="notes" rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm" placeholder="Enter call notes and details..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Hidden field for call duration -->
+                <input type="hidden" name="duration" id="call-duration" value="0">
+                
+                <div class="mt-6 flex justify-end space-x-4">
+                    <a href="{% url 'callcenter:agent_order_detail' order.id %}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md text-sm font-medium">
+                        Cancel
+                    </a>
+                    <button type="submit" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-save mr-2"></i>
+                        Save Call Log
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let startTime = null;
+    let timerInterval = null;
+    let elapsedTime = 0;
+    
+    const timerDisplay = document.getElementById('timer-display');
+    const startButton = document.getElementById('start-timer');
+    const stopButton = document.getElementById('stop-timer');
+    const resetButton = document.getElementById('reset-timer');
+    const durationInput = document.getElementById('call-duration');
+    
+    function updateTimer() {
+        if (startTime) {
+            elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        }
+        
+        const hours = Math.floor(elapsedTime / 3600);
+        const minutes = Math.floor((elapsedTime % 3600) / 60);
+        const seconds = elapsedTime % 60;
+        
+        timerDisplay.textContent = 
+            String(hours).padStart(2, '0') + ':' +
+            String(minutes).padStart(2, '0') + ':' +
+            String(seconds).padStart(2, '0');
+        
+        durationInput.value = elapsedTime;
+    }
+    
+    startButton.addEventListener('click', function() {
+        startTime = Date.now() - (elapsedTime * 1000);
+        timerInterval = setInterval(updateTimer, 1000);
+        
+        startButton.disabled = true;
+        stopButton.disabled = false;
+        resetButton.disabled = true;
+        
+        startButton.innerHTML = '<i class="fas fa-play mr-2"></i>Call in Progress...';
+        startButton.classList.remove('bg-green-600', 'hover:bg-green-700');
+        startButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
+    });
+    
+    stopButton.addEventListener('click', function() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+        
+        startButton.disabled = false;
+        stopButton.disabled = true;
+        resetButton.disabled = false;
+        
+        startButton.innerHTML = '<i class="fas fa-play mr-2"></i>Start Call';
+        startButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+        startButton.classList.add('bg-green-600', 'hover:bg-green-700');
+    });
+    
+    resetButton.addEventListener('click', function() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+        
+        startTime = null;
+        elapsedTime = 0;
+        updateTimer();
+        
+        startButton.disabled = false;
+        stopButton.disabled = true;
+        resetButton.disabled = true;
+        
+        startButton.innerHTML = '<i class="fas fa-play mr-2"></i>Start Call';
+        startButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+        startButton.classList.add('bg-green-600', 'hover:bg-green-700');
+    });
+    
+    // Initialize timer display
+    updateTimer();
+});
+</script>
+{% endblock %}

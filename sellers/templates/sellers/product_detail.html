@@ -1,0 +1,331 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name_en }} - Product Details{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Simple Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-box text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">Product Details</h1>
+                        <p class="mt-1 text-sm text-gray-500">{{ product.name_en }}</p>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'sellers:products' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Products
+                    </a>
+                    <a href="{% url 'sellers:product_edit' product.id %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-edit mr-2"></i>
+                        Edit Product
+                    </a>
+                    <a href="{% url 'sellers:dashboard' %}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-home mr-2"></i>
+                        Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Product Image and Basic Info -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Product Image</h3>
+                    </div>
+                    <div class="p-6">
+                        {% if product.image %}
+                        {% with image_url=product.get_image_url %}
+                        {% if image_url %}
+                        <div class="relative w-full h-64 rounded-lg overflow-hidden border-2 border-gray-200 shadow-md">
+                            <img src="{{ image_url }}" 
+                                 alt="{{ product.name_en }}" 
+                                 class="w-full h-full object-cover"
+                                 onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'w-full h-64 bg-gray-100 rounded-lg flex flex-col items-center justify-center\'><i class=\'fas fa-image text-gray-400 text-4xl mb-2\'></i><p class=\'text-sm text-gray-500\'>Image not available</p></div>';">
+                        </div>
+                        {% else %}
+                        <div class="w-full h-64 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-gray-300">
+                            <i class="fas fa-image text-gray-400 text-5xl mb-3"></i>
+                            <p class="text-sm text-gray-500 font-medium">No image available</p>
+                            <p class="text-xs text-gray-400 mt-1">{{ product.name_en }}</p>
+                        </div>
+                        {% endif %}
+                        {% endwith %}
+                        {% else %}
+                        <div class="w-full h-64 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-gray-300">
+                            <i class="fas fa-image text-gray-400 text-5xl mb-3"></i>
+                            <p class="text-sm text-gray-500 font-medium">No image available</p>
+                            <p class="text-xs text-gray-400 mt-1">{{ product.name_en }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
+                    </div>
+                    <div class="p-6 space-y-3">
+                        <a href="{% url 'sellers:product_edit' product.id %}" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center">
+                            <i class="fas fa-edit mr-2"></i>
+                            Edit Product
+                        </a>
+                        <a href="{% url 'orders:create' %}?product={{ product.id }}" class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center">
+                            <i class="fas fa-plus mr-2"></i>
+                            Create Order
+                        </a>
+                        <button onclick="deleteProduct({{ product.id }})" class="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center">
+                            <i class="fas fa-trash mr-2"></i>
+                            Delete Product
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Details -->
+            <div class="lg:col-span-2">
+                <!-- Basic Information -->
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Basic Information</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Product Name (English)</label>
+                                <p class="mt-1 text-sm text-gray-900">{{ product.name_en|default:"N/A" }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Product Name (Arabic)</label>
+                                <p class="mt-1 text-sm text-gray-900">{{ product.name_ar|default:"N/A" }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Product Code</label>
+                                <p class="mt-1 text-sm text-gray-900">{{ product.code|default:"N/A" }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Category</label>
+                                <p class="mt-1 text-sm text-gray-900">{{ product.category|title|default:"N/A" }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Product Link</label>
+                                <p class="mt-1 text-sm text-gray-900">
+                                    {% if product.product_link %}
+                                        <a href="{{ product.product_link }}" target="_blank" class="text-blue-600 hover:text-blue-800 underline">
+                                            {{ product.product_link|truncatechars:50 }}
+                                        </a>
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pricing Information -->
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Pricing Information</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Cost Price</label>
+                                <p class="mt-1 text-lg font-semibold text-gray-900">AED {{ product.purchase_price|floatformat:2|default:"0.00" }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Selling Price</label>
+                                <p class="mt-1 text-lg font-semibold text-gray-900">AED {{ product.selling_price|floatformat:2|default:"0.00" }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Profit Margin</label>
+                                <p class="mt-1 text-lg font-semibold text-green-600">
+                                    {% if product.purchase_price and product.selling_price %}
+                                        {% widthratio product.selling_price|add:"-"|add:product.purchase_price product.purchase_price 100 %}%
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventory Information -->
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Inventory Information</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Stock Level</label>
+                                <p class="mt-1 text-2xl font-bold text-gray-900">{{ product.stock_quantity|default:"0" }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Available Quantity</label>
+                                <p class="mt-1 text-lg font-semibold text-gray-900">{{ product.available_quantity|default:"0" }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Product Code</label>
+                                <p class="mt-1 text-lg font-semibold text-gray-900">{{ product.code|default:"N/A" }}</p>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm font-medium text-gray-500">Stock Status</span>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                    {% if product.stock_quantity > 10 %}bg-green-100 text-green-800
+                                    {% elif product.stock_quantity > 0 %}bg-yellow-100 text-yellow-800
+                                    {% else %}bg-red-100 text-red-800{% endif %}">
+                                    {% if product.stock_quantity > 10 %}In Stock
+                                    {% elif product.stock_quantity > 0 %}Low Stock
+                                    {% else %}Out of Stock{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Description -->
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Product Description</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Description</label>
+                                <div class="mt-1 text-sm text-gray-900">
+                                    {% if product.description %}
+                                        {{ product.description|linebreaks }}
+                                    {% else %}
+                                        <span class="text-gray-500 italic">No description available</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Status -->
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Product Status</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Status</label>
+                                <div class="mt-1">
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                        {% if product.is_approved %}bg-green-100 text-green-800
+                                        {% else %}bg-red-100 text-red-800{% endif %}">
+                                        {% if product.is_approved %}Active
+                                        {% else %}Inactive{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Approval Status</label>
+                                <div class="mt-1">
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                                        {% if product.is_approved %}bg-green-100 text-green-800
+                                        {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                        {% if product.is_approved %}Approved
+                                        {% else %}Pending{% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Created Date</label>
+                                <p class="mt-1 text-sm text-gray-900">{{ product.created_at|date:"M d, Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function deleteProduct(productId) {
+    // Show loading state
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Deleting...';
+    button.disabled = true;
+    
+    fetch(`/sellers/products/${productId}/delete/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => {
+        if (response.ok) {
+            // Show success message
+            showMessage('Product deleted successfully!', 'success');
+            // Redirect to products list after short delay
+            setTimeout(() => {
+                window.location.href = '{% url "sellers:products" %}';
+            }, 1000);
+        } else {
+            throw new Error('Failed to delete product');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showMessage('Error deleting product. Please try again.', 'error');
+        // Reset button
+        button.innerHTML = originalText;
+        button.disabled = false;
+    });
+}
+
+function showMessage(message, type) {
+    // Remove existing messages
+    const existingMessages = document.querySelectorAll('.system-message');
+    existingMessages.forEach(msg => msg.remove());
+    
+    // Create message element
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `system-message fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg max-w-sm ${type === 'success' ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}`;
+    messageDiv.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>
+            <span>${message}</span>
+            <button onclick="this.parentElement.parentElement.remove()" class="ml-3 text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    // Add to page
+    document.body.appendChild(messageDiv);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (messageDiv.parentElement) {
+            messageDiv.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

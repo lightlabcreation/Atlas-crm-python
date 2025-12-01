@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Materials Management{% endblock %}
+
+{% block header %}Materials Management{% endblock %}
+
+{% block content %}
+<div class="container mx-auto">
+    <div class="mb-4">
+        <a href="{% url 'packaging:dashboard' %}" class="text-sm px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 inline-flex items-center">
+            <i class="fas fa-arrow-left mr-1"></i> Back to Dashboard
+        </a>
+    </div>
+    
+    <!-- Overview Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="bg-white rounded-lg shadow-md p-4">
+            <div class="flex items-center">
+                <div class="rounded-full bg-blue-100 p-3 mr-4">
+                    <i class="fas fa-boxes text-blue-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">{{ total_materials }}</h3>
+                    <p class="text-gray-500 text-sm">Total Materials</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-4">
+            <div class="flex items-center">
+                <div class="rounded-full bg-yellow-100 p-3 mr-4">
+                    <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">{{ low_stock_materials|length }}</h3>
+                    <p class="text-gray-500 text-sm">Low Stock Alerts</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-4">
+            <div class="flex items-center">
+                <div class="rounded-full bg-green-100 p-3 mr-4">
+                    <i class="fas fa-dollar-sign text-green-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">${{ total_value|floatformat:2 }}</h3>
+                    <p class="text-gray-500 text-sm">Total Inventory Value</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Low Stock Alerts -->
+        <div class="bg-white rounded-lg shadow-md p-5">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Low Stock Alerts</h3>
+                <span class="text-sm text-red-600 font-medium">{{ low_stock_materials|length }} items</span>
+            </div>
+            
+            {% if low_stock_materials %}
+                <div class="space-y-3">
+                    {% for material in low_stock_materials %}
+                    <div class="flex justify-between items-center p-3 border border-red-200 rounded bg-red-50">
+                        <div>
+                            <h4 class="font-medium text-gray-900">{{ material.name }}</h4>
+                            <p class="text-sm text-gray-600">{{ material.get_material_type_display }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-medium text-red-600">{{ material.current_stock }} / {{ material.min_stock_level }}</p>
+                            <p class="text-xs text-gray-500">{{ material.unit }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-8">
+                    <i class="fas fa-check-circle text-green-500 text-4xl mb-4"></i>
+                    <p class="text-gray-500">No low stock alerts at the moment.</p>
+                </div>  
+            {% endif %}
+        </div>
+        
+        <!-- Out of Stock -->
+        <div class="bg-white rounded-lg shadow-md p-5">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Out of Stock</h3>
+                <span class="text-sm text-red-600 font-medium">{{ out_of_stock_materials|length }} items</span>
+            </div>
+            
+            {% if out_of_stock_materials %}
+                <div class="space-y-3">
+                    {% for material in out_of_stock_materials %}
+                    <div class="flex justify-between items-center p-3 border border-red-300 rounded bg-red-100">
+                        <div>
+                            <h4 class="font-medium text-gray-900">{{ material.name }}</h4>
+                            <p class="text-sm text-gray-600">{{ material.get_material_type_display }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm font-medium text-red-600">0 {{ material.unit }}</p>
+                            <p class="text-xs text-gray-500">Out of Stock</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-8">
+                    <i class="fas fa-check-circle text-green-500 text-4xl mb-4"></i>
+                    <p class="text-gray-500">All materials are in stock.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Material Usage Statistics -->
+    <div class="bg-white rounded-lg shadow-md p-5 mt-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Most Used Materials</h3>
+        
+        {% if material_usage %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Material</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Stock</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usage Count</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Value</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for usage in material_usage %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {{ usage.material.name }}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                {{ usage.material.get_material_type_display }}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                {{ usage.material.current_stock }} {{ usage.material.unit }}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                {{ usage.usage_count }}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                ${{ usage.total_cost|floatformat:2 }}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap text-sm">
+                                {% if usage.material.current_stock == 0 %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                        Out of Stock
+                                    </span>
+                                {% elif usage.material.is_low_stock %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        Low Stock
+                                    </span>
+                                {% else %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        In Stock
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-8">
+                <i class="fas fa-box-open text-gray-400 text-4xl mb-4"></i>
+                <p class="text-gray-500">No material usage data available.</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- Supplier Information -->
+    {% if supplier_stats %}
+    <div class="bg-white rounded-lg shadow-md p-5 mt-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Supplier Overview</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for supplier in supplier_stats %}
+            <div class="border border-gray-200 rounded-lg p-4">
+                <h4 class="font-medium text-gray-900 mb-2">{{ supplier.name }}</h4>
+                <div class="space-y-1 text-sm">
+                    <p class="text-gray-600">Materials: <span class="font-medium">{{ supplier.materials_count }}</span></p>
+                    <p class="text-gray-600">Total Items: <span class="font-medium">{{ supplier.total_items }}</span></p>
+                    <p class="text-gray-600">Value: <span class="font-medium">${{ supplier.total_value|floatformat:2 }}</span></p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Quick Actions -->
+    <div class="bg-white rounded-lg shadow-md p-5 mt-6">
+        <div class="flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-gray-800">Quick Actions</h3>
+            <div class="flex space-x-2">
+                <a href="{% url 'packaging:materials_inventory' %}" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">
+                    <i class="fas fa-list mr-2"></i> View All Materials
+                </a>
+                <button onclick="openAddMaterialModal()" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
+                    <i class="fas fa-plus mr-2"></i> Add Material
+                </button>
+                <button class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors">
+                    <i class="fas fa-download mr-2"></i> Export Report
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Material Modal -->
+<div id="addMaterialModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4">
+        <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-gray-800">Add New Material</h3>
+            <button type="button" onclick="closeAddMaterialModal()" class="text-gray-400 hover:text-gray-500">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <form id="addMaterialForm" method="post" action="{% url 'packaging:add_material' %}">
+            {% csrf_token %}
+            <div class="p-4 space-y-4">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700">Material Name *</label>
+                    <input type="text" name="name" id="name" required class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                
+                <div>
+                    <label for="material_type" class="block text-sm font-medium text-gray-700">Material Type *</label>
+                    <select name="material_type" id="material_type" required class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <option value="box">Box</option>
+                        <option value="envelope">Envelope</option>
+                        <option value="polybag">Polybag</option>
+                        <option value="tape">Tape</option>
+                        <option value="bubble_wrap">Bubble Wrap</option>
+                        <option value="filler">Filler Material</option>
+                        <option value="label">Label</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                    <textarea name="description" id="description" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="current_stock" class="block text-sm font-medium text-gray-700">Current Stock *</label>
+                        <input type="number" name="current_stock" id="current_stock" min="0" required class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="min_stock_level" class="block text-sm font-medium text-gray-700">Minimum Stock Level *</label>
+                        <input type="number" name="min_stock_level" id="min_stock_level" min="0" required class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="unit" class="block text-sm font-medium text-gray-700">Unit *</label>
+                        <input type="text" name="unit" id="unit" value="pieces" required class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="cost_per_unit" class="block text-sm font-medium text-gray-700">Cost Per Unit *</label>
+                        <input type="number" name="cost_per_unit" id="cost_per_unit" step="0.01" min="0" required class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="supplier" class="block text-sm font-medium text-gray-700">Supplier</label>
+                    <input type="text" name="supplier" id="supplier" class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </div>
+            
+            <div class="p-4 border-t border-gray-200 flex justify-end space-x-3">
+                <button type="button" onclick="closeAddMaterialModal()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors">
+                    Cancel
+                </button>
+                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+                    <i class="fas fa-plus mr-2"></i> Add Material
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-md shadow-lg z-50 hidden">
+    <div class="flex items-center">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span id="toastMessage"></span>
+    </div>
+</div>
+
+<script>
+// Modal functions
+function openAddMaterialModal() {
+    document.getElementById('addMaterialModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeAddMaterialModal() {
+    document.getElementById('addMaterialModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    // Reset form
+    document.getElementById('addMaterialForm').reset();
+}
+
+// Toast notification function
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toastMessage');
+    
+    toastMessage.textContent = message;
+    toast.classList.remove('hidden');
+    
+    setTimeout(() => {
+        toast.classList.add('hidden');
+    }, 3000);
+}
+
+// Form submissions
+document.getElementById('addMaterialForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Material added successfully');
+            closeAddMaterialModal();
+            window.location.reload();
+        } else {
+            showToast(data.error || 'Error adding material');
+        }
+    })
+    .catch(error => {
+        console.error('Error adding material:', error);
+        showToast('Error adding material');
+    });
+});
+
+// Close modal when clicking outside
+document.getElementById('addMaterialModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeAddMaterialModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeAddMaterialModal();
+    }
+});
+</script>
+
+{% endblock %} 

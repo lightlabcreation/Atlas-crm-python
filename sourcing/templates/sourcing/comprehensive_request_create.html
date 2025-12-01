@@ -1,0 +1,750 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Sourcing Request{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Clean Header -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-xl font-semibold text-orange-600">Create Sourcing Request</h1>
+                    <p class="text-sm text-gray-500">Fill out all required fields to create your sourcing request.</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="{% url 'sourcing:requests' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Requests
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <form method="post" id="comprehensiveSourcingForm" class="bg-white rounded border border-gray-200" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Required Fields Section -->
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-check-circle text-blue-600 text-sm"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900">Required Information</h3>
+                </div>
+            </div>
+            
+            <div class="px-6 py-4">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <!-- Product Name -->
+                        <div class="space-y-2">
+                            <label for="{{ form.product_name.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Product Name <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.product_name }}
+                            {% if form.product_name.help_text %}
+                                <div class="text-xs text-gray-600 bg-gray-100 p-2 rounded border-l-2 border-orange-500">
+                                    {{ form.product_name.help_text }}
+                                </div>
+                            {% endif %}
+                            {% if form.product_name.errors %}
+                                <div class="text-red-600 text-xs bg-red-50 p-2 rounded border border-red-200">{{ form.product_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Additional Product Info -->
+                        <div class="space-y-2">
+                            <label for="{{ form.additional_product_info.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                Additional Product Info (Optional)
+                            </label>
+                            {{ form.additional_product_info }}
+                            {% if form.additional_product_info.help_text %}
+                                <div class="text-xs text-gray-600 bg-gray-100 p-2 rounded border-l-2 border-orange-500">
+                                    {{ form.additional_product_info.help_text }}
+                                </div>
+                            {% endif %}
+                            {% if form.additional_product_info.errors %}
+                                <div class="text-red-600 text-xs bg-red-50 p-2 rounded border border-red-200">{{ form.additional_product_info.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Product Image Upload -->
+                    <div class="mb-6">
+                        <div class="space-y-2">
+                            <label for="{{ form.product_image.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                                <i class="fas fa-image mr-2 text-yellow-600"></i>Product Image (Optional)
+                            </label>
+                            {{ form.product_image }}
+                            {% if form.product_image.help_text %}
+                                <div class="text-xs text-gray-600 bg-gray-100 p-2 rounded border-l-2 border-orange-500">
+                                    {{ form.product_image.help_text }}
+                                </div>
+                            {% endif %}
+                            {% if form.product_image.errors %}
+                                <div class="text-red-600 text-xs bg-red-50 p-2 rounded border border-red-200">{{ form.product_image.errors.0 }}</div>
+                            {% endif %}
+                            <div id="image-preview" class="mt-3 hidden">
+                                <img id="preview-img" src="" alt="Preview" class="max-w-xs max-h-48 rounded-lg border border-gray-300 shadow-sm">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <!-- Carton Quantity -->
+                        <div class="space-y-2">
+                            <label for="{{ form.carton_quantity.id_for_label }}" class="block text-sm font-semibold text-slate-700">
+                                Carton Quantity <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.carton_quantity }}
+                            {% if form.carton_quantity.help_text %}
+                                <div class="text-sm text-slate-600 bg-white/60 p-3 rounded-lg border-l-4 border-amber-500">
+                                    {{ form.carton_quantity.help_text }}
+                                </div>
+                            {% endif %}
+                            {% if form.carton_quantity.errors %}
+                                <div class="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{{ form.carton_quantity.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Source Country -->
+                        <div class="space-y-2">
+                            <label for="{{ form.source_country.id_for_label }}" class="block text-sm font-semibold text-slate-700">
+                                Source Country <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.source_country }}
+                            {% if form.source_country.help_text %}
+                                <div class="text-sm text-slate-600 bg-white/60 p-3 rounded-lg border-l-4 border-amber-500">
+                                    {{ form.source_country.help_text }}
+                                </div>
+                            {% endif %}
+                            {% if form.source_country.errors %}
+                                <div class="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{{ form.source_country.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <!-- Destination Country -->
+                        <div class="space-y-2">
+                            <label for="{{ form.destination_country.id_for_label }}" class="block text-sm font-semibold text-slate-700">
+                                Destination Country <span class="text-red-500">*</span>
+                            </label>
+                            {{ form.destination_country }}
+                            {% if form.destination_country.help_text %}
+                                <div class="text-sm text-slate-600 bg-white/60 p-3 rounded-lg border-l-4 border-amber-500">
+                                    {{ form.destination_country.help_text }}
+                                </div>
+                            {% endif %}
+                            {% if form.destination_country.errors %}
+                                <div class="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{{ form.destination_country.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Funding Source -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-slate-700 mb-3">
+                                Funding Source <span class="text-red-500">*</span>
+                            </label>
+                            <div class="space-y-3">
+                                {% for choice in form.funding_source %}
+                                    <div class="flex items-center p-4 border-2 border-slate-200 rounded-xl hover:border-amber-300 transition-colors cursor-pointer bg-white">
+                                        {{ choice.tag }}
+                                        <label for="{{ choice.id_for_label }}" class="ml-3 text-sm font-medium text-slate-700 cursor-pointer">
+                                            {{ choice.choice_label }}
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            {% if form.funding_source.help_text %}
+                                <div class="text-sm text-slate-600 bg-white/60 p-3 rounded-lg border-l-4 border-amber-500 mt-3">
+                                    {{ form.funding_source.help_text }}
+                                </div>
+                            {% endif %}
+                            {% if form.funding_source.errors %}
+                                <div class="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200 mt-3">{{ form.funding_source.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            
+            <!-- Optional Fields Section -->
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-plus-circle text-gray-600 text-sm"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900">Optional Information</h3>
+                </div>
+            </div>
+            
+            <div class="px-6 py-4">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <!-- Supplier Name -->
+                        <div class="space-y-2">
+                            <label for="{{ form.supplier_name.id_for_label }}" class="block text-sm font-semibold text-slate-700">
+                                Supplier Name (Optional)
+                            </label>
+                            {{ form.supplier_name }}
+                            {% if form.supplier_name.help_text %}
+                                <div class="text-sm text-slate-600 bg-white/60 p-3 rounded-lg border-l-4 border-blue-500">
+                                    {{ form.supplier_name.help_text }}
+                                </div>
+                            {% endif %}
+                            {% if form.supplier_name.errors %}
+                                <div class="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{{ form.supplier_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Supplier Phone -->
+                        <div class="space-y-2">
+                            <label for="{{ form.supplier_phone.id_for_label }}" class="block text-sm font-semibold text-slate-700">
+                                Supplier Phone (Optional)
+                            </label>
+                            {{ form.supplier_phone }}
+                            {% if form.supplier_phone.help_text %}
+                                <div class="text-sm text-slate-600 bg-white/60 p-3 rounded-lg border-l-4 border-blue-500">
+                                    {{ form.supplier_phone.help_text }}
+                                </div>
+                            {% endif %}
+                            {% if form.supplier_phone.errors %}
+                                <div class="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{{ form.supplier_phone.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Product Description -->
+                    <div class="space-y-2 mb-6">
+                        <label for="{{ form.product_description.id_for_label }}" class="block text-sm font-semibold text-slate-700">
+                            Product Description
+                        </label>
+                        {{ form.product_description }}
+                        <div class="flex justify-between items-center text-sm text-slate-500 bg-white/60 p-3 rounded-lg">
+                            <span>Character count</span>
+                            <span><span id="descriptionCounter">0</span> / 1000</span>
+                        </div>
+                        {% if form.product_description.help_text %}
+                            <div class="text-sm text-slate-600 bg-white/60 p-3 rounded-lg border-l-4 border-blue-500">
+                                {{ form.product_description.help_text }}
+                            </div>
+                        {% endif %}
+                        {% if form.product_description.errors %}
+                            <div class="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{{ form.product_description.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Target Unit Price -->
+                    <div class="space-y-3 mb-6">
+                        <label class="block text-sm font-semibold text-slate-700">
+                            Target Unit Price (Optional)
+                        </label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label for="{{ form.target_unit_price.id_for_label }}" class="block text-sm text-slate-600">Price</label>
+                                {{ form.target_unit_price }}
+                            </div>
+                            <div class="space-y-2">
+                                <label for="{{ form.currency.id_for_label }}" class="block text-sm text-slate-600">Currency</label>
+                                {{ form.currency }}
+                            </div>
+                        </div>
+                        {% if form.target_unit_price.help_text %}
+                            <div class="text-sm text-slate-600 bg-white/60 p-3 rounded-lg border-l-4 border-blue-500">
+                                {{ form.target_unit_price.help_text }}
+                            </div>
+                        {% endif %}
+                        {% if form.target_unit_price.errors %}
+                            <div class="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{{ form.target_unit_price.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Quality Requirements -->
+                    <div class="space-y-3 mb-6">
+                        <label class="block text-sm font-semibold text-slate-700">
+                            Quality Requirements
+                        </label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {% for choice in form.quality_requirements %}
+                                <div class="flex items-center p-4 border-2 border-slate-200 rounded-xl hover:border-blue-300 transition-colors cursor-pointer bg-white">
+                                    {{ choice.tag }}
+                                    <label for="{{ choice.id_for_label }}" class="ml-3 text-sm font-medium text-slate-700 cursor-pointer">
+                                        {{ choice.choice_label }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% if form.quality_requirements.help_text %}
+                            <div class="text-sm text-slate-600 bg-white/60 p-3 rounded-lg border-l-4 border-blue-500">
+                                {{ form.quality_requirements.help_text }}
+                            </div>
+                        {% endif %}
+                        {% if form.quality_requirements.errors %}
+                            <div class="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{{ form.quality_requirements.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Special Instructions -->
+                    <div class="space-y-2">
+                        <label for="{{ form.special_instructions.id_for_label }}" class="block text-sm font-semibold text-slate-700">
+                            Special Instructions/Notes
+                        </label>
+                        {{ form.special_instructions }}
+                        <div class="flex justify-between items-center text-sm text-slate-500 bg-white/60 p-3 rounded-lg">
+                            <span>Character count</span>
+                            <span><span id="instructionsCounter">0</span> / 500</span>
+                        </div>
+                        {% if form.special_instructions.help_text %}
+                            <div class="text-sm text-slate-600 bg-white/60 p-3 rounded-lg border-l-4 border-blue-500">
+                                {{ form.special_instructions.help_text }}
+                            </div>
+                        {% endif %}
+                        {% if form.special_instructions.errors %}
+                            <div class="text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">{{ form.special_instructions.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+            </div>
+            
+            <!-- Submit Buttons -->
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex flex-col sm:flex-row justify-end gap-3">
+                <a href="{% url 'sourcing:requests' %}" 
+                   class="inline-flex items-center justify-center px-6 py-2 bg-gray-100 text-gray-700 font-medium rounded hover:bg-gray-200">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="inline-flex items-center justify-center px-6 py-2 bg-blue-600 text-white font-medium rounded hover:bg-blue-700">
+                    <i class="fas fa-paper-plane mr-2"></i>
+                    Create Sourcing Request
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Input styling */
+    input, select, textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        font-size: 0.875rem;
+        transition: all 0.2s ease;
+        background: white;
+        color: #374151;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+    
+    input:hover, select:hover, textarea:hover {
+        border-color: #6b7280;
+    }
+    
+    /* Radio and checkbox styling */
+    input[type="radio"], input[type="checkbox"] {
+        width: auto;
+        margin-right: 0.5rem;
+        accent-color: #3b82f6;
+    }
+    
+    /* Radio/checkbox container styling */
+    .flex.items-center.p-4 {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.375rem;
+        transition: all 0.2s ease;
+    }
+    
+    .flex.items-center.p-4:hover {
+        border-color: #3b82f6;
+        background-color: #f8fafc;
+    }
+    
+    .flex.items-center.p-4 input:checked + label {
+        color: #3b82f6;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Progress bar functionality
+    const form = document.getElementById('comprehensiveSourcingForm');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const requiredFields = form.querySelectorAll('[required]');
+    
+    function updateProgress() {
+        let filledFields = 0;
+        requiredFields.forEach(field => {
+            if (field.value.trim() !== '') {
+                filledFields++;
+            }
+        });
+        const progress = (filledFields / requiredFields.length) * 100;
+        progressFill.style.width = progress + '%';
+        progressText.textContent = Math.round(progress) + '%';
+        
+        // Update progress bar color based on completion
+        if (progress >= 100) {
+            progressFill.style.backgroundColor = '#10b981'; // Green when complete
+        } else if (progress >= 75) {
+            progressFill.style.backgroundColor = '#f59e0b'; // Amber when mostly complete
+        } else if (progress >= 50) {
+            progressFill.style.backgroundColor = '#fbbf24'; // Yellow when half complete
+        } else {
+            progressFill.style.backgroundColor = '#ffffff'; // White when just starting
+        }
+    }
+    
+    // Update progress on input
+    requiredFields.forEach(field => {
+        field.addEventListener('input', updateProgress);
+        field.addEventListener('change', updateProgress);
+    });
+    
+    // Initial progress update
+    updateProgress();
+    
+    // Character counter for product description
+    const descriptionField = document.getElementById('{{ form.product_description.id_for_label }}');
+    const descriptionCounter = document.getElementById('descriptionCounter');
+    
+    if (descriptionField && descriptionCounter) {
+        descriptionField.addEventListener('input', function() {
+            const length = this.value.length;
+            descriptionCounter.textContent = length;
+            
+            if (length > 900) {
+                descriptionCounter.style.color = '#ef4444';
+            } else if (length > 800) {
+                descriptionCounter.style.color = '#f59e0b';
+            } else {
+                descriptionCounter.style.color = '#6b7280';
+            }
+        });
+    }
+    
+    // Character counter for special instructions
+    const instructionsField = document.getElementById('{{ form.special_instructions.id_for_label }}');
+    const instructionsCounter = document.getElementById('instructionsCounter');
+    
+    if (instructionsField && instructionsCounter) {
+        instructionsField.addEventListener('input', function() {
+            const length = this.value.length;
+            instructionsCounter.textContent = length;
+            
+            if (length > 450) {
+                instructionsCounter.style.color = '#ef4444';
+            } else if (length > 400) {
+                instructionsCounter.style.color = '#f59e0b';
+            } else {
+                instructionsCounter.style.color = '#6b7280';
+            }
+        });
+    }
+    
+    // Enhanced form validation
+    const formInputs = form.querySelectorAll('input, select, textarea');
+    
+    formInputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.hasAttribute('required') && this.value.trim() === '') {
+                this.style.borderColor = '#ef4444';
+                this.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+            } else if (this.value.trim() !== '') {
+                this.style.borderColor = '#10b981';
+                this.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+            } else {
+                this.style.borderColor = '#e2e8f0';
+                this.style.boxShadow = 'none';
+            }
+        });
+        
+        input.addEventListener('input', function() {
+            if (this.style.borderColor === 'rgb(239, 68, 68)' && this.value.trim() !== '') {
+                this.style.borderColor = '#10b981';
+                this.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+            }
+        });
+    });
+    
+    // Form submission with enhanced validation
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        const errors = [];
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.style.borderColor = '#ef4444';
+                field.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+                errors.push(field.name + ' is required');
+            } else {
+                field.style.borderColor = '#10b981';
+                field.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields:\n' + errors.join('\n'));
+        } else {
+            // If form is valid, allow submission and redirect after success
+            // Check if user has seller role and redirect accordingly
+            setTimeout(() => {
+                // Show success message
+                const successMessage = document.createElement('div');
+                successMessage.className = 'fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg bg-green-500 text-white';
+                successMessage.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span>Sourcing request created successfully! Redirecting...</span>
+                    </div>
+                `;
+                document.body.appendChild(successMessage);
+                
+                // Redirect based on user role
+                // If user has seller role, redirect to sellers sourcing requests
+                // If user is admin or other role, redirect to general sourcing requests
+                const userRole = '{{ request.user.role }}'; // Get user role from context
+                const userRoleLower = userRole ? userRole.toLowerCase() : '';
+                
+                if (userRoleLower === 'seller' || userRoleLower === 'sellers') {
+                    // Redirect to sellers sourcing requests page
+                    setTimeout(() => {
+                        window.location.href = "{% url 'sellers:sourcing_requests' %}";
+                    }, 2000);
+                } else {
+                    // Redirect admins and other roles to general sourcing requests page
+                    setTimeout(() => {
+                        window.location.href = "{% url 'sourcing:requests' %}";
+                    }, 2000);
+                }
+            }, 1000);
+        }
+    });
+    
+    // Real-time validation for carton quantity
+    const cartonQuantityField = document.getElementById('{{ form.carton_quantity.id_for_label }}');
+    if (cartonQuantityField) {
+        cartonQuantityField.addEventListener('input', function() {
+            const value = parseInt(this.value);
+            if (value < 1) {
+                this.setCustomValidity('Carton quantity must be at least 1');
+                this.style.borderColor = '#ef4444';
+                this.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+            } else if (value > 10000) {
+                this.setCustomValidity('Carton quantity cannot exceed 10,000');
+                this.style.borderColor = '#ef4444';
+                this.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+            } else {
+                this.setCustomValidity('');
+                this.style.borderColor = '#10b981';
+                this.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+            }
+        });
+    }
+    
+    // Real-time validation for target unit price
+    const targetPriceField = document.getElementById('{{ form.target_unit_price.id_for_label }}');
+    if (targetPriceField) {
+        targetPriceField.addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            if (value < 0) {
+                this.setCustomValidity('Target unit price must be positive');
+                this.style.borderColor = '#ef4444';
+                this.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.1)';
+            } else {
+                this.setCustomValidity('');
+                this.style.borderColor = '#e2e8f0';
+                this.style.boxShadow = 'none';
+                if (value > 0) {
+                    this.style.borderColor = '#10b981';
+                    this.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+                }
+            }
+        });
+    }
+    
+    // Smooth scrolling to sections
+    const sections = document.querySelectorAll('.bg-gradient-to-r');
+    sections.forEach(section => {
+        section.addEventListener('click', function() {
+            this.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+    
+    // Enhanced radio and checkbox interactions
+    const radioItems = document.querySelectorAll('input[type="radio"]');
+    radioItems.forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Remove active state from all radio items in the same group
+            const name = this.name;
+            document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+                r.closest('.flex').style.borderColor = '#e2e8f0';
+                r.closest('.flex').style.backgroundColor = '#ffffff';
+            });
+            
+            // Add active state to selected radio
+            if (this.checked) {
+                this.closest('.flex').style.borderColor = '#f59e0b';
+                this.closest('.flex').style.backgroundColor = '#fef3c7';
+            }
+        });
+    });
+    
+    const checkboxItems = document.querySelectorAll('input[type="checkbox"]');
+    checkboxItems.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                this.closest('.flex').style.borderColor = '#3b82f6';
+                this.closest('.flex').style.backgroundColor = '#dbeafe';
+            } else {
+                this.closest('.flex').style.borderColor = '#e2e8f0';
+                this.closest('.flex').style.backgroundColor = '#ffffff';
+            }
+        });
+    });
+
+    // Enhanced Country Search Functionality
+    function createSearchableSelect(selectElement) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'relative';
+        
+        // Create search input
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.placeholder = 'Search countries...';
+        searchInput.className = 'w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-yellow-500 focus:border-yellow-500 block sm:text-sm';
+        
+        // Create dropdown container
+        const dropdown = document.createElement('div');
+        dropdown.className = 'absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto hidden';
+        
+        // Create options list
+        const optionsList = document.createElement('div');
+        optionsList.className = 'py-1';
+        
+        // Get all options from original select
+        const options = Array.from(selectElement.options);
+        let filteredOptions = options;
+        
+        // Create option elements
+        function createOptionElements(options) {
+            optionsList.innerHTML = '';
+            options.forEach(option => {
+                if (option.value === '') return; // Skip empty option
+                
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm';
+                optionDiv.textContent = option.textContent;
+                optionDiv.dataset.value = option.value;
+                
+                optionDiv.addEventListener('click', () => {
+                    selectElement.value = option.value;
+                    searchInput.value = option.textContent;
+                    dropdown.classList.add('hidden');
+                    selectElement.dispatchEvent(new Event('change'));
+                });
+                
+                optionsList.appendChild(optionDiv);
+            });
+        }
+        
+        // Initial options
+        createOptionElements(options);
+        
+        // Search functionality
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            filteredOptions = options.filter(option => 
+                option.textContent.toLowerCase().includes(searchTerm)
+            );
+            createOptionElements(filteredOptions);
+        });
+        
+        // Show/hide dropdown
+        searchInput.addEventListener('focus', () => {
+            dropdown.classList.remove('hidden');
+        });
+        
+        searchInput.addEventListener('blur', (e) => {
+            // Delay hiding to allow option clicks
+            setTimeout(() => {
+                dropdown.classList.add('hidden');
+            }, 200);
+        });
+        
+        // Update search input when select changes
+        selectElement.addEventListener('change', () => {
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            if (selectedOption) {
+                searchInput.value = selectedOption.textContent;
+            }
+        });
+        
+        // Assemble the components
+        dropdown.appendChild(optionsList);
+        wrapper.appendChild(searchInput);
+        wrapper.appendChild(dropdown);
+        
+        // Replace original select
+        selectElement.style.display = 'none';
+        selectElement.parentNode.insertBefore(wrapper, selectElement);
+        
+        // Set initial value
+        const selectedOption = selectElement.options[selectElement.selectedIndex];
+        if (selectedOption && selectedOption.value !== '') {
+            searchInput.value = selectedOption.textContent;
+        }
+    }
+    
+    // Apply to destination country select
+    const destinationSelect = document.getElementById('destination_country_select');
+    if (destinationSelect) {
+        createSearchableSelect(destinationSelect);
+    }
+    
+    // Apply to source country select
+    const sourceSelect = document.getElementById('source_country_select');
+    if (sourceSelect) {
+        createSearchableSelect(sourceSelect);
+    }
+    
+    // Image preview functionality
+    const productImageInput = document.querySelector('input[type="file"][name="product_image"]');
+    const imagePreview = document.getElementById('image-preview');
+    const previewImg = document.getElementById('preview-img');
+    
+    if (productImageInput && imagePreview && previewImg) {
+        productImageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.classList.add('hidden');
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 

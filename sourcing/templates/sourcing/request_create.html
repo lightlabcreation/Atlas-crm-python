@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Sourcing Request{% endblock %}
+
+{% block content %}
+<div class="bg-white ">
+    <!-- Page Header -->
+    <div class="bg-yellow-400  shadow-lg">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <h1 class="text-3xl font-bold text-gray-900 ">Create Sourcing Request</h1>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div class="bg-white  shadow overflow-hidden sm:rounded-lg">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                        <!-- Request Type -->
+                        <div class="sm:col-span-3">
+                            <label for="{{ form.request_type.id_for_label }}" class="block text-sm font-medium text-gray-700 ">Request Type</label>
+                            <div class="mt-1">
+                                {{ form.request_type }}
+                                {% if form.request_type.errors %}
+                                    <p class="mt-2 text-sm text-red-600">{{ form.request_type.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Priority -->
+                        <div class="sm:col-span-3">
+                            <label for="{{ form.priority.id_for_label }}" class="block text-sm font-medium text-gray-700 ">Priority</label>
+                            <div class="mt-1">
+                                {{ form.priority }}
+                                {% if form.priority.errors %}
+                                    <p class="mt-2 text-sm text-red-600">{{ form.priority.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Product Selection -->
+                        <div class="sm:col-span-6" id="product_selection_container">
+                            <label for="{{ form.product.id_for_label }}" class="block text-sm font-medium text-gray-700 ">Select Product</label>
+                            <div class="mt-1">
+                                {{ form.product }}
+                                {% if form.product.errors %}
+                                    <p class="mt-2 text-sm text-red-600">{{ form.product.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <p class="mt-2 text-sm text-gray-500">For inventory replenishment or sample requests.</p>
+                        </div>
+
+                        <!-- New Product Info (initially hidden) -->
+                        <div class="sm:col-span-6 hidden" id="new_product_container">
+                            <div class="pt-4 pb-2">
+                                <h3 class="text-lg font-medium leading-6 text-gray-900 ">New Product Details</h3>
+                                <p class="mt-1 text-sm text-gray-500">Provide details of the new product you want to source.</p>
+                            </div>
+                        </div>
+
+                        <!-- New Product Name -->
+                        <div class="sm:col-span-6 hidden" id="new_product_name_container">
+                            <label for="{{ form.new_product_name.id_for_label }}" class="block text-sm font-medium text-gray-700 ">Product Name</label>
+                            <div class="mt-1">
+                                {{ form.new_product_name }}
+                                {% if form.new_product_name.errors %}
+                                    <p class="mt-2 text-sm text-red-600">{{ form.new_product_name.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Quantity -->
+                        <div class="sm:col-span-2">
+                            <label for="{{ form.quantity.id_for_label }}" class="block text-sm font-medium text-gray-700 ">Quantity</label>
+                            <div class="mt-1">
+                                {{ form.quantity }}
+                                {% if form.quantity.errors %}
+                                    <p class="mt-2 text-sm text-red-600">{{ form.quantity.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Target Date -->
+                        <div class="sm:col-span-2">
+                            <label for="{{ form.target_date.id_for_label }}" class="block text-sm font-medium text-gray-700 ">Target Date</label>
+                            <div class="mt-1">
+                                {{ form.target_date }}
+                                {% if form.target_date.errors %}
+                                    <p class="mt-2 text-sm text-red-600">{{ form.target_date.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Budget -->
+                        <div class="sm:col-span-2">
+                            <label for="{{ form.budget.id_for_label }}" class="block text-sm font-medium text-gray-700 ">Budget (AED)</label>
+                            <div class="mt-1">
+                                {{ form.budget }}
+                                {% if form.budget.errors %}
+                                    <p class="mt-2 text-sm text-red-600">{{ form.budget.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="sm:col-span-6">
+                            <label for="{{ form.notes.id_for_label }}" class="block text-sm font-medium text-gray-700 ">Notes</label>
+                            <div class="mt-1">
+                                {{ form.notes }}
+                                {% if form.notes.errors %}
+                                    <p class="mt-2 text-sm text-red-600">{{ form.notes.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Upload References -->
+                        <div class="sm:col-span-6">
+                            <label for="{{ form.references.id_for_label }}" class="block text-sm font-medium text-gray-700 ">Reference Images or Documents</label>
+                            <div class="mt-1">
+                                <input type="file" name="references" id="references" multiple class="sr-only">
+                                <label for="references" class="cursor-pointer block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium leading-4 text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+                                    <div class="flex items-center">
+                                        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                        </svg>
+                                        <span class="ml-2">Attach files</span>
+                                    </div>
+                                </label>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-500">Upload any reference images or documents (Optional).</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-4 py-3 bg-gray-50  text-right sm:px-6">
+                    <button type="button" onclick="window.location.href='{% url 'sourcing:requests' %}'" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 mr-3">
+                        Cancel
+                    </button>
+                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                        Submit Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Set default target date to 14 days from now
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date();
+        const targetDate = new Date(today);
+        targetDate.setDate(today.getDate() + 14);
+        
+        const formattedDate = targetDate.toISOString().substring(0, 10);
+        document.getElementById('{{ form.target_date.id_for_label }}').value = formattedDate;
+    });
+
+    // Show/hide fields based on request type
+    document.getElementById('{{ form.request_type.id_for_label }}').addEventListener('change', function() {
+        const requestType = this.value;
+        const productSelection = document.getElementById('product_selection_container');
+        const newProductContainer = document.getElementById('new_product_container');
+        const newProductNameContainer = document.getElementById('new_product_name_container');
+        
+        if (requestType === 'new_product') {
+            productSelection.classList.add('hidden');
+            newProductContainer.classList.remove('hidden');
+            newProductNameContainer.classList.remove('hidden');
+            document.getElementById('{{ form.product.id_for_label }}').removeAttribute('required');
+            document.getElementById('{{ form.new_product_name.id_for_label }}').setAttribute('required', 'required');
+        } else {
+            productSelection.classList.remove('hidden');
+            newProductContainer.classList.add('hidden');
+            newProductNameContainer.classList.add('hidden');
+            if (requestType === 'replenishment' || requestType === 'sample') {
+                document.getElementById('{{ form.product.id_for_label }}').setAttribute('required', 'required');
+            } else {
+                document.getElementById('{{ form.product.id_for_label }}').removeAttribute('required');
+            }
+            document.getElementById('{{ form.new_product_name.id_for_label }}').removeAttribute('required');
+        }
+    });
+</script>
+{% endblock %} 

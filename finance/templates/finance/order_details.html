@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order Details - Atlas Fulfillment{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white">
+    <!-- Page Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-shopping-cart text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">Order Details</h1>
+                        <p class="mt-1 text-sm text-gray-500">{{ order.order_code }} - {{ order.customer }}</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'dashboard:index' %}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-home mr-2"></i>
+                        Dashboard
+                    </a>
+                    <a href="{% url 'finance:order_management' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Orders
+                    </a>
+                    <a href="{% url 'finance:invoice_generation' order.id %}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-file-invoice mr-2"></i>
+                        Generate Invoice
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Order Information -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
+            <div class="bg-orange-100 border-b border-gray-200 px-6 py-4 -m-6 mb-6">
+                <h3 class="text-lg font-semibold text-orange-600">Order Information</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h4 class="text-sm font-medium text-gray-700 mb-4">ORDER DETAILS</h4>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                            <span class="text-sm text-gray-500">Order Code:</span>
+                            <span class="text-sm font-medium text-gray-900">{{ order.order_code }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                            <span class="text-sm text-gray-500">Order ID:</span>
+                            <span class="text-sm font-medium text-gray-900">#{{ order.id }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                            <span class="text-sm text-gray-500">Order Date:</span>
+                            <span class="text-sm font-medium text-gray-900">{{ order.date|date:"F d, Y" }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-sm text-gray-500">Status:</span>
+                            <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full
+                                {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                {% elif order.status == 'confirmed' %}bg-blue-100 text-blue-800
+                                {% elif order.status == 'processing' %}bg-purple-100 text-purple-800
+                                {% elif order.status == 'shipped' %}bg-indigo-100 text-indigo-800
+                                {% elif order.status == 'delivered' %}bg-green-100 text-green-800
+                                {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ order.status|title }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-sm font-medium text-gray-700 mb-4">CUSTOMER INFORMATION</h4>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                            <span class="text-sm text-gray-500">Customer Name:</span>
+                            <span class="text-sm font-medium text-gray-900">{{ order.customer }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                            <span class="text-sm text-gray-500">Phone:</span>
+                            <span class="text-sm font-medium text-gray-900">{{ order.customer_phone|default:"Not provided" }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                            <span class="text-sm text-gray-500">Address:</span>
+                            <span class="text-sm font-medium text-gray-900">{{ order.customer_address|default:"Not provided" }}</span>
+                        </div>
+                        <div class="flex justify-between items-center py-2">
+                            <span class="text-sm text-gray-500">City:</span>
+                            <span class="text-sm font-medium text-gray-900">{{ order.customer_city|default:"Not provided" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Summary -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
+            <div class="bg-orange-100 border-b border-gray-200 px-6 py-4 -m-6 mb-6">
+                <h3 class="text-lg font-semibold text-orange-600">Financial Summary</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="text-center p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-dollar-sign text-blue-600"></i>
+                    </div>
+                    <p class="text-sm font-medium text-gray-500 mb-1">Unit Price</p>
+                    <p class="text-xl font-bold text-gray-900">AED {{ order.price_per_unit|floatformat:0 }}</p>
+                </div>
+                <div class="text-center p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-hashtag text-green-600"></i>
+                    </div>
+                    <p class="text-sm font-medium text-gray-500 mb-1">Quantity</p>
+                    <p class="text-xl font-bold text-gray-900">{{ order.quantity }}</p>
+                </div>
+                <div class="text-center p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-calculator text-purple-600"></i>
+                    </div>
+                    <p class="text-sm font-medium text-gray-500 mb-1">Subtotal</p>
+                    <p class="text-xl font-bold text-gray-900">AED {{ order.total_price_aed|default:order.price_per_unit|floatformat:0 }}</p>
+                </div>
+                <div class="text-center p-6 bg-gray-50 rounded-lg border border-gray-200">
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                        <i class="fas fa-receipt text-orange-600"></i>
+                    </div>
+                    <p class="text-sm font-medium text-gray-500 mb-1">Total Amount</p>
+                    <p class="text-xl font-bold text-gray-900">AED {{ order.total_price_aed|default:order.price_per_unit|floatformat:0 }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Information -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 mb-6">
+            <div class="bg-orange-100 border-b border-gray-200 px-6 py-4 -m-6 mb-6">
+                <h3 class="text-lg font-semibold text-orange-600">Product Information</h3>
+            </div>
+            <div class="flex items-start space-x-6">
+                <div class="flex-shrink-0">
+                    <div class="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
+                        {% if order.product and order.product.image %}
+                            <img src="{{ order.product.image.url }}" alt="{{ order.product.name_en }}" class="w-full h-full object-cover rounded-lg">
+                        {% else %}
+                            <i class="fas fa-box text-gray-400 text-3xl"></i>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h4 class="text-xl font-semibold text-gray-900 mb-2">
+                                {% if order.product %}
+                                    {{ order.product.name_en }}
+                                {% else %}
+                                    Product Name
+                                {% endif %}
+                            </h4>
+                            {% if order.product and order.product.name_ar %}
+                                <p class="text-sm text-gray-600 mb-4">{{ order.product.name_ar }}</p>
+                            {% endif %}
+                            <div class="space-y-2">
+                                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <span class="text-sm text-gray-500">Code:</span>
+                                    <span class="text-sm font-medium text-gray-900">
+                                        {% if order.product %}
+                                            {{ order.product.code }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="py-2">
+                                    <span class="text-sm text-gray-500">Description:</span>
+                                    <p class="text-sm text-gray-700 mt-1">
+                                        {% if order.product %}
+                                            {{ order.product.description|default:"No description available" }}
+                                        {% else %}
+                                            No description available
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="text-sm font-medium text-gray-700 mb-4">PRICING DETAILS</h5>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <span class="text-sm text-gray-500">Selling Price:</span>
+                                    <span class="text-sm font-medium text-gray-900">AED {{ order.price_per_unit|floatformat:0 }}</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <span class="text-sm text-gray-500">Purchase Price:</span>
+                                    <span class="text-sm font-medium text-gray-900">
+                                        {% if order.product %}
+                                            AED {{ order.product.purchase_price|floatformat:0 }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <span class="text-sm text-gray-500">Quantity:</span>
+                                    <span class="text-sm font-medium text-gray-900">{{ order.quantity }}</span>
+                                </div>
+                                <div class="flex justify-between items-center py-2 bg-orange-50 rounded-lg px-3">
+                                    <span class="text-sm font-medium text-gray-700">Total:</span>
+                                    <span class="text-lg font-bold text-orange-600">AED {{ order.total_price_aed|default:order.price_per_unit|floatformat:0 }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Actions -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+            <div class="bg-orange-100 border-b border-gray-200 px-6 py-4 -m-6 mb-6">
+                <h3 class="text-lg font-semibold text-orange-600">Order Actions</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <a href="{% url 'finance:invoice_generation' order.id %}" 
+                   class="flex items-center p-6 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors duration-200">
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-file-invoice text-green-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">Generate Invoice</p>
+                        <p class="text-xs text-gray-500">Create invoice for this order</p>
+                    </div>
+                </a>
+                
+                <a href="{% url 'finance:fee_management' order.id %}" 
+                   class="flex items-center p-6 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors duration-200">
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-coins text-blue-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">Manage Fees</p>
+                        <p class="text-xs text-gray-500">Adjust order fees</p>
+                    </div>
+                </a>
+                
+                <a href="#" 
+                   class="flex items-center p-6 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors duration-200">
+                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-edit text-purple-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">Edit Order</p>
+                        <p class="text-xs text-gray-500">Modify order details</p>
+                    </div>
+                </a>
+                
+                <a href="#" 
+                   class="flex items-center p-6 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors duration-200">
+                    <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-print text-orange-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">Print Order</p>
+                        <p class="text-xs text-gray-500">Print order details</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

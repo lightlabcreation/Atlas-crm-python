@@ -1,0 +1,446 @@
+{% extends 'landing/base_landing.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Atlas Fulfillment - Global Logistics & E-commerce Solutions{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* DHL/Aramex inspired design */
+    html {
+    scroll-behavior: smooth;
+  }
+    .hero-gradient {
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+    }
+
+    .service-card {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .service-card:hover {
+        transform: translateY(-5px);
+        border-color: #FFD700;
+        box-shadow: 0 20px 40px rgba(255, 215, 0, 0.2);
+    }
+
+    .tracking-input {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+    }
+
+    .stats-card {
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    }
+
+    .floating-element {
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-20px);
+        }
+    }
+
+    .pulse-glow {
+        animation: pulse-glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulse-glow {
+        from {
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        }
+
+        to {
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+        }
+    }
+
+    .image-container {
+        position: relative;
+        width: 250px;
+        height: 350px;
+    }
+
+    .image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 20px;
+        position: relative;
+        z-index: 2;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .shape1 {
+        position: absolute;
+        top: -30px;
+        left: -40px;
+        width: 300px;
+        height: 100px;
+        background: #fff6a4;
+        border-radius: 100px;
+        transform: rotate(-25deg);
+        z-index: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+
+<section id="home" class="text-white py-20 relative overflow-hidden bg-white min-h-screen pt-21  md:pt-[9rem">
+    <div class=" mx-auto px-4 py-20 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center justify-items-center text-center lg:text-left">
+
+            <!-- النص -->
+            <div class="md:w-4/5 flex flex-col items-center lg:items-start" {% if LANGUAGE_CODE == 'ar' %}dir="rtl"
+                style="text-align: right;" {% else %}dir="ltr" style="text-align: left;" {% endif %}>
+                <h1 class="text-5xl font-bold text-gray-900 mb-6 leading-snug">
+                    {% if LANGUAGE_CODE == 'ar' %}
+                    بوابتك لتنمية عملك <span class="text-yellow-400">الإلكتروني</span> في سوق الخليج.
+                    {% else %}
+                    Your gateway to growing your <span class="text-yellow-400">Online</span> business in the Gulf
+                    market.
+                    {% endif %}
+                </h1>
+
+                <p class="text-xl text-gray-700 leading-relaxed mb-6 max-w-[90%]">
+                    {% if LANGUAGE_CODE == 'ar' %}
+                    دول الخليج توفر سوقًا مربحًا وأقل منافسة — هذه فرصتك لاستكشافه وتوسيع عملك في التجارة الإلكترونية.
+                    {% else %}
+                    The Gulf countries offer a profitable and less competitive market — this is your chance to explore
+                    it and expand your e-commerce business.
+                    {% endif %}
+                </p>
+
+                <a href="/users/login/"
+                    class="rounded-full inline-flex {% if LANGUAGE_CODE == 'ar' %}space-x-reverse{% endif %} space-x-2 text-xl py-3 px-6 items-center border border-[#a7a7a7] bg-[#a7a7a7] text-white hover:bg-white hover:text-[#a7a7a7] transition-all duration-300 justify-center group">
+                    <span>{% trans "Start Now" %}</span> <svg xmlns="http://www.w3.org/2000/svg"
+                        class="{% if LANGUAGE_CODE == 'ar' %}-rotate-90 group-hover:-translate-x-1{% else %}rotate-90 group-hover:translate-x-1{% endif %} transition-all duration-300"
+                        width="24" height="24" viewBox="0 0 16 16">
+                        <path fill="currentColor"
+                            d="m13.707 6.293l-5-5a1 1 0 0 0-1.414 0l-5 5a.999.999 0 1 0 1.414 1.414L7 4.414V14a1 1 0 0 0 2 0V4.414l3.293 3.293a.997.997 0 0 0 1.414 0a1 1 0 0 0 0-1.414" />
+                    </svg> </a>
+            </div>
+
+            <!-- الصورة -->
+            <div class="md:w-1/2 flex justify-center">
+                <div class="image-container relative">
+                    <div class="shape1"></div>
+                    <div class="shape1"
+                        style="top: 90px; {% if LANGUAGE_CODE == 'ar' %}right: -50px;{% else %}left: -50px;{% endif %}">
+                    </div>
+                    <div class="shape1"
+                        style="top: 240px; {% if LANGUAGE_CODE == 'ar' %}right: -45px;{% else %}left: -45px;{% endif %}">
+                    </div>
+                    <img src="https://i.ibb.co/h1mBb7zb/19.png" alt="Atlas Fulfillment">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="flex flex-wrap justify-center select-none items-center gap-16 px-6 py-8 md:mt-[4rem]" dir="{% if LANGUAGE_CODE == 'ar' %}ltr{% else %}rtl{% endif %}">
+        <div class="bg-black rounded-md flex items-center justify-center p-5">
+          <img src="https://i.ibb.co/0jjFyCW3/4.png" class="w-16 h-auto md:w-20" draggable="false" />
+        </div>
+        <div class="bg-black rounded-md flex items-center justify-center p-5">
+          <img src="https://i.ibb.co/LD9Lfrxm/1.png" class="w-16 h-auto md:w-20" draggable="false" />
+        </div>
+        <div class="bg-black rounded-md flex items-center justify-center p-5">
+          <img src="https://i.ibb.co/sv1ybbRz/3.png" class="w-16 h-auto md:w-20" draggable="false" />
+        </div>
+        <div class="bg-black rounded-md flex items-center justify-center p-5">
+          <img src="https://i.ibb.co/T3c13By/7.png" class="w-16 h-auto md:w-20" draggable="false" />
+        </div>
+        <div class="bg-black rounded-md flex items-center justify-center p-5">
+          <img src="https://i.ibb.co/99s6cDxn/6.png" class="w-16 h-auto md:w-20" draggable="false" />
+        </div>
+        <div class="bg-black rounded-md flex items-center justify-center p-5">
+          <img src="https://i.ibb.co/JFk9q4gR/12.png" class="w-16 h-auto md:w-20" draggable="false" />
+        </div>
+      </div>
+      
+</section>
+
+
+<section id="who" class="relative w-full min-h-screen overflow-hidden flex items-center justify-center">
+    <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg" 
+    class="absolute inset-0 w-full h-full z-0" preserveAspectRatio="none">
+ <rect width="1200" height="800" fill="#FFF9E6" />
+ <path d="M 0,120 Q 300,200 600,120 Q 900,40 1200,120 L 1200,0 L 0,0 Z" fill="#FFFFFF" />
+ <path d="M 0,680 Q 300,760 600,680 Q 900,600 1200,680 L 1200,800 L 0,800 Z" fill="#FFFFFF" />
+ 
+ <!-- الدواير تختفي في الهاتف -->
+ <circle class="hidden md:block" cx="200" cy="150" r="40" fill="#FFD700"/>
+ <circle class="hidden md:block" cx="900" cy="90" r="40" fill="#000"/>
+</svg>
+
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center justify-items-center text-center lg:text-left z-10">
+        <div class="text-left md:w-1/2">
+            <h2 class="text-5xl font-bold text-[#000] mb-6">  {% trans "Who are us" %}{% if LANGUAGE_CODE == 'ar' %}؟ {% else %}?{% endif %}</h2>
+            <p class="text-lg text-[#000] leading-relaxed">
+                {% if LANGUAGE_CODE == 'ar' %}
+                نوفر لك نظاما كاملا ومتكاملا لبدء التجارة الإلكترونية في الأسواق الخليجية.
+                يمكنك التركيز فقط على البحث عن المنتجات وكذلك على نجاح الحملات الإعلانية.
+                الخدمات الأخرى كالاستيراد، تأكيد الطلبيات، التخزين، التعبئة والشحن من مسؤوليتنا.
+                {% else %}
+                We provide you with a complete and integrated system to start your e-commerce business in Gulf markets.
+                You can focus only on product research and the success of your advertising campaigns.
+                Other services such as importing, order confirmation, storage, packaging, and shipping are our responsibility.                
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="md:w-1/2 mt-10 md:mt-0 flex justify-center md:justify-end">
+            <img src="https://i.ibb.co/pv8nR5SL/16.png" alt="من نحن"
+                class="w-[300px] md:w-[400px] lg:w-[500px] object-contain" />
+        </div>
+    </div>
+</section>
+
+
+<section id="services" class="min-h-screen bg-white py-20">
+    <div class="container mx-auto px-4">
+      <!-- العنوان -->
+      <h1 class="flex text-center justify-center items-center mb-16">
+        {% if LANGUAGE_CODE == 'ar' %}
+        <span class="tajawal-bold font-extrabold text-4xl md:text-6xl">
+          خدمات حصرية علي منصة <span class="text-yellow-400">AS Fullfillment</span>
+        </span>
+        {% else %}
+        <span class="tajawal-bold font-extrabold text-4xl md:text-6xl">
+          Exclusive services on <span class="text-yellow-400">AS Fullfillment</span> platform
+        </span>
+        {% endif %}
+      </h1>
+  
+      <!-- العناصر -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 text-center">
+        <!-- عنصر 1 -->
+        <div class="flex flex-col items-center">
+          <img src="https://i.ibb.co/mF0RNxRD/18.png" alt="Service 1" class="w-64 h-64 mb-4" draggable="false">
+          <h3 class="text-2xl font-bold text-gray-800 mb-2">
+            {% if LANGUAGE_CODE == 'ar' %} الاستيراد من الأسواق العالمية {% else %} Importing from Global Markets {% endif %}
+          </h3>
+          <p class="text-gray-600">
+            {% if LANGUAGE_CODE == 'ar' %}
+            نساعدك في استيراد البضائع من أكبر الأسواق مع ضمان التعامل والأمان الفعال.
+            {% else %}
+            We help you import goods from major international markets with guaranteed safe and reliable transactions.
+            {% endif %}
+          </p>
+        </div>
+  
+        <!-- عنصر 2 -->
+        <div class="flex flex-col items-center">
+          <img src="https://i.ibb.co/Wv36g7cC/9.png" alt="Service 2" class="w-64 h-64 mb-4" draggable="false">
+          <h3 class="text-2xl font-bold text-gray-800 mb-2">
+            {% if LANGUAGE_CODE == 'ar' %} خدمات التخزين المتقدمة {% else %} Advanced Storage Services {% endif %}
+          </h3>
+          <p class="text-gray-600">
+            {% if LANGUAGE_CODE == 'ar' %}
+            نوفر مستودعات حديثة ومجهزة بأحدث التقنيات لتخزين بضائعك بأمان وكفاءة.
+            {% else %}
+            We provide modern, well-equipped warehouses using the latest technologies to store your goods safely and efficiently.
+            {% endif %}
+          </p>
+        </div>
+  
+        <!-- عنصر 3 -->
+        <div class="flex flex-col items-center">
+          <img src="https://i.ibb.co/x8RXd3xP/14.png" alt="Service 3" class="w-128 h-64 mb-4" draggable="false">
+          <h3 class="text-2xl font-bold text-gray-800 mb-2">
+            {% if LANGUAGE_CODE == 'ar' %} تأكيد الطلبيات الإحترافي {% else %} Professional Order Confirmation {% endif %}
+          </h3>
+          <p class="text-gray-600">
+            {% if LANGUAGE_CODE == 'ar' %}
+            لدينا فريق متخصص ومحترف يعمل على تأكيد الطلبيات بدقة عالية، مما يضمن تحقيق أفضل نسبة تأكيد ورفع مستوى رضا العملاء.
+            {% else %}
+            Our specialized and professional team accurately confirms orders, ensuring the highest confirmation rate and maximizing customer satisfaction.
+            {% endif %}
+          </p>
+        </div>
+  
+        <!-- عنصر 4 -->
+        <div class="flex flex-col items-center">
+          <img src="https://i.ibb.co/kggK76qh/5.png" alt="Service 4" class="w-128 h-64 mb-4" draggable="false">
+          <h3 class="text-2xl font-bold text-gray-800 mb-2">
+            {% if LANGUAGE_CODE == 'ar' %} التوصيل السريع والآمن {% else %} Fast and Secure Delivery {% endif %}
+          </h3>
+          <p class="text-gray-600">
+            {% if LANGUAGE_CODE == 'ar' %}
+            فريقنا المتخصص في الخدمات اللوجستية يضمن توصيل منتجاتك بسرعة وأمان إلى العملاء في جميع المناطق.
+            {% else %}
+            Our dedicated logistics team ensures your products are delivered quickly and securely to customers across all regions.
+            {% endif %}
+          </p>
+        </div>
+  
+        <!-- عنصر 5 -->
+        <div class="flex flex-col items-center md:mt-[5.5rem]">
+          <img src="https://i.ibb.co/5P2Dxd9/13.png" alt="Service 5" class="w-72 h-50 mb-4" draggable="false">
+          <h3 class="text-2xl font-bold text-gray-800 mb-2">
+            {% if LANGUAGE_CODE == 'ar' %} توصل بأموالك كل أسبوع {% else %} Receive Your Money Weekly {% endif %}
+          </h3>
+          <p class="text-gray-600">
+            {% if LANGUAGE_CODE == 'ar' %}
+            ما إن يتم الزبون عملية الدفع يتم تحصيل المبلغ ثم نقوم بتحويل الأموال المحصلة إلى حسابك المصرفي أسبوعيًا في أي مكان في العالم.
+            {% else %}
+            Once a customer completes payment, we collect the funds and transfer them to your bank account weekly — wherever you are in the world.
+            {% endif %}
+          </p>
+        </div>
+  
+        <!-- عنصر 6 -->
+        <div class="flex flex-col items-center md:mt-[3.5rem]">
+          <img src="https://i.ibb.co/q8p6TLF/11.png" alt="Service 6" class="w-72 h-50 mb-4" draggable="false">
+          <h3 class="text-2xl font-bold text-gray-800 mb-2">
+            {% if LANGUAGE_CODE == 'ar' %} تتبع أداء تجارتك الإلكترونية {% else %} Track Your E-Commerce Performance {% endif %}
+          </h3>
+          <p class="text-gray-600">
+            {% if LANGUAGE_CODE == 'ar' %}
+            نوفر لك فريقًا جاهزًا ومتمكنًا في مراكز الاتصال الخاصة بنا لتسهيل التواصل مع العملاء ومتابعة معدلات التأكيد، مما يساعدك على رفع مبيعاتك وتطوير تجارتك.
+            {% else %}
+            We provide you with a skilled support team in our call centers to facilitate customer communication and track confirmation rates, helping you increase sales and grow your business.
+            {% endif %}
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  
+  <section id="start" class="relative bg-white mb-[6rem] px-6">
+    <!-- المربع الأسود -->
+    <div class="relative bg-black text-white py-24 rounded-3xl overflow-hidden max-w-7xl mx-auto shadow-xl mb-20">
+      <!-- الزخارف -->
+      <div class="absolute -top-20 -right-20 w-64 h-64 bg-yellow-400 rounded-full overflow-hidden">
+        <svg class="w-full h-full opacity-60" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+          <path d="M0,50 Q50,100 100,50 T200,50" stroke="white" stroke-width="2" fill="none" />
+          <path d="M0,80 Q50,130 100,80 T200,80" stroke="white" stroke-width="2" fill="none" />
+          <path d="M0,110 Q50,160 100,110 T200,110" stroke="white" stroke-width="2" fill="none" />
+          <path d="M0,140 Q50,190 100,140 T200,140" stroke="white" stroke-width="2" fill="none" />
+          <path d="M0,170 Q50,220 100,170 T200,170" stroke="white" stroke-width="2" fill="none" />
+        </svg>
+      </div>
+  
+      <div class="absolute -bottom-20 -left-20 w-80 h-80 bg-yellow-400 rounded-full overflow-hidden">
+        <svg class="w-full h-full opacity-60" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+          <path d="M0,50 Q50,100 100,50 T200,50" stroke="white" stroke-width="2" fill="none" />
+          <path d="M0,80 Q50,130 100,80 T200,80" stroke="white" stroke-width="2" fill="none" />
+          <path d="M0,110 Q50,160 100,110 T200,110" stroke="white" stroke-width="2" fill="none" />
+          <path d="M0,140 Q50,190 100,140 T200,140" stroke="white" stroke-width="2" fill="none" />
+          <path d="M0,170 Q50,220 100,170 T200,170" stroke="white" stroke-width="2" fill="none" />
+        </svg>
+      </div>
+  
+      <!-- المحتوى -->
+      <div class="relative z-10 container mx-auto px-6 text-center">
+        {% if LANGUAGE_CODE == 'ar' %}
+          <h2 class="text-3xl md:text-5xl font-extrabold mb-6 tajawal-bold">
+            يمكنك بدء تجارتك في الخليج بكل سهولة
+          </h2>
+          <p class="text-gray-400 text-lg mb-8 tajawal-bold">
+            استفد من مزايا عديدة وحصرية فقط عند
+          </p>
+          <a href="#join" class="bg-[#a7a7a7] hover:bg-[#858585] cursor-pointer text-white font-bold py-3 px-8 rounded-full transition">
+            ابدأ الآن
+          </a>
+        {% else %}
+          <h2 class="text-3xl md:text-5xl font-extrabold mb-6">
+            Start your business in the Gulf easily
+          </h2>
+          <p class="text-gray-400 text-lg mb-8">
+            Take advantage of many exclusive benefits only with
+          </p>
+          <a href="#join" class="bg-[#a7a7a7] hover:bg-[#858585] cursor-pointer text-white font-bold py-3 px-8 rounded-full transition">
+            Get Started
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  
+    <div class="text-center items-center">
+    {% if LANGUAGE_CODE == 'ar' %}
+    <h2 class="text-4xl font-bold mb-4">انضم الآن</h2>
+    <p class="text-gray-500 mb-8">المرجو ملء الإستمارة أدناه للمزيد من المعلومات<br>سيتم التواصل معك في أقل من 24 ساعة</p>
+    {% else %}
+    <h2 class="text-3xl font-bold mb-4">Join Now</h2>
+    <p class="text-gray-500 mb-8">Please fill out the form below for more information.<br>We’ll contact you within 24 hours.</p>
+    {% endif %}
+</div>
+    <div class="max-w-lg mx-auto bg-white border border-gray-900 rounded-2xl  p-8 text-center">
+      {% if LANGUAGE_CODE == 'ar' %}
+       
+        <form class="space-y-4">
+          <input type="text" placeholder="الاسم الكامل" class="w-full p-3 rounded-md bg-gray-100 text-right" />
+          <input type="email" placeholder="البريد الإلكتروني" class="w-full p-3 rounded-md bg-gray-100 text-right" />
+          <input type="text" placeholder="الدولة" class="w-full p-3 rounded-md bg-gray-100 text-right" />
+          <input type="text" placeholder="رقم الهاتف" class="w-full p-3 rounded-md bg-gray-100 text-right" />
+          <button type="submit" class="w-full bg-black text-white font-bold py-3 rounded-md hover:bg-gray-800 transition">
+            ابدأ الآن
+          </button>
+        </form>
+      {% else %}
+       
+        <form class="space-y-4">
+          <input type="text" placeholder="Full Name" class="w-full p-3 rounded-md bg-gray-100" />
+          <input type="email" placeholder="Email" class="w-full p-3 rounded-md bg-gray-100" />
+          <input type="text" placeholder="Country" class="w-full p-3 rounded-md bg-gray-100" />
+          <input type="text" placeholder="Phone" class="w-full p-3 rounded-md bg-gray-100" />
+          <button type="submit" class="w-full bg-black text-white font-bold py-3 rounded-md hover:bg-gray-800 transition">
+            Get Started
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  </section>
+  
+  <!-- Footer with CodixVerse Team Credit
+  <footer class="bg-gray-900 text-white py-12">
+    <div class="container mx-auto px-4 text-center">
+      <div class="mb-6">
+        <img src="https://i.ibb.co/YT4Ny4L1/10.png" alt="Atlas Fulfillment" class="h-12 w-auto mx-auto mb-4">
+        <h3 class="text-2xl font-bold mb-2">Atlas Fulfillment</h3>
+        <p class="text-gray-400">
+          {% if LANGUAGE_CODE == 'ar' %}
+          بوابتك لتنمية عملك الإلكتروني في سوق الخليج
+          {% else %}
+          Your gateway to growing your online business in the Gulf market
+          {% endif %}
+        </p>
+      </div>
+      
+      <div class="border-t border-gray-700 pt-6">
+        <p class="text-gray-400 text-sm mb-2">
+          {% if LANGUAGE_CODE == 'ar' %}
+          تم تطوير هذا المشروع بواسطة
+          {% else %}
+          This project was developed by
+          {% endif %}
+        </p>
+        <div class="flex items-center justify-center space-x-2">
+          <span class="text-yellow-400 font-bold text-lg">CodixVerse</span>
+          <span class="text-gray-400">Team</span>
+        </div>
+        <p class="text-gray-500 text-xs mt-2">
+          {% if LANGUAGE_CODE == 'ar' %}
+          جميع الحقوق محفوظة © 2024
+          {% else %}
+          All rights reserved © 2024
+          {% endif %}
+        </p>
+      </div>
+    </div>
+  </footer> -->
+
+{% endblock %}

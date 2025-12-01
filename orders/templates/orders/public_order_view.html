@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order Information - {{ order.order_code }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-3xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold">Atlas Fulfillment</h1>
+            <p class="text-gray-600 mt-2">Order Information</p>
+        </div>
+        
+        <!-- Order Details Card -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+            <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-800">Order #{{ order.order_code }}</h2>
+                <p class="text-sm text-gray-600">{{ order.date|date:"d/m/Y H:i" }}</p>
+            </div>
+            
+            <div class="p-6">
+                <!-- Product Information -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-medium text-gray-800 mb-3">Product Information</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 border">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
+                                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">
+                                            {% if order.product %}
+                                                {{ order.product.name_en|default:order.product.name_ar }}
+                                            {% else %}
+                                                {% for item in order.items.all %}
+                                                    {{ item.product.name_en|default:item.product.name_ar }}{% if not forloop.last %}, {% endif %}
+                                                {% empty %}
+                                                    N/A
+                                                {% endfor %}
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                                        {% if order.product %}
+                                            {{ order.product.code }}
+                                        {% else %}
+                                            {% for item in order.items.all %}
+                                                {{ item.product.code }}{% if not forloop.last %}, {% endif %}
+                                            {% empty %}
+                                                N/A
+                                            {% endfor %}
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500 text-center">
+                                        {{ order.quantity }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Customer Information -->
+                <div>
+                    <h3 class="text-lg font-medium text-gray-800 mb-3">Customer Information</h3>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-sm text-gray-600">Name</p>
+                                <p class="text-base font-medium">{{ order.customer }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-600">Phone</p>
+                                <p class="text-base font-medium">{{ order.customer_phone }}</p>
+                            </div>
+                            {% if order.shipping_address %}
+                            <div class="md:col-span-2">
+                                <p class="text-sm text-gray-600">Shipping Address</p>
+                                <p class="text-base">{{ order.shipping_address|linebreaksbr }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="text-center text-sm text-gray-500">
+            <p>This information is provided by Atlas Fulfillment</p>
+            <p>For any inquiries, please contact our customer service</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

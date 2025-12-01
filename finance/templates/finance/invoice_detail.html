@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Invoice Details{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white">
+    <!-- Page Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-file-invoice text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">Invoice Details</h1>
+                        <p class="mt-1 text-sm text-gray-500">{{ invoice.invoice_number }}</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'finance:invoices' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Invoices
+                    </a>
+                    <a href="{% url 'finance:edit_invoice' invoice.id %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-edit mr-2"></i>
+                        Edit Invoice
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Invoice Information -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+            <div class="bg-orange-100 border-b border-gray-200 px-6 py-4">
+                <h3 class="text-lg font-semibold text-orange-600">Invoice Information</h3>
+            </div>
+            
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Invoice Number</p>
+                        <p class="text-sm text-gray-900">{{ invoice.invoice_number }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Status</p>
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                            {% if invoice.status == 'paid' %}bg-green-100 text-green-800
+                            {% elif invoice.status == 'sent' %}bg-blue-100 text-blue-800
+                            {% elif invoice.status == 'overdue' %}bg-red-100 text-red-800
+                            {% elif invoice.status == 'cancelled' %}bg-gray-100 text-gray-800
+                            {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                            {{ invoice.get_status_display }}
+                        </span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Total Amount</p>
+                        <p class="text-sm text-gray-900">AED {{ invoice.total_amount|floatformat:2 }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Due Date</p>
+                        <p class="text-sm text-gray-900">{{ invoice.due_date|date:"M d, Y" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Information -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+            <div class="bg-orange-100 border-b border-gray-200 px-6 py-4">
+                <h3 class="text-lg font-semibold text-orange-600">Order Information</h3>
+            </div>
+            
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Order Code</p>
+                        <p class="text-sm text-gray-900">{{ invoice.order.order_code }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Customer</p>
+                        <p class="text-sm text-gray-900">{{ invoice.order.customer }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Customer Phone</p>
+                        <p class="text-sm text-gray-900">{{ invoice.order.customer_phone|default:"N/A" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Product</p>
+                        <p class="text-sm text-gray-900">{{ invoice.order.product.name_en|default:"N/A" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Quantity</p>
+                        <p class="text-sm text-gray-900">{{ invoice.order.quantity }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Order Date</p>
+                        <p class="text-sm text-gray-900">{{ invoice.order.date|date:"M d, Y" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Details -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+            <div class="bg-orange-100 border-b border-gray-200 px-6 py-4">
+                <h3 class="text-lg font-semibold text-orange-600">Financial Details</h3>
+            </div>
+            
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Unit Price</p>
+                        <p class="text-sm text-gray-900">AED {{ invoice.order.price_per_unit|floatformat:2 }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Quantity</p>
+                        <p class="text-sm text-gray-900">{{ invoice.order.quantity }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Subtotal</p>
+                        <p class="text-sm text-gray-900">AED {{ subtotal|floatformat:2 }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Total Amount</p>
+                        <p class="text-lg font-bold text-gray-900">AED {{ invoice.total_amount|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes -->
+        {% if invoice.notes %}
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+            <div class="bg-orange-100 border-b border-gray-200 px-6 py-4">
+                <h3 class="text-lg font-semibold text-orange-600">Notes</h3>
+            </div>
+            
+            <div class="p-6">
+                <p class="text-sm text-gray-900">{{ invoice.notes }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="bg-orange-100 border-b border-gray-200 px-6 py-4">
+                <h3 class="text-lg font-semibold text-orange-600">Actions</h3>
+            </div>
+            
+            <div class="p-6">
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'finance:edit_invoice' invoice.id %}" 
+                       class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md flex items-center transition-colors duration-200">
+                        <i class="fas fa-edit mr-2"></i>
+                        Edit Invoice
+                    </a>
+                    
+                    <a href="{% url 'finance:invoice_generation' invoice.order.id %}" 
+                       class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md flex items-center transition-colors duration-200">
+                        <i class="fas fa-print mr-2"></i>
+                        Print Invoice
+                    </a>
+                    
+                    <a href="{% url 'finance:order_detail' invoice.order.id %}" 
+                       class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md flex items-center transition-colors duration-200">
+                        <i class="fas fa-eye mr-2"></i>
+                        View Order
+                    </a>
+                    
+                    <a href="{% url 'finance:delete_invoice' invoice.id %}" 
+                       class="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-md flex items-center transition-colors duration-200">
+                        <i class="fas fa-trash mr-2"></i>
+                        Delete Invoice
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

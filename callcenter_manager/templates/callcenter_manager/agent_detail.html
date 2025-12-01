@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+
+{% block title %}Agent Detail - {{ agent.get_full_name|default:agent.email }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-user-tie text-orange-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h1 class="text-2xl font-bold text-orange-500">Agent Detail</h1>
+                        <p class="text-gray-600">{{ agent.get_full_name|default:agent.email }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'callcenter_manager:agents' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Agents
+                    </a>
+                    <a href="{% url 'callcenter_manager:agent_edit' agent.id %}" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-edit mr-2"></i>
+                        Edit Agent
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Agent Status Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-orange-600 text-2xl"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <h2 class="text-xl font-bold text-gray-900">{{ agent.get_full_name|default:agent.email }}</h2>
+                        <p class="text-gray-600">Call Center Agent</p>
+                        <p class="text-sm text-gray-500">{{ agent.email }}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="px-4 py-2 text-sm font-medium rounded-full bg-green-100 text-green-800">
+                        {% if agent.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                    <p class="text-sm text-gray-500 mt-1">
+                        Last Login: {{ agent.last_login|date:"M d, Y H:i"|default:"Never" }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Agent Information -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Basic Information -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center mb-6">
+                        <i class="fas fa-info-circle text-blue-600 text-xl mr-3"></i>
+                        <h3 class="text-lg font-medium text-gray-900">Basic Information</h3>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Full Name</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ agent.get_full_name|default:"Not provided" }}</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Email</label>
+                            <p class="mt-1 text-sm text-gray-900">
+                                <a href="mailto:{{ agent.email }}" class="text-blue-600 hover:text-blue-800">
+                                    {{ agent.email }}
+                                </a>
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Phone</label>
+                            <p class="mt-1 text-sm text-gray-900">
+                                {% if agent.phone %}
+                                    <a href="tel:{{ agent.phone }}" class="text-blue-600 hover:text-blue-800">
+                                        {{ agent.phone }}
+                                    </a>
+                                {% else %}
+                                    <span class="text-gray-400 italic">Not provided</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Status</label>
+                            <span class="mt-1 inline-flex px-2 py-1 text-xs font-medium rounded-full
+                                {% if agent.is_active %}bg-green-100 text-green-800
+                                {% else %}bg-red-100 text-red-800{% endif %}">
+                                {% if agent.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Date Joined</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ agent.date_joined|date:"F d, Y" }}</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Last Login</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ agent.last_login|date:"M d, Y H:i"|default:"Never" }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Statistics -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center mb-6">
+                        <i class="fas fa-chart-line text-green-600 text-xl mr-3"></i>
+                        <h3 class="text-lg font-medium text-gray-900">Performance Statistics</h3>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <i class="fas fa-shopping-cart text-blue-600 text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold text-gray-900">{{ agent_orders.count }}</p>
+                            <p class="text-sm text-gray-500">Total Orders</p>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold text-gray-900">{{ agent_orders.filter|length }}</p>
+                            <p class="text-sm text-gray-500">Completed</p>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold text-gray-900">{{ agent_orders.filter|length }}</p>
+                            <p class="text-sm text-gray-500">Pending</p>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <i class="fas fa-percentage text-purple-600 text-xl"></i>
+                            </div>
+                            <p class="text-2xl font-bold text-gray-900">85%</p>
+                            <p class="text-sm text-gray-500">Success Rate</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Orders -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-list text-purple-600 text-xl mr-3"></i>
+                            <h3 class="text-lg font-medium text-gray-900">Recent Orders</h3>
+                        </div>
+                        <a href="{% url 'callcenter_manager:orders_management' %}?agent={{ agent.id }}" class="text-blue-600 hover:text-blue-800 text-sm">
+                            View all
+                        </a>
+                    </div>
+                    
+                    {% if agent_orders %}
+                        <div class="space-y-4">
+                            {% for order in agent_orders|slice:":5" %}
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">#{{ order.order_code }}</p>
+                                    <p class="text-sm text-gray-500">{{ order.customer }} - {{ order.get_status_display }}</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full
+                                        {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                        {% elif order.status == 'processing' %}bg-blue-100 text-blue-800
+                                        {% elif order.status == 'confirmed' %}bg-green-100 text-green-800
+                                        {% elif order.status == 'completed' %}bg-green-100 text-green-800
+                                        {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                    <a href="{% url 'callcenter_manager:order_detail' order.id %}" class="text-blue-600 hover:text-blue-800 text-sm">
+                                        View
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-8">
+                            <i class="fas fa-shopping-cart text-gray-400 text-4xl mb-4"></i>
+                            <p class="text-gray-500">No orders assigned to this agent yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-8">
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center mb-6">
+                        <i class="fas fa-bolt text-orange-600 text-xl mr-3"></i>
+                        <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <a href="{% url 'callcenter_manager:agent_edit' agent.id %}" 
+                           class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium text-center block">
+                            <i class="fas fa-edit mr-2"></i>
+                            Edit Agent
+                        </a>
+                        
+                        <a href="{% url 'callcenter_manager:orders_management' %}?agent={{ agent.id }}" 
+                           class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium text-center block">
+                            <i class="fas fa-list mr-2"></i>
+                            View Orders
+                        </a>
+                        
+                        <button class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            <i class="fas fa-plus mr-2"></i>
+                            Assign Order
+                        </button>
+                        
+                        <button class="w-full bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            <i class="fas fa-chart-bar mr-2"></i>
+                            View Reports
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Agent Activity -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center mb-6">
+                        <i class="fas fa-clock text-blue-600 text-xl mr-3"></i>
+                        <h3 class="text-lg font-medium text-gray-900">Recent Activity</h3>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-check text-green-600 text-sm"></i>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-900">Order Completed</p>
+                                <p class="text-sm text-gray-500">Order #ORD-123456</p>
+                                <p class="text-xs text-gray-400">2 hours ago</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-phone text-blue-600 text-sm"></i>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-900">Customer Call</p>
+                                <p class="text-sm text-gray-500">Called customer for order confirmation</p>
+                                <p class="text-xs text-gray-400">4 hours ago</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-edit text-yellow-600 text-sm"></i>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-900">Order Updated</p>
+                                <p class="text-sm text-gray-500">Updated order status to processing</p>
+                                <p class="text-xs text-gray-400">6 hours ago</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center mb-6">
+                        <i class="fas fa-phone text-green-600 text-xl mr-3"></i>
+                        <h3 class="text-lg font-medium text-gray-900">Contact Information</h3>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-envelope text-gray-400 mr-3"></i>
+                            <a href="mailto:{{ agent.email }}" class="text-blue-600 hover:text-blue-800 text-sm">
+                                {{ agent.email }}
+                            </a>
+                        </div>
+                        
+                        {% if agent.phone %}
+                        <div class="flex items-center">
+                            <i class="fas fa-phone text-gray-400 mr-3"></i>
+                            <a href="tel:{{ agent.phone }}" class="text-blue-600 hover:text-blue-800 text-sm">
+                                {{ agent.phone }}
+                            </a>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar text-gray-400 mr-3"></i>
+                            <span class="text-sm text-gray-600">
+                                Joined {{ agent.date_joined|date:"M d, Y" }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

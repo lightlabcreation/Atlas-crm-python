@@ -1,0 +1,309 @@
+<!-- Reusable Modal System for Alerts, Confirms, and Prompts -->
+<!-- Include this in your base template or any template that needs modals -->
+
+<!-- Alert Modal -->
+<div id="alertModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
+                <i class="fas fa-info-circle text-blue-600 text-xl"></i>
+            </div>
+            <h3 id="alertTitle" class="text-lg font-medium text-gray-900 mt-4">Alert</h3>
+            <div class="mt-2 px-7 py-3">
+                <p id="alertMessage" class="text-sm text-gray-500"></p>
+            </div>
+            <div class="items-center px-4 py-3">
+                <button id="alertOkBtn" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Modal -->
+<div id="confirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
+                <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
+            </div>
+            <h3 id="confirmTitle" class="text-lg font-medium text-gray-900 mt-4">Confirm</h3>
+            <div class="mt-2 px-7 py-3">
+                <p id="confirmMessage" class="text-sm text-gray-500"></p>
+            </div>
+            <div class="items-center px-4 py-3 flex space-x-3">
+                <button id="confirmCancelBtn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                    Cancel
+                </button>
+                <button id="confirmOkBtn" class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Prompt Modal -->
+<div id="promptModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                <i class="fas fa-question-circle text-green-600 text-xl"></i>
+            </div>
+            <h3 id="promptTitle" class="text-lg font-medium text-gray-900 mt-4">Input Required</h3>
+            <div class="mt-2 px-7 py-3">
+                <p id="promptMessage" class="text-sm text-gray-500 mb-3"></p>
+                <input type="text" id="promptInput" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Enter your input...">
+            </div>
+            <div class="items-center px-4 py-3 flex space-x-3">
+                <button id="promptCancelBtn" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                    Cancel
+                </button>
+                <button id="promptOkBtn" class="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                <i class="fas fa-check-circle text-green-600 text-xl"></i>
+            </div>
+            <h3 id="successTitle" class="text-lg font-medium text-gray-900 mt-4">Success</h3>
+            <div class="mt-2 px-7 py-3">
+                <p id="successMessage" class="text-sm text-gray-500"></p>
+            </div>
+            <div class="items-center px-4 py-3">
+                <button id="successOkBtn" class="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div id="errorModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <i class="fas fa-exclamation-circle text-red-600 text-xl"></i>
+            </div>
+            <h3 id="errorTitle" class="text-lg font-medium text-gray-900 mt-4">Error</h3>
+            <div class="mt-2 px-7 py-3">
+                <p id="errorMessage" class="text-sm text-gray-500"></p>
+            </div>
+            <div class="items-center px-4 py-3">
+                <button id="errorOkBtn" class="px-4 py-2 bg-red-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Modal System JavaScript
+class ModalSystem {
+    constructor() {
+        this.initEventListeners();
+    }
+
+    initEventListeners() {
+        // Alert Modal
+        document.getElementById('alertOkBtn').addEventListener('click', () => this.closeAlert());
+        
+        // Confirm Modal
+        document.getElementById('confirmCancelBtn').addEventListener('click', () => this.closeConfirm());
+        document.getElementById('confirmOkBtn').addEventListener('click', () => this.confirmAction());
+        
+        // Prompt Modal
+        document.getElementById('promptCancelBtn').addEventListener('click', () => this.closePrompt());
+        document.getElementById('promptOkBtn').addEventListener('click', () => this.promptAction());
+        
+        // Success Modal
+        document.getElementById('successOkBtn').addEventListener('click', () => this.closeSuccess());
+        
+        // Error Modal
+        document.getElementById('errorOkBtn').addEventListener('click', () => this.closeError());
+
+        // Close modals when clicking outside
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('bg-opacity-50')) {
+                this.closeAllModals();
+            }
+        });
+
+        // Close modals with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeAllModals();
+            }
+        });
+    }
+
+    // Alert Modal Methods
+    showAlert(title = 'Alert', message = '') {
+        document.getElementById('alertTitle').textContent = title;
+        document.getElementById('alertMessage').textContent = message;
+        document.getElementById('alertModal').classList.remove('hidden');
+    }
+
+    closeAlert() {
+        document.getElementById('alertModal').classList.add('hidden');
+    }
+
+    // Confirm Modal Methods
+    showConfirm(title = 'Confirm', message = '', onConfirm = null) {
+        document.getElementById('confirmTitle').textContent = title;
+        document.getElementById('confirmMessage').textContent = message;
+        document.getElementById('confirmModal').classList.remove('hidden');
+        
+        // Store the callback
+        this.confirmCallback = onConfirm;
+    }
+
+    confirmAction() {
+        if (this.confirmCallback) {
+            this.confirmCallback();
+        }
+        this.closeConfirm();
+    }
+
+    closeConfirm() {
+        document.getElementById('confirmModal').classList.add('hidden');
+        this.confirmCallback = null;
+    }
+
+    // Prompt Modal Methods
+    showPrompt(title = 'Input Required', message = '', defaultValue = '', onConfirm = null) {
+        document.getElementById('promptTitle').textContent = title;
+        document.getElementById('promptMessage').textContent = message;
+        document.getElementById('promptInput').value = defaultValue;
+        document.getElementById('promptModal').classList.remove('hidden');
+        
+        // Store the callback
+        this.promptCallback = onConfirm;
+        
+        // Focus on input
+        setTimeout(() => {
+            document.getElementById('promptInput').focus();
+        }, 100);
+    }
+
+    promptAction() {
+        const value = document.getElementById('promptInput').value;
+        if (this.promptCallback) {
+            this.promptCallback(value);
+        }
+        this.closePrompt();
+    }
+
+    closePrompt() {
+        document.getElementById('promptModal').classList.add('hidden');
+        this.promptCallback = null;
+    }
+
+    // Success Modal Methods
+    showSuccess(title = 'Success', message = '') {
+        document.getElementById('successTitle').textContent = title;
+        document.getElementById('successMessage').textContent = message;
+        document.getElementById('successModal').classList.remove('hidden');
+    }
+
+    closeSuccess() {
+        document.getElementById('successModal').classList.add('hidden');
+    }
+
+    // Error Modal Methods
+    showError(title = 'Error', message = '') {
+        document.getElementById('errorTitle').textContent = title;
+        document.getElementById('errorMessage').textContent = message;
+        document.getElementById('errorModal').classList.remove('hidden');
+    }
+
+    closeError() {
+        document.getElementById('errorModal').classList.add('hidden');
+    }
+
+    // Utility Methods
+    closeAllModals() {
+        this.closeAlert();
+        this.closeConfirm();
+        this.closePrompt();
+        this.closeSuccess();
+        this.closeError();
+    }
+}
+
+// Initialize modal system when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    window.modalSystem = new ModalSystem();
+});
+
+// Global functions for backward compatibility
+function showAlert(title, message) {
+    if (window.modalSystem) {
+        window.modalSystem.showAlert(title, message);
+    }
+}
+
+function showConfirm(title, message, onConfirm) {
+    if (window.modalSystem) {
+        window.modalSystem.showConfirm(title, message, onConfirm);
+    }
+}
+
+function showPrompt(title, message, defaultValue, onConfirm) {
+    if (window.modalSystem) {
+        window.modalSystem.showPrompt(title, message, defaultValue, onConfirm);
+    }
+}
+
+function showSuccess(title, message) {
+    if (window.modalSystem) {
+        window.modalSystem.showSuccess(title, message);
+    }
+}
+
+function showError(title, message) {
+    if (window.modalSystem) {
+        window.modalSystem.showError(title, message);
+    }
+}
+
+// Replace native alert, confirm, and prompt functions
+window.alert = function(message) {
+    showAlert('Alert', message);
+};
+
+window.confirm = function(message) {
+    return new Promise((resolve) => {
+        showConfirm('Confirm', message, () => resolve(true));
+        // If user clicks cancel, we need to handle that
+        const originalCloseConfirm = window.modalSystem.closeConfirm;
+        window.modalSystem.closeConfirm = function() {
+            originalCloseConfirm.call(this);
+            resolve(false);
+        };
+    });
+};
+
+window.prompt = function(message, defaultValue = '') {
+    return new Promise((resolve) => {
+        showPrompt('Input Required', message, defaultValue, (value) => resolve(value));
+        // If user clicks cancel, we need to handle that
+        const originalClosePrompt = window.modalSystem.closePrompt;
+        window.modalSystem.closePrompt = function() {
+            originalClosePrompt.call(this);
+            resolve(null);
+        };
+    });
+};
+</script>

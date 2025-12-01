@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Cycle Count{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/30 to-yellow-50/20">
+    <!-- Enhanced Page Header -->
+    <div class="bg-gradient-to-r from-amber-500 to-yellow-600 shadow-2xl border-b-4 border-amber-400">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div class="space-y-2">
+                    <div class="flex items-center gap-3">
+                        <a href="{% url 'stock_keeper:dashboard' %}" class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center hover:bg-white/30 transition-all duration-200">
+                            <i class="fas fa-arrow-left text-white text-lg"></i>
+                        </a>
+                        <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                            <i class="fas fa-clipboard-check text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-4xl font-bold text-white">Cycle Count</h1>
+                            <p class="text-amber-100 text-lg">Perform inventory cycle counts and audits</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-500 to-cyan-600 px-6 py-6 border-b border-blue-400/50">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-plus text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white">Start New Count</h3>
+                            <p class="text-blue-100 text-sm">Begin a new cycle count</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <a href="{% url 'stock_keeper:start_count_session' %}" 
+                       class="w-full inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-cyan-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+                        <i class="fas fa-play mr-2"></i>Start Count
+                    </a>
+                </div>
+            </div>
+
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                <div class="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-6 border-b border-green-400/50">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-list text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white">Active Counts</h3>
+                            <p class="text-green-100 text-sm">View ongoing counts</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <button onclick="viewActiveCounts()" 
+                            class="w-full inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-emerald-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+                        <i class="fas fa-eye mr-2"></i>View Counts
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                <div class="bg-gradient-to-r from-purple-500 to-pink-600 px-6 py-6 border-b border-purple-400/50">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-chart-bar text-white text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white">Reports</h3>
+                            <p class="text-purple-100 text-sm">View count reports</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <button onclick="viewReports()" 
+                            class="w-full inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 text-white font-semibold rounded-xl hover:from-purple-600 hover:to-pink-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+                        <i class="fas fa-chart-line mr-2"></i>View Reports
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Counts -->
+        <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden mb-8">
+            <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                        <i class="fas fa-history text-slate-900 text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Recent Cycle Counts</h2>
+                        <p class="text-slate-300 text-sm">Latest inventory count activities</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                {% if recent_counts %}
+                    <div class="space-y-4">
+                        {% for count in recent_counts %}
+                        <div class="bg-slate-50/50 rounded-2xl p-6 hover:bg-slate-100/50 transition-all duration-200 border border-slate-200/50">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-slate-900 text-lg">{{ count.warehouse.name }}</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3 text-sm">
+                                        <div class="flex items-center">
+                                            <i class="fas fa-calendar text-amber-500 mr-2"></i>
+                                            <span class="text-slate-600">Date: {{ count.start_date|date:"M d, Y" }}</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-user text-blue-500 mr-2"></i>
+                                            <span class="text-slate-600">Counted by: {{ count.counted_by.get_full_name|default:count.counted_by.username }}</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-boxes text-green-500 mr-2"></i>
+                                            <span class="text-slate-600">Items: {{ count.total_items }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col items-end space-y-3">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold 
+                                        {% if count.status == 'completed' %}bg-green-100 text-green-800 border border-green-200
+                                        {% elif count.status == 'in_progress' %}bg-amber-100 text-amber-800 border border-amber-200
+                                        {% else %}bg-slate-100 text-slate-800 border border-slate-200{% endif %} shadow-sm">
+                                        {{ count.status|title }}
+                                    </span>
+                                    <div class="flex space-x-2">
+                                        <button onclick="viewCountDetails('{{ count.id }}')" 
+                                                class="inline-flex items-center justify-center px-4 py-2 text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all duration-200">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        {% if count.status == 'in_progress' %}
+                                        <button onclick="continueCount('{{ count.id }}')" 
+                                                class="inline-flex items-center justify-center px-4 py-2 text-amber-600 hover:text-amber-800 bg-amber-100 hover:bg-amber-200 rounded-xl transition-all duration-200">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-clipboard-check text-slate-400 text-2xl"></i>
+                        </div>
+                        <p class="text-slate-500 text-lg">No recent cycle counts</p>
+                        <p class="text-slate-400 text-sm">Start your first cycle count to get started</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Count Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-chart-pie text-slate-900 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white">Count Accuracy</h3>
+                            <p class="text-slate-300 text-sm">Overall inventory accuracy</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="text-center">
+                        <div class="text-4xl font-bold text-slate-900 mb-2">98.5%</div>
+                        <div class="text-sm text-slate-600">Average accuracy rate</div>
+                        <div class="mt-4">
+                            <div class="w-full bg-slate-200 rounded-full h-2">
+                                <div class="bg-gradient-to-r from-green-500 to-emerald-600 h-2 rounded-full" style="width: 98.5%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-clock text-slate-900 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white">Count Frequency</h3>
+                            <p class="text-slate-300 text-sm">How often counts are performed</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-slate-600">High Value Items</span>
+                            <span class="text-sm font-semibold text-slate-900">Monthly</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-slate-600">Medium Value Items</span>
+                            <span class="text-sm font-semibold text-slate-900">Quarterly</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-slate-600">Low Value Items</span>
+                            <span class="text-sm font-semibold text-slate-900">Annually</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Count Methods -->
+        <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+            <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                        <i class="fas fa-cogs text-slate-900 text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-white">Count Methods</h2>
+                        <p class="text-slate-300 text-sm">Different approaches to cycle counting</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center mr-3">
+                                <i class="fas fa-random text-white text-lg"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-slate-900">Random Sampling</h3>
+                        </div>
+                        <p class="text-slate-600 text-sm">Count a random selection of items to estimate overall accuracy</p>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mr-3">
+                                <i class="fas fa-sort-amount-down text-white text-lg"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-slate-900">ABC Analysis</h3>
+                        </div>
+                        <p class="text-slate-600 text-sm">Focus on high-value items that have the most financial impact</p>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-200">
+                        <div class="flex items-center mb-4">
+                            <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mr-3">
+                                <i class="fas fa-calendar-alt text-white text-lg"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-slate-900">Scheduled Counts</h3>
+                        </div>
+                        <p class="text-slate-600 text-sm">Count specific categories on a regular schedule throughout the year</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewActiveCounts() {
+    window.location.href = "{% url 'stock_keeper:cycle_count_sessions' %}";
+}
+
+function viewReports() {
+    // Implement reports view
+    alert('Reports functionality will be implemented here');
+}
+
+function viewCountDetails(countId) {
+    window.location.href = `/stock-keeper/cycle-count/${countId}/details/`;
+}
+
+function continueCount(countId) {
+    window.location.href = `/stock-keeper/cycle-count/${countId}/continue/`;
+}
+
+function showSuccess(message) {
+    // Implement success notification
+    const notification = document.createElement('div');
+    notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg z-50';
+    notification.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas fa-check-circle mr-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    document.body.appendChild(notification);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies.trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

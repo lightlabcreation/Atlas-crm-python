@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventory and Warehouse{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white">
+    <!-- Simple Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-boxes text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">Inventory and Warehouse</h1>
+                        <p class="mt-1 text-sm text-gray-500">Monitor and manage your product inventory efficiently</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'dashboard:index' %}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-home mr-2"></i>
+                        Dashboard
+                    </a>
+                    <a href="{% url 'inventory:add_product' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Product
+                    </a>
+                    <a href="{% url 'inventory:products' %}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-list mr-2"></i>
+                        View All Products
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Total Products -->
+            <div class="bg-gray-50 rounded-lg border border-gray-300">
+                <div class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Total Products</p>
+                            <p class="text-2xl font-semibold text-gray-900">{{ total_products }}</p>
+                        </div>
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-boxes text-blue-600"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{% url 'inventory:products' %}" class="text-sm text-blue-600 hover:text-blue-700">
+                            View details →
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Low Stock Items -->
+            <div class="bg-gray-50 rounded-lg border border-gray-300">
+                <div class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Low Stock Items</p>
+                            <p class="text-2xl font-semibold text-gray-900">{{ low_stock_items }}</p>
+                        </div>
+                        <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-red-600"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{% url 'inventory:products' %}?status=low_stock" class="text-sm text-red-600 hover:text-red-700">
+                            View details →
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warehouses -->
+            <div class="bg-gray-50 rounded-lg border border-gray-300">
+                <div class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Warehouses</p>
+                            <p class="text-2xl font-semibold text-gray-900">{{ warehouses_count }}</p>
+                        </div>
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-warehouse text-purple-600"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{% url 'inventory:warehouses' %}" class="text-sm text-purple-600 hover:text-purple-700">
+                            View details →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock Alert -->
+        {% if low_stock_products %}
+        <div class="bg-red-50 border border-red-200 rounded-lg mb-6">
+            <div class="px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-exclamation-triangle text-red-600"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-medium text-red-900">Low Stock Items (≤10 units)</h3>
+                            <p class="text-sm text-red-700">Products that need immediate attention</p>
+                        </div>
+                    </div>
+                    <div class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
+                        {{ low_stock_products|length }} items
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Low Stock Products Table -->
+        <div class="bg-gray-50 rounded-lg border border-gray-300 mb-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Low Stock Products</h3>
+                <p class="text-sm text-gray-500">Products requiring immediate restocking</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Stock</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for item in low_stock_products %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center mr-3">
+                                        {% if item.product.image %}
+                                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name_en }}" class="w-10 h-10 rounded-lg object-cover">
+                                        {% else %}
+                                            <i class="fas fa-image text-gray-400"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">{{ item.product.name_en }}</div>
+                                        <div class="text-sm text-gray-500">{{ item.product.name_ar }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.code }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.current_stock }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if item.current_stock == 0 %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <i class="fas fa-times mr-1"></i>
+                                        Out of Stock
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                                        Low Stock
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                {% if item.product.id %}
+                                    <a href="{% url 'inventory:edit_product' product_id=item.product.id %}" class="text-green-600 hover:text-green-900">
+                                        <i class="fas fa-edit mr-1"></i>
+                                        Edit + Restock
+                                    </a>
+                                {% else %}
+                                    <span class="text-gray-400">
+                                        <i class="fas fa-edit mr-1"></i>
+                                        No ID
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Quick Actions -->
+        <div class="bg-gray-50 rounded-lg border border-gray-300">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
+                <p class="text-sm text-gray-500">Common inventory management tasks</p>
+            </div>
+            <div class="px-6 py-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <a href="{% url 'inventory:add_product' %}" class="flex items-center p-4 bg-white rounded-lg border border-gray-200 hover:bg-gray-50">
+                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-plus text-blue-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900">Add Product</h4>
+                            <p class="text-xs text-gray-500">Create new product</p>
+                        </div>
+                    </a>
+                    
+                    <a href="{% url 'inventory:products' %}" class="flex items-center p-4 bg-white rounded-lg border border-gray-200 hover:bg-gray-50">
+                        <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-list text-green-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900">View Products</h4>
+                            <p class="text-xs text-gray-500">Browse all products</p>
+                        </div>
+                    </a>
+                    
+                    <a href="{% url 'inventory:movements' %}" class="flex items-center p-4 bg-white rounded-lg border border-gray-200 hover:bg-gray-50">
+                        <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-truck text-purple-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900">Inventory Movements</h4>
+                            <p class="text-xs text-gray-500">View stock movements</p>
+                        </div>
+                    </a>
+                    
+                    <a href="{% url 'inventory:warehouses' %}" class="flex items-center p-4 bg-white rounded-lg border border-gray-200 hover:bg-gray-50">
+                        <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-warehouse text-orange-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900">Warehouses</h4>
+                            <p class="text-xs text-gray-500">Manage warehouses</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

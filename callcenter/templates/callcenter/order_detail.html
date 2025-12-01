@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order #{{ order.id }} Details{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100">
+    <!-- Simple Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-receipt text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">Order #{{ order.id }}</h1>
+                        <p class="mt-1 text-sm text-gray-500">Order details and call history</p>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'callcenter:manager_order_list' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Orders
+                    </a>
+                    {% if user.has_role == 'Call Center Agent' %}
+                        <a href="{% url 'callcenter:agent_log_call' order.id %}" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            <i class="fas fa-phone mr-2"></i>
+                            Log Call
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Order Details Card -->
+        <div class="bg-white rounded-lg border border-gray-200 mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-info-circle text-orange-600"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-medium text-gray-900">Order Information</h2>
+                            <p class="text-sm text-gray-500">Details and current status of the order</p>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                            {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                            {% elif order.status == 'confirmed' %}bg-green-100 text-green-800
+                            {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                            {% elif order.status == 'delivered' %}bg-blue-100 text-blue-800
+                            {% elif order.status == 'processing' %}bg-purple-100 text-purple-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ order.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Customer</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ order.customer }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Phone</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ order.customer_phone|default:"N/A" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Product</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ order.product_name|default:"N/A" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Quantity</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ order.quantity }}</dd>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Price per Unit</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ order.price_per_unit|floatformat:2 }} AED</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Total Price</dt>
+                            <dd class="mt-1 text-sm font-bold text-gray-900">{{ order.total_amount|floatformat:2 }} AED</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Order Date</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ order.created_at|date:"F d, Y, g:i a" }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Shipping Address</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ order.shipping_address|default:"N/A" }}</dd>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Status Timeline -->
+        <div class="bg-white rounded-lg border border-gray-200 mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-clock text-blue-600"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-medium text-gray-900">Order Timeline</h2>
+                        <p class="text-sm text-gray-500">Order status progression</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="flow-root">
+                    <ul class="-mb-8">
+                        <li>
+                            <div class="relative pb-8">
+                                <div class="relative flex space-x-3">
+                                    <div>
+                                        <span class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white">
+                                            <i class="fas fa-check text-white text-sm"></i>
+                                        </span>
+                                    </div>
+                                    <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                                        <div>
+                                            <p class="text-sm text-gray-500">Order Created</p>
+                                        </div>
+                                        <div class="text-right text-sm whitespace-nowrap text-gray-500">
+                                            {{ order.created_at|date:"M d, Y" }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        
+                        {% if order.status == 'confirmed' or order.status == 'processing' or order.status == 'delivered' %}
+                        <li>
+                            <div class="relative pb-8">
+                                <div class="relative flex space-x-3">
+                                    <div>
+                                        <span class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white">
+                                            <i class="fas fa-check text-white text-sm"></i>
+                                        </span>
+                                    </div>
+                                    <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                                        <div>
+                                            <p class="text-sm text-gray-500">Order Confirmed</p>
+                                        </div>
+                                        <div class="text-right text-sm whitespace-nowrap text-gray-500">
+                                            {{ order.updated_at|date:"M d, Y" }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        {% endif %}
+                        
+                        {% if order.status == 'processing' or order.status == 'delivered' %}
+                        <li>
+                            <div class="relative pb-8">
+                                <div class="relative flex space-x-3">
+                                    <div>
+                                        <span class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white">
+                                            <i class="fas fa-cog text-white text-sm"></i>
+                                        </span>
+                                    </div>
+                                    <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                                        <div>
+                                            <p class="text-sm text-gray-500">Processing</p>
+                                        </div>
+                                        <div class="text-right text-sm whitespace-nowrap text-gray-500">
+                                            {{ order.updated_at|date:"M d, Y" }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        {% endif %}
+                        
+                        {% if order.status == 'delivered' %}
+                        <li>
+                            <div class="relative">
+                                <div class="relative flex space-x-3">
+                                    <div>
+                                        <span class="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white">
+                                            <i class="fas fa-truck text-white text-sm"></i>
+                                        </span>
+                                    </div>
+                                    <div class="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                                        <div>
+                                            <p class="text-sm text-gray-500">Delivered</p>
+                                        </div>
+                                        <div class="text-right text-sm whitespace-nowrap text-gray-500">
+                                            {{ order.updated_at|date:"M d, Y" }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call History -->
+        <div class="bg-white rounded-lg border border-gray-200">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-phone text-purple-600"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-medium text-gray-900">Call History</h2>
+                        <p class="text-sm text-gray-500">Previous calls and interactions</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <div class="text-center py-8">
+                    <i class="fas fa-phone text-gray-400 text-4xl mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">No calls recorded</h3>
+                    <p class="text-gray-500">No call history available for this order.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

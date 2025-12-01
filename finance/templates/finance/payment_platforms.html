@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment Platforms - Atlas Fulfillment{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        {% if is_seller %}
+                            My Payment Platforms
+                        {% else %}
+                            Payment Platform Integrations
+                        {% endif %}
+                    </h1>
+                    <p class="ml-4 text-gray-600">
+                        {% if is_seller %}
+                            Connect your online stores to sync payments and orders
+                        {% else %}
+                            Manage payment platform integrations for automated data sync
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'finance:add_payment_platform' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center transition-colors duration-200">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Platform
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-plug text-2xl text-blue-500"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Platforms</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ total_platforms }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-check-circle text-2xl text-green-500"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Active Connections</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ active_platforms }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-clock text-2xl text-orange-500"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Pending Verification</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ pending_platforms }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Platforms List -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="bg-blue-500 text-white px-6 py-3 rounded-t-lg">
+                <h3 class="text-lg font-semibold">
+                    {% if is_seller %}
+                        My Connected Platforms
+                    {% else %}
+                        Payment Platform Integrations
+                    {% endif %}
+                </h3>
+            </div>
+            
+            <div class="p-6">
+                {% if platforms %}
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {% for platform in platforms %}
+                        <div class="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0">
+                                        {% if platform.platform_name == 'amazon_seller' %}
+                                            <i class="fab fa-amazon text-2xl text-orange-500"></i>
+                                        {% elif platform.platform_name == 'shopify' %}
+                                            <i class="fab fa-shopify text-2xl text-green-500"></i>
+                                        {% elif platform.platform_name == 'magento' %}
+                                            <i class="fas fa-shopping-cart text-2xl text-orange-600"></i>
+                                        {% elif platform.platform_name == 'woocommerce' %}
+                                            <i class="fab fa-wordpress text-2xl text-blue-500"></i>
+                                        {% elif platform.platform_name == 'etsy' %}
+                                            <i class="fas fa-store text-2xl text-orange-400"></i>
+                                        {% elif platform.platform_name == 'ebay' %}
+                                            <i class="fas fa-tags text-2xl text-blue-600"></i>
+                                        {% else %}
+                                            <i class="fas fa-globe text-2xl text-gray-500"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="ml-3">
+                                        <h4 class="text-lg font-medium text-gray-900">{{ platform.get_platform_display_name }}</h4>
+                                        <p class="text-sm text-gray-500">{{ platform.store_name }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center">
+                                    {% if platform.status == 'active' %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                            <i class="fas fa-check-circle mr-1"></i>
+                                            Active
+                                        </span>
+                                    {% elif platform.status == 'pending' %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            <i class="fas fa-clock mr-1"></i>
+                                            Pending
+                                        </span>
+                                    {% elif platform.status == 'error' %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                                            Error
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            <i class="fas fa-pause mr-1"></i>
+                                            Inactive
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="space-y-2 mb-4">
+                                {% if platform.store_url %}
+                                    <p class="text-sm text-gray-600">
+                                        <i class="fas fa-link mr-2"></i>
+                                        <a href="{{ platform.store_url }}" target="_blank" class="text-blue-500 hover:text-blue-700">{{ platform.store_url }}</a>
+                                    </p>
+                                {% endif %}
+                                
+                                {% if platform.last_sync %}
+                                    <p class="text-sm text-gray-600">
+                                        <i class="fas fa-sync mr-2"></i>
+                                        Last sync: {{ platform.last_sync|date:"M d, Y H:i" }}
+                                    </p>
+                                {% endif %}
+                                
+                                <p class="text-sm text-gray-600">
+                                    <i class="fas fa-cog mr-2"></i>
+                                    Sync frequency: {{ platform.get_sync_frequency_display }}
+                                </p>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <div class="flex space-x-2">
+                                    <a href="{% url 'finance:test_platform_connection' platform.id %}" class="text-blue-500 hover:text-blue-700 text-sm font-medium">
+                                        <i class="fas fa-vial mr-1"></i>
+                                        Test
+                                    </a>
+                                    <a href="{% url 'finance:sync_platform_data' platform.id %}" class="text-green-500 hover:text-green-700 text-sm font-medium">
+                                        <i class="fas fa-sync mr-1"></i>
+                                        Sync
+                                    </a>
+                                    <a href="{% url 'finance:platform_sync_logs' platform.id %}" class="text-purple-500 hover:text-purple-700 text-sm font-medium">
+                                        <i class="fas fa-list mr-1"></i>
+                                        Logs
+                                    </a>
+                                </div>
+                                
+                                <div class="flex space-x-2">
+                                    <a href="{% url 'finance:edit_payment_platform' platform.id %}" class="text-gray-500 hover:text-gray-700">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'finance:delete_payment_platform' platform.id %}" class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-12">
+                        <i class="fas fa-plug text-6xl text-gray-300 mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">
+                            {% if is_seller %}
+                                No payment platforms connected yet
+                            {% else %}
+                                No payment platform integrations found
+                            {% endif %}
+                        </h3>
+                        <p class="text-gray-500 mb-6">
+                            {% if is_seller %}
+                                Connect your online stores to automatically sync payments and orders.
+                            {% else %}
+                                Add payment platform integrations to automate data synchronization.
+                            {% endif %}
+                        </p>
+                        <a href="{% url 'finance:add_payment_platform' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-md inline-flex items-center transition-colors duration-200">
+                            <i class="fas fa-plus mr-2"></i>
+                            Add Your First Platform
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Supported Platforms Info -->
+        <div class="mt-8 bg-white rounded-lg shadow">
+            <div class="bg-gray-500 text-white px-6 py-3 rounded-t-lg">
+                <h3 class="text-lg font-semibold">Supported Platforms</h3>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Amazon Seller Central -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <i class="fab fa-amazon text-2xl text-orange-500 mr-3"></i>
+                            <h4 class="text-lg font-medium">Amazon Seller Central</h4>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">Connect your Amazon Seller Central account to sync orders and payments automatically.</p>
+                        <ul class="text-xs text-gray-500 space-y-1">
+                            <li>• Order synchronization</li>
+                            <li>• Payment tracking</li>
+                            <li>• Inventory updates</li>
+                        </ul>
+                    </div>
+
+                    <!-- Shopify -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <i class="fab fa-shopify text-2xl text-green-500 mr-3"></i>
+                            <h4 class="text-lg font-medium">Shopify</h4>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">Integrate your Shopify store to automatically sync orders, payments, and customer data.</p>
+                        <ul class="text-xs text-gray-500 space-y-1">
+                            <li>• Real-time order sync</li>
+                            <li>• Payment processing</li>
+                            <li>• Customer management</li>
+                        </ul>
+                    </div>
+
+                    <!-- Magento -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <i class="fas fa-shopping-cart text-2xl text-orange-600 mr-3"></i>
+                            <h4 class="text-lg font-medium">Magento</h4>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">Connect your Magento store for seamless order and payment synchronization.</p>
+                        <ul class="text-xs text-gray-500 space-y-1">
+                            <li>• Order management</li>
+                            <li>• Payment tracking</li>
+                            <li>• Product sync</li>
+                        </ul>
+                    </div>
+
+                    <!-- WooCommerce -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <i class="fab fa-wordpress text-2xl text-blue-500 mr-3"></i>
+                            <h4 class="text-lg font-medium">WooCommerce</h4>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">Integrate your WooCommerce store to sync orders and payments automatically.</p>
+                        <ul class="text-xs text-gray-500 space-y-1">
+                            <li>• WordPress integration</li>
+                            <li>• Order synchronization</li>
+                            <li>• Payment processing</li>
+                        </ul>
+                    </div>
+
+                    <!-- Etsy -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <i class="fas fa-store text-2xl text-orange-400 mr-3"></i>
+                            <h4 class="text-lg font-medium">Etsy</h4>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">Connect your Etsy shop to sync orders and track payments from your handmade marketplace.</p>
+                        <ul class="text-xs text-gray-500 space-y-1">
+                            <li>• Handmade marketplace</li>
+                            <li>• Order tracking</li>
+                            <li>• Payment sync</li>
+                        </ul>
+                    </div>
+
+                    <!-- eBay -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center mb-3">
+                            <i class="fas fa-tags text-2xl text-blue-600 mr-3"></i>
+                            <h4 class="text-lg font-medium">eBay</h4>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">Integrate your eBay store to sync orders and payments from the world's largest marketplace.</p>
+                        <ul class="text-xs text-gray-500 space-y-1">
+                            <li>• Marketplace integration</li>
+                            <li>• Order management</li>
+                            <li>• Payment tracking</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

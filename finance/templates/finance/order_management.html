@@ -1,0 +1,774 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Billing and Invoicing{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white">
+    <!-- Page Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-shopping-cart text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">Billing and Invoicing</h1>
+                        <p class="mt-1 text-sm text-gray-500">Manage orders, generate invoices, and track financial transactions</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'dashboard:index' %}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-home mr-2"></i>
+                        Dashboard
+                    </a>
+                    <a href="{% url 'finance:accountant_dashboard' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Finance
+                    </a>
+                    <a href="{% url 'orders:create' %}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-plus mr-2"></i>
+                        Create New Order
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Barcode Scanner Section -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fas fa-barcode text-blue-600 text-xl mr-3"></i>
+                    <div>
+                        <h3 class="text-sm font-medium text-blue-900">Scan Order Barcode</h3>
+                        <p class="text-xs text-blue-700">Use barcode scanner to quickly find orders</p>
+                    </div>
+                </div>
+                <button type="button" id="cameraBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                    <i class="fas fa-camera mr-2"></i>
+                    Open Scanner
+                </button>
+            </div>
+            <div id="cameraContainer" class="mt-4 hidden">
+                <video id="barcodeCamera" width="100%" height="300" style="border: 1px solid #ccc; border-radius: 8px;"></video>
+                <div class="mt-2 flex gap-2">
+                    <input type="text" id="barcodeInput" placeholder="Or enter order code manually" class="flex-1 border-gray-300 rounded-md px-3 py-2 text-sm">
+                    <button type="button" id="stopCameraBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-stop mr-2"></i>
+                        Stop Camera
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <!-- Total Orders -->
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200 shadow-sm p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-blue-600 uppercase tracking-wide mb-1">Total Orders</p>
+                        <p class="text-2xl font-bold text-blue-900">{{ total_orders|default:"0" }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-200 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-shopping-cart text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Orders -->
+            <div class="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg border border-orange-200 shadow-sm p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-orange-600 uppercase tracking-wide mb-1">Pending Orders</p>
+                        <p class="text-2xl font-bold text-orange-900">{{ pending_orders|default:"0" }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-orange-200 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-clock text-orange-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completed Orders -->
+            <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg border border-green-200 shadow-sm p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-green-600 uppercase tracking-wide mb-1">Completed Orders</p>
+                        <p class="text-2xl font-bold text-green-900">{{ completed_orders|default:"0" }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-200 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Revenue -->
+            <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg border border-purple-200 shadow-sm p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-purple-600 uppercase tracking-wide mb-1">Total Revenue</p>
+                        <p class="text-2xl font-bold text-purple-900">AED {{ total_revenue|floatformat:0|default:"0" }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-200 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-dollar-sign text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Status Filters -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6 overflow-hidden">
+            <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-3">
+                <h3 class="text-lg font-semibold text-white flex items-center">
+                    <i class="fas fa-filter mr-2"></i>
+                    Quick Filters
+                </h3>
+            </div>
+            <div class="p-4">
+                <div class="flex flex-wrap gap-2 justify-center">
+                    <a href="{% url 'finance:order_management' %}" 
+                       class="px-4 py-2 rounded-md text-xs font-semibold transition-all duration-200 {% if not current_filters.status %}bg-orange-600 text-white shadow-md transform scale-105{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
+                        <i class="fas fa-list mr-1"></i>
+                        All Orders ({{ total_orders }})
+                    </a>
+                    
+                    <a href="{% url 'finance:order_management' %}?status=pending" 
+                       class="px-4 py-2 rounded-md text-xs font-semibold transition-all duration-200 {% if current_filters.status == 'pending' %}bg-yellow-500 text-white shadow-md transform scale-105{% else %}bg-yellow-100 text-yellow-800 hover:bg-yellow-200{% endif %}">
+                        <i class="fas fa-clock mr-1"></i>
+                        Pending ({{ pending_orders }})
+                    </a>
+                    
+                    <a href="{% url 'finance:order_management' %}?status=confirmed" 
+                       class="px-4 py-2 rounded-md text-xs font-semibold transition-all duration-200 {% if current_filters.status == 'confirmed' %}bg-blue-500 text-white shadow-md transform scale-105{% else %}bg-blue-100 text-blue-800 hover:bg-blue-200{% endif %}">
+                        <i class="fas fa-check mr-1"></i>
+                        Confirmed ({{ confirmed_orders }})
+                    </a>
+                    
+                    <a href="{% url 'finance:order_management' %}?status=processing" 
+                       class="px-4 py-2 rounded-md text-xs font-semibold transition-all duration-200 {% if current_filters.status == 'processing' %}bg-purple-500 text-white shadow-md transform scale-105{% else %}bg-purple-100 text-purple-800 hover:bg-purple-200{% endif %}">
+                        <i class="fas fa-cog mr-1"></i>
+                        Processing ({{ processing_orders }})
+                    </a>
+                    
+                    <a href="{% url 'finance:order_management' %}?status=packaged" 
+                       class="px-4 py-2 rounded-md text-xs font-semibold transition-all duration-200 {% if current_filters.status == 'packaged' %}bg-indigo-500 text-white shadow-md transform scale-105{% else %}bg-indigo-100 text-indigo-800 hover:bg-indigo-200{% endif %}">
+                        <i class="fas fa-box mr-1"></i>
+                        Packaged ({{ packaged_orders }})
+                    </a>
+                    
+                    <a href="{% url 'finance:order_management' %}?status=shipped" 
+                       class="px-4 py-2 rounded-md text-xs font-semibold transition-all duration-200 {% if current_filters.status == 'shipped' %}bg-teal-500 text-white shadow-md transform scale-105{% else %}bg-teal-100 text-teal-800 hover:bg-teal-200{% endif %}">
+                        <i class="fas fa-shipping-fast mr-1"></i>
+                        Shipped ({{ shipped_orders }})
+                    </a>
+                    
+                    <a href="{% url 'finance:order_management' %}?status=delivered" 
+                       class="px-4 py-2 rounded-md text-xs font-semibold transition-all duration-200 {% if current_filters.status == 'delivered' %}bg-green-500 text-white shadow-md transform scale-105{% else %}bg-green-100 text-green-800 hover:bg-green-200{% endif %}">
+                        <i class="fas fa-check-circle mr-1"></i>
+                        Delivered ({{ completed_orders }})
+                    </a>
+                    
+                    <a href="{% url 'finance:order_management' %}?status=cancelled" 
+                       class="px-4 py-2 rounded-md text-xs font-semibold transition-all duration-200 {% if current_filters.status == 'cancelled' %}bg-red-500 text-white shadow-md transform scale-105{% else %}bg-red-100 text-red-800 hover:bg-red-200{% endif %}">
+                        <i class="fas fa-times-circle mr-1"></i>
+                        Cancelled ({{ cancelled_orders }})
+                    </a>
+                    
+                    <a href="{% url 'finance:order_management' %}?status=postponed" 
+                       class="px-4 py-2 rounded-md text-xs font-semibold transition-all duration-200 {% if current_filters.status == 'postponed' %}bg-gray-500 text-white shadow-md transform scale-105{% else %}bg-gray-100 text-gray-800 hover:bg-gray-200{% endif %}">
+                        <i class="fas fa-calendar-times mr-1"></i>
+                        Postponed ({{ postponed_orders }})
+                    </a>
+                    
+                    <a href="{% url 'finance:order_management' %}?payment_status=paid" 
+                       class="px-4 py-2 rounded-md text-xs font-semibold transition-all duration-200 {% if current_filters.payment_status == 'paid' %}bg-emerald-500 text-white shadow-md transform scale-105{% else %}bg-emerald-100 text-emerald-800 hover:bg-emerald-200{% endif %}">
+                        <i class="fas fa-money-bill-wave mr-1"></i>
+                        Paid ({{ paid_orders }})
+                    </a>
+                    
+                    <a href="{% url 'finance:order_management' %}?payment_status=pending" 
+                       class="px-4 py-2 rounded-md text-xs font-semibold transition-all duration-200 {% if current_filters.payment_status == 'pending' %}bg-amber-500 text-white shadow-md transform scale-105{% else %}bg-amber-100 text-amber-800 hover:bg-amber-200{% endif %}">
+                        <i class="fas fa-hourglass-half mr-1"></i>
+                        Payment Pending ({{ pending_payment_orders }})
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- Advanced Filters -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6 overflow-hidden">
+            <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-3">
+                <h3 class="text-lg font-semibold text-white flex items-center">
+                    <i class="fas fa-sliders-h mr-2"></i>
+                    Advanced Filters
+                </h3>
+            </div>
+            <div class="p-6">
+            
+            <!-- Search Section -->
+            <form method="GET" id="search-form">
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                    <div class="flex gap-2">
+                        <input type="text" name="search" placeholder="Search by order number, customer name, phone, product..." 
+                               value="{{ current_filters.search }}"
+                               class="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                        <button type="submit" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md flex items-center">
+                            <i class="fas fa-search mr-2"></i>
+                            Search
+                        </button>
+                    </div>
+                </div>
+            </form>
+            
+            <!-- Filter Grid -->
+            <form method="GET" id="filter-form">
+                <!-- Hidden search field to maintain search when applying filters -->
+                <input type="hidden" name="search" value="{{ current_filters.search }}">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
+                    <!-- Status Filter -->
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-tasks mr-2 text-orange-600"></i>
+                            Order Status
+                        </label>
+                        <select name="status" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                            <option value="">All Statuses</option>
+                            <option value="pending" {% if current_filters.status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="confirmed" {% if current_filters.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                            <option value="processing" {% if current_filters.status == 'processing' %}selected{% endif %}>Processing</option>
+                            <option value="packaged" {% if current_filters.status == 'packaged' %}selected{% endif %}>Packaged</option>
+                            <option value="shipped" {% if current_filters.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                            <option value="delivered" {% if current_filters.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                            <option value="cancelled" {% if current_filters.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                            <option value="postponed" {% if current_filters.status == 'postponed' %}selected{% endif %}>Postponed</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Workflow Status Filter -->
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-cogs mr-2 text-orange-600"></i>
+                            Workflow Status
+                        </label>
+                        <select name="workflow_status" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                            <option value="">All Workflow Statuses</option>
+                            <option value="seller_submitted" {% if current_filters.workflow_status == 'seller_submitted' %}selected{% endif %}>Seller Submitted</option>
+                            <option value="callcenter_review" {% if current_filters.workflow_status == 'callcenter_review' %}selected{% endif %}>Call Center Review</option>
+                            <option value="callcenter_approved" {% if current_filters.workflow_status == 'callcenter_approved' %}selected{% endif %}>Call Center Approved</option>
+                            <option value="packaging_in_progress" {% if current_filters.workflow_status == 'packaging_in_progress' %}selected{% endif %}>Packaging In Progress</option>
+                            <option value="packaging_completed" {% if current_filters.workflow_status == 'packaging_completed' %}selected{% endif %}>Packaging Completed</option>
+                            <option value="ready_for_delivery" {% if current_filters.workflow_status == 'ready_for_delivery' %}selected{% endif %}>Ready for Delivery</option>
+                            <option value="delivery_in_progress" {% if current_filters.workflow_status == 'delivery_in_progress' %}selected{% endif %}>Delivery In Progress</option>
+                            <option value="delivery_completed" {% if current_filters.workflow_status == 'delivery_completed' %}selected{% endif %}>Delivery Completed</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Date Filter -->
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-calendar mr-2 text-orange-600"></i>
+                            Time Period
+                        </label>
+                        <select name="date" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                            <option value="">All Dates</option>
+                            <option value="today" {% if current_filters.date == 'today' %}selected{% endif %}>Today</option>
+                            <option value="yesterday" {% if current_filters.date == 'yesterday' %}selected{% endif %}>Yesterday</option>
+                            <option value="week" {% if current_filters.date == 'week' %}selected{% endif %}>This Week</option>
+                            <option value="month" {% if current_filters.date == 'month' %}selected{% endif %}>This Month</option>
+                            <option value="quarter" {% if current_filters.date == 'quarter' %}selected{% endif %}>This Quarter</option>
+                            <option value="year" {% if current_filters.date == 'year' %}selected{% endif %}>This Year</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Emirate Filter -->
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-map-marker-alt mr-2 text-orange-600"></i>
+                            Emirate
+                        </label>
+                        <select name="emirate" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                            <option value="">All Emirates</option>
+                            {% for emirate in emirates %}
+                            <option value="{{ emirate }}" {% if current_filters.emirate == emirate %}selected{% endif %}>{{ emirate }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Seller Filter -->
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-store mr-2 text-orange-600"></i>
+                            Seller
+                        </label>
+                        <select name="seller" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                            <option value="">All Sellers</option>
+                            {% for seller in sellers %}
+                            <option value="{{ seller.id }}" {% if current_filters.seller == seller.id|stringformat:"s" %}selected{% endif %}>
+                                {{ seller.first_name }} {{ seller.last_name }} ({{ seller.email }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Agent Filter -->
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-user-tie mr-2 text-orange-600"></i>
+                            Call Center Agent
+                        </label>
+                        <select name="agent" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                            <option value="">All Agents</option>
+                            {% for agent in agents %}
+                            <option value="{{ agent.id }}" {% if current_filters.agent == agent.id|stringformat:"s" %}selected{% endif %}>
+                                {{ agent.first_name }} {{ agent.last_name }} ({{ agent.email }})
+                            </option>
+                            {% endfor %}
+                    </select>
+                </div>
+                    
+                    <!-- Amount Range -->
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-dollar-sign mr-2 text-orange-600"></i>
+                            Amount Range (AED)
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="number" name="amount_min" placeholder="Min Amount" 
+                                   value="{{ current_filters.amount_min }}"
+                                   class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                            <input type="number" name="amount_max" placeholder="Max Amount" 
+                                   value="{{ current_filters.amount_max }}"
+                                   class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Status Filter -->
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-credit-card mr-2 text-orange-600"></i>
+                            حالة الدفع
+                        </label>
+                        <select name="payment_status" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                            <option value="">جميع حالات الدفع</option>
+                            <option value="paid" {% if current_filters.payment_status == 'paid' %}selected{% endif %}>مدفوع</option>
+                            <option value="pending" {% if current_filters.payment_status == 'pending' %}selected{% endif %}>معلق</option>
+                            <option value="failed" {% if current_filters.payment_status == 'failed' %}selected{% endif %}>فشل الدفع</option>
+                            <option value="no_payment" {% if current_filters.payment_status == 'no_payment' %}selected{% endif %}>بدون دفع</option>
+                    </select>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+                    <div class="flex gap-2">
+                        <button type="submit" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-md flex items-center">
+                            <i class="fas fa-filter mr-2"></i>
+                            Apply Filters
+                    </button>
+                        <a href="{% url 'finance:order_management' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md flex items-center">
+                            <i class="fas fa-times mr-2"></i>
+                            Reset
+                        </a>
+                        {% if current_filters.search or current_filters.status or current_filters.workflow_status or current_filters.date or current_filters.emirate or current_filters.seller or current_filters.agent or current_filters.amount_min or current_filters.amount_max or current_filters.payment_status %}
+                        <div class="bg-orange-100 text-orange-800 px-3 py-2 rounded-md text-sm flex items-center">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Active Filters
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        <span id="filter-count">{{ orders.paginator.count }}</span> order(s)
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-white flex items-center">
+                        <i class="fas fa-list mr-2"></i>
+                        Orders
+                    </h3>
+                    <div class="flex space-x-2">
+                        <button id="export-btn" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md flex items-center text-sm">
+                            <i class="fas fa-download mr-2"></i>
+                            تصدير البيانات
+                        </button>
+                        <button id="print-btn" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-md flex items-center text-sm">
+                            <i class="fas fa-print mr-2"></i>
+                            طباعة
+                        </button>
+                        <button id="refresh-btn" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md flex items-center text-sm">
+                            <i class="fas fa-sync-alt mr-2"></i>
+                            تحديث
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="w-full">
+                <table class="w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                        <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order</th>
+                        <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                        <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                        <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                        <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="orders-table-body">
+                        {% for order in orders %}
+                        <tr class="hover:bg-gray-50 transition duration-150 ease-in-out">
+                            <td class="px-3 py-2">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-8 w-8">
+                                        <div class="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center">
+                                            <i class="fas fa-shopping-cart text-orange-600 text-xs"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ml-2">
+                                        <div class="text-sm font-medium text-gray-900">{{ order.order_code }}</div>
+                                        <div class="text-xs text-gray-500">#{{ order.id }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-3 py-2">
+                                <div class="text-sm font-medium text-gray-900">{{ order.customer }}</div>
+                                <div class="text-xs text-gray-500">{{ order.customer_phone|default:"No phone" }}</div>
+                            </td>
+                            <td class="px-3 py-2">
+                                <div class="text-sm font-medium text-gray-900">{{ order.product.name_en|default:"N/A" }}</div>
+                                <div class="text-xs text-gray-500">Qty: {{ order.quantity }}</div>
+                            </td>
+                            <td class="px-3 py-2">
+                                <div class="text-sm font-medium text-gray-900">AED {{ order.total_price_aed|default:order.price_per_unit|floatformat:0 }}</div>
+                                <div class="text-xs text-gray-500">Per unit: AED {{ order.price_per_unit|floatformat:0 }}</div>
+                            </td>
+                            <td class="px-3 py-2">
+                                {% if order.status == 'pending' %}
+                                <span class="px-2 py-1 inline-flex text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    <i class="fas fa-clock mr-1"></i>Pending
+                                </span>
+                                {% elif order.status == 'confirmed' %}
+                                <span class="px-2 py-1 inline-flex text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    <i class="fas fa-check mr-1"></i>Confirmed
+                                </span>
+                                {% elif order.status == 'processing' %}
+                                <span class="px-2 py-1 inline-flex text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                                    <i class="fas fa-cog mr-1"></i>Processing
+                                </span>
+                                {% elif order.status == 'shipped' %}
+                                <span class="px-2 py-1 inline-flex text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">
+                                    <i class="fas fa-shipping-fast mr-1"></i>Shipped
+                                </span>
+                                {% elif order.status == 'delivered' %}
+                                <span class="px-2 py-1 inline-flex text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                    <i class="fas fa-check-circle mr-1"></i>Delivered
+                                </span>
+                                {% elif order.status == 'cancelled' %}
+                                <span class="px-2 py-1 inline-flex text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                    <i class="fas fa-times-circle mr-1"></i>Cancelled
+                                </span>
+                                {% else %}
+                                <span class="px-2 py-1 inline-flex text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                    {{ order.status|title }}
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-3 py-2 text-sm text-gray-900">
+                                {{ order.date|date:"M d, Y" }}
+                            </td>
+                            <td class="px-3 py-2 text-sm font-medium">
+                                <div class="flex space-x-2">
+                                    <a href="{% url 'finance:order_detail' order.id %}" class="text-orange-600 hover:text-orange-500" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'finance:invoice_generation' order.id %}" class="text-green-600 hover:text-green-500" title="Generate Invoice">
+                                        <i class="fas fa-file-invoice"></i>
+                                    </a>
+                                    <a href="{% url 'finance:fee_management' order.id %}" class="text-blue-600 hover:text-blue-500" title="Manage Fees">
+                                        <i class="fas fa-coins"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="px-3 py-8 text-center text-gray-500">
+                                <div class="flex flex-col items-center">
+                                    <i class="fas fa-search text-4xl text-gray-300 mb-4"></i>
+                                    {% if current_filters.search or current_filters.status or current_filters.workflow_status or current_filters.date or current_filters.emirate or current_filters.seller or current_filters.agent or current_filters.amount_min or current_filters.amount_max or current_filters.payment_status %}
+                                    <p class="text-lg font-medium text-gray-900 mb-2">No orders match the selected filters</p>
+                                    <p class="text-sm text-gray-500 mb-4">Try adjusting your search criteria or resetting the filters</p>
+                                    <a href="{% url 'finance:order_management' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                                        <i class="fas fa-times mr-2"></i>
+                                        Reset Filters
+                                    </a>
+                                    {% else %}
+                                    <p class="text-lg font-medium text-gray-900 mb-2">No orders found</p>
+                                    <p class="text-sm text-gray-500">Create your first order to get started</p>
+                                    <a href="{% url 'orders:create' %}" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                                        <i class="fas fa-plus mr-2"></i>
+                                        Create New Order
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if orders.has_other_pages %}
+            <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200">
+                <div class="flex-1 flex justify-between sm:hidden">
+                    {% if orders.has_previous %}
+                    <a href="?page={{ orders.previous_page_number }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Previous
+                    </a>
+                    {% endif %}
+                    {% if orders.has_next %}
+                    <a href="?page={{ orders.next_page_number }}" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                        Next
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-gray-700">
+                            Showing
+                            <span class="font-medium">{{ orders.start_index }}</span>
+                            to
+                            <span class="font-medium">{{ orders.end_index }}</span>
+                            of
+                            <span class="font-medium">{{ orders.paginator.count }}</span>
+                            results
+                        </p>
+                    </div>
+                    <div>
+                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                            {% if orders.has_previous %}
+                            <a href="?page={{ orders.previous_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <span class="sr-only">Previous</span>
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                            {% endif %}
+                            
+                            {% for num in orders.paginator.page_range %}
+                                {% if orders.number == num %}
+                                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-orange-50 text-sm font-medium text-orange-600">
+                                    {{ num }}
+                                </span>
+                                {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
+                                <a href="?page={{ num }}" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                    {{ num }}
+                                </a>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if orders.has_next %}
+                            <a href="?page={{ orders.next_page_number }}" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                <span class="sr-only">Next</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                            {% endif %}
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit form when filters change
+    const filterForm = document.getElementById('filter-form');
+    const filterInputs = filterForm.querySelectorAll('select, input[type="number"]');
+    
+    filterInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            // Add a small delay to prevent too many requests
+            setTimeout(() => {
+                filterForm.submit();
+            }, 300);
+        });
+    });
+    
+    // Handle search input with debouncing
+    const searchForm = document.getElementById('search-form');
+    const searchInput = document.querySelector('input[name="search"]');
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            // Update hidden search field in filter form
+            const hiddenSearchField = filterForm.querySelector('input[name="search"]');
+            if (hiddenSearchField) {
+                hiddenSearchField.value = searchInput.value;
+            }
+            searchForm.submit();
+        }, 1000); // Wait 1 second after user stops typing
+    });
+    
+    // Update hidden search field when filter form is submitted
+    filterForm.addEventListener('submit', function() {
+        const hiddenSearchField = filterForm.querySelector('input[name="search"]');
+        if (hiddenSearchField) {
+            hiddenSearchField.value = searchInput.value;
+        }
+    });
+    
+    // Export functionality
+    document.getElementById('export-btn').addEventListener('click', function() {
+        // Get current filter parameters
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams();
+        
+        for (let [key, value] of formData.entries()) {
+            if (value) {
+                params.append(key, value);
+            }
+        }
+        
+        // Redirect to export URL with current filters
+        window.location.href = '{% url "finance:order_management" %}?' + params.toString() + '&export=csv';
+    });
+    
+    // Print functionality
+    document.getElementById('print-btn').addEventListener('click', function() {
+        window.print();
+    });
+    
+    // Refresh functionality
+    document.getElementById('refresh-btn').addEventListener('click', function() {
+        window.location.reload();
+    });
+    
+    // Update filter count display
+    function updateFilterCount() {
+        const countElement = document.getElementById('filter-count');
+        if (countElement) {
+            countElement.textContent = '{{ orders.paginator.count }}';
+        }
+    }
+    
+    updateFilterCount();
+    
+    // Barcode Scanner
+    let stream = null;
+    let barcodeDetector = null;
+
+    if ('BarcodeDetector' in window) {
+        barcodeDetector = new BarcodeDetector({ formats: ['qr_code', 'ean_13', 'code_128', 'code_39'] });
+    }
+
+    document.getElementById('cameraBtn')?.addEventListener('click', async function() {
+        const cameraContainer = document.getElementById('cameraContainer');
+        const video = document.getElementById('barcodeCamera');
+        
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode: 'environment',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            });
+            
+            video.srcObject = stream;
+            video.play();
+            cameraContainer.classList.remove('hidden');
+            this.style.display = 'none';
+            
+            if (barcodeDetector) {
+                detectBarcode(video);
+            } else {
+                alert('Barcode detection not supported. Please enter order code manually.');
+            }
+        } catch (error) {
+            console.error('Error accessing camera:', error);
+            alert('Unable to access camera. Please use manual input.');
+        }
+    });
+
+    document.getElementById('stopCameraBtn')?.addEventListener('click', function() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+        document.getElementById('barcodeCamera').srcObject = null;
+        document.getElementById('cameraContainer').classList.add('hidden');
+        document.getElementById('cameraBtn').style.display = 'block';
+    });
+
+    async function detectBarcode(video) {
+        if (!barcodeDetector) return;
+        
+        try {
+            const barcodes = await barcodeDetector.detect(video);
+            
+            if (barcodes.length > 0) {
+                const barcodeValue = barcodes[0].rawValue;
+                document.getElementById('barcodeInput').value = barcodeValue;
+                document.querySelector('input[name="search"]').value = barcodeValue;
+                document.getElementById('search-form').submit();
+                document.getElementById('stopCameraBtn').click();
+            }
+        } catch (error) {
+            console.error('Barcode detection error:', error);
+        }
+        
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            requestAnimationFrame(() => detectBarcode(video));
+        } else {
+            video.addEventListener('loadeddata', () => {
+                requestAnimationFrame(() => detectBarcode(video));
+            });
+        }
+    }
+
+    // Manual barcode input
+    document.getElementById('barcodeInput')?.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            const orderCode = this.value.trim();
+            if (orderCode) {
+                document.querySelector('input[name="search"]').value = orderCode;
+                document.getElementById('search-form').submit();
+            }
+        }
+    });
+    
+    // Add loading state to form submission
+    filterForm.addEventListener('submit', function() {
+        const submitBtn = filterForm.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>جاري التحميل...';
+            submitBtn.disabled = true;
+        }
+    });
+    
+    // Add loading state to search form submission
+    searchForm.addEventListener('submit', function() {
+        const submitBtn = searchForm.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Searching...';
+            submitBtn.disabled = true;
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Warehouse - Atlas Fulfillment{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <!-- Page Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl flex items-center justify-center mr-4 shadow-lg">
+                        <i class="fas fa-edit text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Edit Warehouse</h1>
+                        <p class="mt-2 text-lg text-gray-600">Update warehouse information and settings</p>
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="{% url 'inventory:warehouses' %}" class="inline-flex items-center px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all duration-300 font-semibold shadow-sm hover:shadow-md">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Warehouses
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Form Card -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                    <div class="bg-gradient-to-r from-green-500 to-green-600 px-8 py-6">
+                        <h3 class="text-xl font-bold text-white">Warehouse Information</h3>
+                        <p class="text-green-100 mt-1">Update the details for this warehouse</p>
+                    </div>
+                    <div class="p-8">
+                        <form method="post" class="space-y-8">
+                            {% csrf_token %}
+                            
+                            <!-- Basic Information Section -->
+                            <div class="space-y-6">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-info-circle text-green-600"></i>
+                                    </div>
+                                    <h4 class="text-lg font-semibold text-gray-900">Basic Information</h4>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                    <!-- Warehouse Name -->
+                                    <div class="space-y-2">
+                                        <label for="name" class="flex items-center text-sm font-semibold text-gray-700">
+                                            <i class="fas fa-warehouse text-green-500 mr-2"></i>
+                                            Warehouse Name <span class="text-red-500 ml-1">*</span>
+                                        </label>
+                                        <input type="text" name="name" id="name" value="{{ warehouse.name }}" required
+                                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-green-100 focus:border-green-500 transition-all duration-300 text-lg">
+                                        <p class="text-xs text-gray-500">Enter a descriptive name for the warehouse</p>
+                                    </div>
+
+                                    <!-- Warehouse Code -->
+                                    <div class="space-y-2">
+                                        <label for="code" class="flex items-center text-sm font-semibold text-gray-700">
+                                            <i class="fas fa-tag text-green-500 mr-2"></i>
+                                            Warehouse Code
+                                        </label>
+                                        <input type="text" name="code" id="code" value="{{ warehouse.code|default:'' }}"
+                                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-green-100 focus:border-green-500 transition-all duration-300 text-lg">
+                                        <p class="text-xs text-gray-500">Unique identifier for the warehouse</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Location Section -->
+                            <div class="space-y-6">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-map-marker-alt text-blue-600"></i>
+                                    </div>
+                                    <h4 class="text-lg font-semibold text-gray-900">Location Details</h4>
+                                </div>
+                                
+                                <!-- Address -->
+                                <div class="space-y-2">
+                                    <label for="address" class="flex items-center text-sm font-semibold text-gray-700">
+                                        <i class="fas fa-map-pin text-blue-500 mr-2"></i>
+                                        Address <span class="text-red-500 ml-1">*</span>
+                                    </label>
+                                    <textarea name="address" id="address" rows="4" required
+                                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all duration-300 text-lg resize-none">{{ warehouse.address|default:'' }}</textarea>
+                                    <p class="text-xs text-gray-500">Physical address or location description</p>
+                                </div>
+                            </div>
+
+                            <!-- Settings Section -->
+                            <div class="space-y-6">
+                                <div class="flex items-center mb-4">
+                                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                        <i class="fas fa-cog text-purple-600"></i>
+                                    </div>
+                                    <h4 class="text-lg font-semibold text-gray-900">Warehouse Settings</h4>
+                                </div>
+                                
+                                <!-- Capacity -->
+                                <div class="space-y-2">
+                                    <label for="capacity" class="flex items-center text-sm font-semibold text-gray-700">
+                                        <i class="fas fa-boxes text-purple-500 mr-2"></i>
+                                        Storage Capacity
+                                    </label>
+                                    <input type="number" name="capacity" id="capacity" value="{{ warehouse.capacity|default:'' }}" min="1"
+                                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-purple-100 focus:border-purple-500 transition-all duration-300 text-lg">
+                                    <p class="text-xs text-gray-500">Leave empty for unlimited capacity</p>
+                                </div>
+
+                                <!-- Status -->
+                                <div class="space-y-2">
+                                    <label class="flex items-center text-sm font-semibold text-gray-700">
+                                        <i class="fas fa-toggle-on text-purple-500 mr-2"></i>
+                                        Warehouse Status
+                                    </label>
+                                    <div class="flex items-center p-4 bg-gray-50 rounded-xl">
+                                        <input type="checkbox" name="is_active" {% if warehouse.is_active %}checked{% endif %}
+                                            class="h-5 w-5 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                                        <span class="ml-3 text-sm text-gray-700">Active Warehouse</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500">Uncheck to deactivate this warehouse</p>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                                <a href="{% url 'inventory:warehouses' %}" class="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all duration-300 font-semibold shadow-sm hover:shadow-md">
+                                    <i class="fas fa-times mr-2"></i>
+                                    Cancel
+                                </a>
+                                <button type="submit" class="px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                                    <i class="fas fa-save mr-2"></i>
+                                    Update Warehouse
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Warehouse Info Card -->
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mr-3">
+                            <i class="fas fa-warehouse text-green-600"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900">Current Info</h3>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Name:</span>
+                            <span class="font-medium text-gray-900">{{ warehouse.name }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Code:</span>
+                            <span class="font-medium text-gray-900">{{ warehouse.code|default:"N/A" }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Status:</span>
+                            <span class="font-medium {% if warehouse.is_active %}text-green-600{% else %}text-red-600{% endif %}">
+                                {% if warehouse.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Card -->
+                <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mr-3">
+                            <i class="fas fa-lightbulb text-blue-600"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900">Tips</h3>
+                    </div>
+                    <ul class="space-y-3 text-sm text-gray-600">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                            <span>Keep warehouse names descriptive and unique</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                            <span>Update capacity based on actual storage space</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                            <span>Deactivate warehouses that are no longer in use</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Warning Card -->
+                <div class="bg-yellow-50 rounded-2xl border border-yellow-200 p-6">
+                    <div class="flex items-center mb-3">
+                        <i class="fas fa-exclamation-triangle text-yellow-600 mr-2"></i>
+                        <h3 class="text-sm font-semibold text-yellow-800">Important</h3>
+                    </div>
+                    <p class="text-xs text-yellow-700">Changes to warehouse settings may affect inventory management and reporting</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Custom animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fadeInUp {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Focus ring animation */
+input:focus, textarea:focus {
+    animation: pulse 0.3s ease-in-out;
+}
+
+/* Hover effects */
+.hover-lift:hover {
+    transform: translateY(-2px);
+    transition: transform 0.3s ease;
+}
+</style>
+
+<script>
+// Add some interactive features
+document.addEventListener('DOMContentLoaded', function() {
+    // Add animation to form elements
+    const formElements = document.querySelectorAll('input, textarea');
+    formElements.forEach((element, index) => {
+        element.style.animationDelay = `${index * 0.1}s`;
+        element.classList.add('animate-fadeInUp');
+    });
+    
+    // Add hover effects to cards
+    const cards = document.querySelectorAll('.bg-white');
+    cards.forEach(card => {
+        card.classList.add('hover-lift');
+    });
+});
+</script>
+{% endblock %}

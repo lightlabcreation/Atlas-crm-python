@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+
+{% block title %}Call Center Agent Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-headset text-orange-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h1 class="text-2xl font-bold text-orange-500">Call Center Agent Dashboard</h1>
+                        <p class="text-gray-600">Manage your assigned orders and calls.</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm text-gray-600">Current Time {{ "now"|date:"H:i" }}</p>
+                        <p class="text-sm text-gray-600">Today's Date {{ "now"|date:"F d, Y" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Welcome Message -->
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Welcome back, {{ request.user.get_full_name|default:request.user.username }}!</h2>
+            <p class="text-gray-600">You are logged in as a Call Center Agent.</p>
+            <p class="text-sm text-gray-500 mt-2">Last Login {{ request.user.last_login|date:"M d, Y H:i" }}</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-list text-blue-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Assigned Orders</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ total_orders }}</p>
+                        <p class="text-xs text-green-600">↑ Active</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Confirmed Orders</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ confirmed_orders }}</p>
+                        <p class="text-xs text-green-600">↑ Completed</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-clock text-orange-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Postponed Orders</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ postponed_orders }}</p>
+                        <p class="text-xs text-orange-600">↑ Pending</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-times-circle text-red-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Cancelled Orders</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ cancelled_orders }}</p>
+                        <p class="text-xs text-red-600">↑ Cancelled</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-phone text-purple-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Total Calls Today</p>
+                        <p class="text-2xl font-bold text-gray-900">{{ today_orders }}</p>
+                        <p class="text-xs text-purple-600">↑ Today</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Current Priority Orders -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-triangle text-orange-500 text-xl mr-3"></i>
+                        <h3 class="text-lg font-medium text-gray-900">Current Priority Orders</h3>
+                    </div>
+                    <a href="{% url 'callcenter_agent:orders' %}" class="text-blue-600 hover:text-blue-800 text-sm">View all</a>
+                </div>
+                <div class="p-6">
+                    <p class="text-sm text-gray-600 mb-4">Orders requiring immediate attention.</p>
+                    {% if recent_orders %}
+                        <div class="space-y-4">
+                            {% for order in recent_orders %}
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">#{{ order.order_code }}</p>
+                                    <p class="text-sm text-gray-500">{{ order.customer }}</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full
+                                        {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                        {% elif order.status == 'confirmed' %}bg-green-100 text-green-800
+                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                    <a href="{% url 'callcenter_agent:order_detail' order.id %}" class="text-blue-600 hover:text-blue-800 text-sm">
+View                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-8">
+                            <i class="fas fa-check-circle text-gray-400 text-4xl mb-4"></i>
+                            <p class="text-gray-500">No priority orders at the moment.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center">
+                        <i class="fas fa-redo text-blue-500 text-xl mr-3"></i>
+                        <h3 class="text-lg font-medium text-gray-900">Recent Activity</h3>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <p class="text-sm text-gray-600 mb-4">Your latest calls and actions.</p>
+                    {% if recent_orders %}
+                        <div class="space-y-4">
+                            {% for order in recent_orders %}
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-gray-900">Order #{{ order.order_code }}</p>
+                                    <p class="text-sm text-gray-500">{{ order.customer }} - {{ order.get_status_display }}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xs text-gray-500">{{ order.date|date:"M d, H:i" }}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-8">
+                            <i class="fas fa-phone text-gray-400 text-4xl mb-4"></i>
+                            <p class="text-gray-500">No Recent Activity, Start making calls to see your activity here.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-8">
+            <h3 class="text-lg font-medium text-gray-900 mb-6">Quick Actions</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="{% url 'callcenter_agent:orders' %}" class="flex items-center justify-center p-6 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition-colors">
+                    <i class="fas fa-list text-xl mr-3"></i>
+                    <span class="font-medium">View All Orders</span>
+                </a>
+                
+                <a href="{% url 'orders:create' %}" class="flex items-center justify-center p-6 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors">
+                    <i class="fas fa-plus text-xl mr-3"></i>
+                    <span class="font-medium">Create Order</span>
+                </a>
+                
+                <a href="{% url 'dashboard:index' %}" class="flex items-center justify-center p-6 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors">
+                    <i class="fas fa-home text-xl mr-3"></i>
+                    <span class="font-medium">Main Dashboard</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

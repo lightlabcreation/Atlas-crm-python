@@ -1,0 +1,400 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order Details{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white">
+    <!-- Page Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-shopping-cart text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">Order Details</h1>
+                        <p class="mt-1 text-sm text-gray-500">{{ order.order_code }} - {{ order.customer }}</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'finance:order_management' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Orders
+                    </a>
+                    <a href="{% url 'finance:invoice_generation' order.id %}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-file-invoice mr-2"></i>
+                        Generate Invoice
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Order Information -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Order Details -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div class="bg-orange-100 border-b border-gray-200 px-6 py-4 -m-6 mb-6">
+                        <h3 class="text-lg font-semibold text-orange-600">Order Information</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">Order Details</h4>
+                                <dl class="space-y-3">
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500">Order Code</dt>
+                                        <dd class="text-sm text-gray-900 font-medium">{{ order.order_code }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500">Order ID</dt>
+                                        <dd class="text-sm text-gray-900">#{{ order.id }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500">Order Date</dt>
+                                        <dd class="text-sm text-gray-900">{{ order.date|date:"F d, Y" }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500">Status</dt>
+                                        <dd class="text-sm">
+                                            {% if order.status == 'pending' %}
+                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                <i class="fas fa-clock mr-1"></i>Pending
+                                            </span>
+                                            {% elif order.status == 'confirmed' %}
+                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                <i class="fas fa-check mr-1"></i>Confirmed
+                                            </span>
+                                            {% elif order.status == 'processing' %}
+                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                                                <i class="fas fa-cog mr-1"></i>Processing
+                                            </span>
+                                            {% elif order.status == 'shipped' %}
+                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">
+                                                <i class="fas fa-shipping-fast mr-1"></i>Shipped
+                                            </span>
+                                            {% elif order.status == 'delivered' %}
+                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                                <i class="fas fa-check-circle mr-1"></i>Delivered
+                                            </span>
+                                            {% elif order.status == 'cancelled' %}
+                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                                <i class="fas fa-times-circle mr-1"></i>Cancelled
+                                            </span>
+                                            {% else %}
+                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                                {{ order.status|title }}
+                                            </span>
+                                            {% endif %}
+                                        </dd>
+                                    </div>
+                                </dl>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">Customer Information</h4>
+                                <dl class="space-y-3">
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500">Customer Name</dt>
+                                        <dd class="text-sm text-gray-900 font-medium">{{ order.customer }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500">Phone</dt>
+                                        <dd class="text-sm text-gray-900">{{ order.customer_phone|default:"Not provided" }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500">Address</dt>
+                                        <dd class="text-sm text-gray-900">{{ order.customer_address|default:"Not provided" }}</dd>
+                                    </div>
+                                    <div>
+                                        <dt class="text-sm font-medium text-gray-500">City</dt>
+                                        <dd class="text-sm text-gray-900">{{ order.customer_city|default:"Not provided" }}</dd>
+                                    </div>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Summary -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div class="bg-orange-100 border-b border-gray-200 px-6 py-4 -m-6 mb-6">
+                        <h3 class="text-lg font-semibold text-orange-600">Financial Summary</h3>
+                    </div>
+                    <div class="p-6">
+                        <dl class="space-y-4">
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Unit Price</dt>
+                                <dd class="text-lg font-medium text-gray-900">AED {{ order.price_per_unit|floatformat:2 }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Quantity</dt>
+                                <dd class="text-lg font-medium text-gray-900">{{ order.quantity }}</dd>
+                            </div>
+                            <div class="border-t border-gray-200 pt-4">
+                                <dt class="text-sm font-medium text-gray-500">Subtotal</dt>
+                                <dd class="text-lg font-medium text-gray-900">AED {{ subtotal|floatformat:2 }}</dd>
+                            </div>
+                            <div class="border-t border-gray-200 pt-4">
+                                <dt class="text-sm font-medium text-gray-500">Total Amount</dt>
+                                <dd class="text-xl font-bold text-green-600">AED {{ total_amount|floatformat:2 }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Information -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-8">
+            <div class="bg-orange-100 border-b border-gray-200 px-6 py-4 -m-6 mb-6">
+                <h3 class="text-lg font-semibold text-orange-600">Product Information</h3>
+            </div>
+            <div class="p-6">
+                {% if order.product %}
+                <div class="flex items-center space-x-4">
+                    <div class="flex-shrink-0 h-16 w-16">
+                        {% if order.product.image %}
+                        <img class="h-16 w-16 rounded-lg object-cover cursor-pointer hover:opacity-80 transition-opacity" src="{{ order.product.image.url }}" alt="{{ order.product.name_en }}" onclick="openProductDetail({{ order.product.id }})">
+                        {% else %}
+                        <div class="h-16 w-16 rounded-lg bg-gray-200 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors" onclick="openProductDetail({{ order.product.id }})">
+                            <i class="fas fa-image text-gray-400 text-xl"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h4 class="text-lg font-medium text-gray-900 cursor-pointer hover:text-orange-600 transition-colors" onclick="openProductDetail({{ order.product.id }})">
+                                    {{ order.product.name_en }}
+                                    <i class="fas fa-external-link-alt text-xs ml-2"></i>
+                                </h4>
+                                <p class="text-sm text-gray-500">{{ order.product.name_ar }}</p>
+                                <p class="text-sm text-gray-500">Code: {{ order.product.code }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-medium text-gray-900">AED {{ order.product.selling_price|floatformat:2 }}</p>
+                                <p class="text-sm text-gray-500">Purchase: AED {{ order.product.purchase_price|floatformat:2 }}</p>
+                            </div>
+                        </div>
+                        {% if order.product.description %}
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-600">{{ order.product.description }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- View Product Details Button -->
+                        <div class="mt-4">
+                            <button onclick="openProductDetail({{ order.product.id }})" class="inline-flex items-center px-4 py-2 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg text-sm font-medium transition-all duration-200 hover:shadow-md">
+                                <i class="fas fa-eye mr-2"></i>
+                                View Product Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-8">
+                    <i class="fas fa-box text-4xl text-gray-300 mb-4"></i>
+                    <p class="text-lg font-medium text-gray-900 mb-2">No Product Information</p>
+                    <p class="text-sm text-gray-500">Product details are not available for this order</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="bg-orange-100 border-b border-gray-200 px-6 py-4 -m-6 mb-6">
+                <h3 class="text-lg font-semibold text-orange-600">Actions</h3>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <a href="{% url 'finance:invoice_generation' order.id %}" class="flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                        <i class="fas fa-file-invoice mr-2"></i>
+                        Generate Invoice
+                    </a>
+                    <a href="{% url 'finance:fee_management' order.id %}" class="flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors">
+                        <i class="fas fa-coins mr-2"></i>
+                        Manage Fees
+                    </a>
+                    <a href="{% url 'orders:update' order.id %}" class="flex items-center justify-center px-4 py-3 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors">
+                        <i class="fas fa-edit mr-2"></i>
+                        Edit Order
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Product Detail Modal -->
+<div id="productModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900" id="modalProductName">Product Details</h3>
+                <button onclick="closeProductModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div id="modalProductContent" class="space-y-6">
+                <!-- Product content will be loaded here -->
+            </div>
+            
+            <div class="flex justify-end space-x-3 mt-6">
+                <button onclick="closeProductModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openProductDetail(productId) {
+    // Show loading state
+    document.getElementById('modalProductContent').innerHTML = `
+        <div class="flex items-center justify-center py-8">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+            <span class="ml-2 text-gray-600">Loading product details...</span>
+        </div>
+    `;
+    
+    // Show modal
+    document.getElementById('productModal').classList.remove('hidden');
+    
+    // Fetch product details from API
+    fetch('/products/' + productId + '/api/')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Check if there's an error in the response
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            // Update modal content with product data
+            document.getElementById('modalProductName').textContent = data.name_en || 'Product Details';
+            
+            const imageHtml = data.image_url ? 
+                `<img src="${data.image_url}" alt="${data.name_en}" class="w-full h-full object-cover rounded-lg">` :
+                `<i class="fas fa-image text-gray-400 text-6xl"></i>`;
+            
+            document.getElementById('modalProductContent').innerHTML = `
+                <div class="flex items-start space-x-6">
+                    <div class="flex-shrink-0">
+                        <div class="w-48 h-48 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200 overflow-hidden">
+                            ${imageHtml}
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Product Name (EN)</dt>
+                                <dd class="mt-1 text-xl font-semibold text-gray-900">${data.name_en || 'N/A'}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Product Name (AR)</dt>
+                                <dd class="mt-1 text-xl font-semibold text-gray-900">${data.name_ar || 'N/A'}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Product Code</dt>
+                                <dd class="mt-1 text-lg text-gray-900 font-mono bg-gray-50 px-3 py-2 rounded-lg">${data.code || 'N/A'}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">SKU</dt>
+                                <dd class="mt-1 text-lg text-gray-900 font-mono bg-gray-50 px-3 py-2 rounded-lg">${data.sku || 'N/A'}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Selling Price</dt>
+                                <dd class="mt-1 text-lg font-semibold text-green-600">AED ${data.selling_price.toFixed(2)}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Purchase Price</dt>
+                                <dd class="mt-1 text-lg font-semibold text-blue-600">AED ${data.purchase_price.toFixed(2)}</dd>
+                            </div>
+                            ${data.category ? `
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Category</dt>
+                                <dd class="mt-1 text-lg text-gray-900">${data.category}</dd>
+                            </div>
+                            ` : ''}
+                            ${data.brand ? `
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Brand</dt>
+                                <dd class="mt-1 text-lg text-gray-900">${data.brand}</dd>
+                            </div>
+                            ` : ''}
+                            ${data.stock_quantity !== null ? `
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Stock Quantity</dt>
+                                <dd class="mt-1 text-lg font-semibold ${data.stock_quantity > 0 ? 'text-green-600' : 'text-red-600'}">${data.stock_quantity}</dd>
+                            </div>
+                            ` : ''}
+                            ${data.weight ? `
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Weight</dt>
+                                <dd class="mt-1 text-lg text-gray-900">${data.weight} kg</dd>
+                            </div>
+                            ` : ''}
+                            ${data.dimensions ? `
+                            <div>
+                                <dt class="text-sm font-medium text-gray-500">Dimensions</dt>
+                                <dd class="mt-1 text-lg text-gray-900">${data.dimensions}</dd>
+                            </div>
+                            ` : ''}
+                            <div class="md:col-span-2">
+                                <dt class="text-sm font-medium text-gray-500">Status</dt>
+                                <dd class="mt-1">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${data.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                                        <i class="fas fa-circle text-xs mr-2"></i>
+                                        ${data.is_active ? 'Active' : 'Inactive'}
+                                    </span>
+                                </dd>
+                            </div>
+                            ${data.description ? `
+                            <div class="md:col-span-2">
+                                <dt class="text-sm font-medium text-gray-500">Description</dt>
+                                <dd class="mt-1 text-lg text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">${data.description}</dd>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        })
+        .catch(error => {
+            console.error('Error loading product details:', error);
+            document.getElementById('modalProductContent').innerHTML = `
+                <div class="text-center py-8">
+                    <i class="fas fa-exclamation-triangle text-red-400 text-4xl mb-4"></i>
+                    <p class="text-lg font-medium text-gray-900 mb-2">Error Loading Product</p>
+                    <p class="text-sm text-gray-500">Unable to load product details. Please try again.</p>
+                </div>
+            `;
+        });
+}
+
+function closeProductModal() {
+    document.getElementById('productModal').classList.add('hidden');
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('productModal');
+    if (event.target === modal) {
+        closeProductModal();
+    }
+}
+</script>
+{% endblock %} 

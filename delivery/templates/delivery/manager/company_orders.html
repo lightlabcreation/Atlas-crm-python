@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ company.name_en }} Orders - Delivery Manager{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white">
+    <!-- Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-filter text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-blue-600">{{ company.name_en }} Orders</h1>
+                        <p class="mt-1 text-sm text-gray-500">Filter and view company orders</p>
+                    </div>
+                </div>
+                <a href="{% url 'delivery:manager_shipping_companies' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Companies
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Barcode Scanner Section -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fas fa-barcode text-blue-600 text-xl mr-3"></i>
+                    <div>
+                        <h3 class="text-sm font-medium text-blue-900">Scan Order Barcode</h3>
+                        <p class="text-xs text-blue-700">Use barcode scanner to quickly find orders</p>
+                    </div>
+                </div>
+                <button type="button" id="cameraBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                    <i class="fas fa-camera mr-2"></i>
+                    Open Scanner
+                </button>
+            </div>
+            <div id="cameraContainer" class="mt-4 hidden">
+                <video id="barcodeCamera" width="100%" height="300" style="border: 1px solid #ccc; border-radius: 8px;"></video>
+                <div class="mt-2 flex gap-2">
+                    <input type="text" id="barcodeInput" placeholder="Or enter order code manually" class="flex-1 border-gray-300 rounded-md px-3 py-2 text-sm">
+                    <button type="button" id="stopCameraBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-stop mr-2"></i>
+                        Stop Camera
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+            <form method="GET" class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select name="status" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <option value="">All Statuses</option>
+                            <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="processing" {% if status_filter == 'processing' %}selected{% endif %}>Processing</option>
+                            <option value="shipped" {% if status_filter == 'shipped' %}selected{% endif %}>Shipped</option>
+                            <option value="delivered" {% if status_filter == 'delivered' %}selected{% endif %}>Delivered</option>
+                            <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                        <input type="text" name="search" value="{{ search_query }}" placeholder="Order Code/Customer/Phone" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-search mr-2"></i>
+                        Search
+                    </button>
+                    <a href="{% url 'delivery:manager_company_orders' company.id %}" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-redo mr-2"></i>
+                        Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Orders</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Code</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for order in page_obj %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ order.order_code }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.customer }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                                    {% if order.status == 'delivered' %}bg-green-100 text-green-800
+                                    {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                                    {% elif order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.date|date:"Y-m-d H:i" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-4 text-center text-gray-500">No orders found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <div class="px-6 py-4 border-t border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-700">
+                        Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} orders
+                    </div>
+                    <div class="flex gap-2">
+                        {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            Previous
+                        </a>
+                        {% endif %}
+                        {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            Next
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Barcode Scanner for Delivery
+let stream = null;
+let barcodeDetector = null;
+
+if ('BarcodeDetector' in window) {
+    barcodeDetector = new BarcodeDetector({ formats: ['qr_code', 'ean_13', 'code_128', 'code_39'] });
+}
+
+document.getElementById('cameraBtn')?.addEventListener('click', async function() {
+    const cameraContainer = document.getElementById('cameraContainer');
+    const video = document.getElementById('barcodeCamera');
+    
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }
+        });
+        
+        video.srcObject = stream;
+        video.play();
+        cameraContainer.classList.remove('hidden');
+        this.style.display = 'none';
+        
+        if (barcodeDetector) {
+            detectBarcode(video);
+        } else {
+            alert('Barcode detection not supported. Please enter order code manually.');
+        }
+    } catch (error) {
+        console.error('Error accessing camera:', error);
+        alert('Unable to access camera. Please use manual input.');
+    }
+});
+
+document.getElementById('stopCameraBtn')?.addEventListener('click', function() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+    document.getElementById('barcodeCamera').srcObject = null;
+    document.getElementById('cameraContainer').classList.add('hidden');
+    document.getElementById('cameraBtn').style.display = 'block';
+});
+
+async function detectBarcode(video) {
+    if (!barcodeDetector) return;
+    
+    try {
+        const barcodes = await barcodeDetector.detect(video);
+        
+        if (barcodes.length > 0) {
+            const barcodeValue = barcodes[0].rawValue;
+            document.getElementById('barcodeInput').value = barcodeValue;
+            document.querySelector('input[name="search"]').value = barcodeValue;
+            document.querySelector('form[method="GET"]').submit();
+            document.getElementById('stopCameraBtn').click();
+        }
+    } catch (error) {
+        console.error('Barcode detection error:', error);
+    }
+    
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        requestAnimationFrame(() => detectBarcode(video));
+    } else {
+        video.addEventListener('loadeddata', () => {
+            requestAnimationFrame(() => detectBarcode(video));
+        });
+    }
+}
+
+// Manual barcode input
+document.getElementById('barcodeInput')?.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        const orderCode = this.value.trim();
+        if (orderCode) {
+            document.querySelector('input[name="search"]').value = orderCode;
+            document.querySelector('form[method="GET"]').submit();
+        }
+    }
+});
+</script>
+{% endblock %}

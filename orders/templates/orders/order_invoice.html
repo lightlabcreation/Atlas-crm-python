@@ -1,0 +1,338 @@
+{% extends 'base_print.html' %}
+{% load static %}
+
+{% block title %}Invoice - {{ order.order_code }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    @media print {
+        body {
+            font-size: 12pt;
+            color: #000;
+            background-color: #ffffff;
+        }
+        .no-print {
+            display: none;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+        /* Ensure images are printed */
+        img {
+            max-width: 100% !important;
+            height: auto !important;
+            -webkit-print-color-adjust: exact !important;
+            color-adjust: exact !important;
+        }
+        .company-logo {
+            max-height: 60px !important;
+            max-width: 120px !important;
+        }
+    }
+    
+    .invoice-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .qr-code {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .company-logo {
+        max-height: 50px;
+    }
+    
+    .invoice-header {
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+    }
+    
+    .invoice-footer {
+        border-top: 1px solid #ddd;
+        margin-top: 20px;
+        padding-top: 10px;
+        font-size: 0.8em;
+    }
+    
+    .invoice-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .invoice-table th,
+    .invoice-table td {
+        padding: 8px;
+        border: 1px solid #ddd;
+    }
+    
+    .invoice-table th {
+        background-color: #f9f9f9;
+        font-weight: bold;
+        text-align: left;
+    }
+    
+    .invoice-id {
+        font-size: 1.1em;
+        font-weight: bold;
+    }
+    
+    .barcode {
+        margin-top: 20px;
+        text-align: center;
+    }
+    
+    .barcode svg {
+        max-width: 200px;
+        height: auto;
+    }
+    
+    @media print {
+        .barcode svg {
+            max-width: 200px !important;
+            height: auto !important;
+        }
+    }
+    
+    .info-section {
+        margin-bottom: 20px;
+    }
+    
+    .info-title {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .info-content {
+        border: 1px solid #ddd;
+        padding: 10px;
+        background-color: #f9f9f9;
+    }
+    
+    .address-section {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .address-details {
+        margin-left: 20px;
+        line-height: 1.4;
+    }
+    
+    .address-line {
+        margin: 2px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4 ">
+    <!-- Print Button - Only visible on screen -->
+    <div class="no-print mb-4 flex justify-between">
+        <a href="{% url 'orders:detail' order.id %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded font-medium transition-colors duration-200 flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Back
+        </a>
+        <button onclick="printInvoice()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded font-medium transition-colors duration-200 flex items-center">
+            <i class="fas fa-print mr-2"></i>
+            Print
+        </button>
+    </div>
+
+    <!-- Invoice Content -->
+    <div class="invoice-container bg-white p-6 border border-gray-200">
+        <!-- Invoice Header -->
+        <div class="invoice-header flex justify-between items-center">
+            <div class="flex items-center">
+                <!-- Company Logo -->
+                <div class="mr-4">
+                    <img src="https://i.ibb.co/YT4Ny4L1/10.png" 
+                         alt="Atlas Fulfillment Logo" 
+                         class="company-logo" 
+                         style="max-height: 60px; max-width: 120px; display: block;"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="display: none; font-size: 12px; color: #666; padding: 10px; border: 1px dashed #ccc;">
+                        Atlas Fulfillment Logo
+                    </div>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold">Atlas Fulfillment</h1>
+                </div>
+            </div>
+            <div class="text-right">
+                <div class="invoice-id">Invoice #{{ order.order_code }}</div>
+                <div>Date: {{ order.date|date:"d/m/Y" }}</div>
+            </div>
+        </div>
+
+        <!-- Customer Info -->
+        <div class="info-section">
+            <div class="info-title">Customer Information</div>
+            <div class="info-content">
+                <p><strong>Name:</strong> {{ order.customer }}</p>
+                <p><strong>Phone:</strong> {{ order.customer_phone }}</p>
+                {% if order.customer_email %}
+                <p><strong>Email:</strong> {{ order.customer_email }}</p>
+                {% endif %}
+                
+                <!-- Address Information -->
+                {% if order.shipping_address or order.city or order.state or order.zip_code or order.country %}
+                <div class="address-section">
+                    <p><strong>Address:</strong></p>
+                    <div class="address-details">
+                        {% if order.shipping_address %}
+                        <div class="address-line">{{ order.shipping_address|linebreaksbr }}</div>
+                        {% endif %}
+                        <div class="address-line">
+                            {% if order.city %}{{ order.city }}{% endif %}
+                            {% if order.state %}{% if order.city %}, {% endif %}{{ order.state }}{% endif %}
+                            {% if order.zip_code %}{% if order.city or order.state %}, {% endif %}{{ order.zip_code }}{% endif %}
+                            {% if order.country %}{% if order.city or order.state or order.zip_code %}, {% endif %}{{ order.country }}{% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+
+        <!-- Product Details -->
+        <div class="info-section">
+            <div class="info-title">Product Details</div>
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>SKU</th>
+                        <th>Qty</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            {% if order.product %}
+                                {{ order.product.name_en|default:order.product.name_ar }}
+                            {% else %}
+                                {% for item in order.items.all %}
+                                    {{ item.product.name_en|default:item.product.name_ar }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    N/A
+                                {% endfor %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if order.product %}
+                                {{ order.product.code }}
+                            {% else %}
+                                {% for item in order.items.all %}
+                                    {{ item.product.code }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    N/A
+                                {% endfor %}
+                            {% endif %}
+                        </td>
+                        <td align="center">{{ order.quantity }}</td>
+                        <td align="right">AED {{ order.price_per_unit|floatformat:2 }}</td>
+                        <td align="right">AED {{ order.total_amount|default:order.price_per_unit|floatformat:2 }}</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3"></td>
+                        <td align="right"><strong>Total:</strong></td>
+                        <td align="right"><strong>AED {{ order.total_amount|default:order.price_per_unit|floatformat:2 }}</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- QR Code and Barcode -->
+        <div class="flex justify-between items-center mt-8">
+            <div class="qr-code">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?data=https://atlas-fulfillment.com/orders/public/{{ order.order_code }}&size=100x100" alt="Order QR Code">
+            </div>
+            <div class="barcode" style="text-align: center;">
+                <svg id="barcode"></svg>
+                <div style="font-size: 12px; margin-top: 5px;">#{{ order.order_code }}</div>
+            </div>
+        </div>
+
+        <!-- Invoice Footer -->
+        <div class="invoice-footer text-center text-gray-500">
+            <p>This is a computer-generated invoice and requires no signature.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Include JsBarcode library -->
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<script>
+// Generate barcode when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Generate barcode
+    if (typeof JsBarcode !== 'undefined') {
+        try {
+            JsBarcode("#barcode", "{{ order.order_code }}", {
+                format: "CODE128",
+                width: 2,
+                height: 60,
+                displayValue: true,
+                fontSize: 14,
+                margin: 10
+            });
+        } catch (error) {
+            console.error('Error generating barcode:', error);
+            // Fallback: show order code as text if barcode generation fails
+            document.getElementById('barcode').innerHTML = '<text x="50%" y="50%" text-anchor="middle" font-size="14">{{ order.order_code }}</text>';
+        }
+    }
+    
+    // Preload images when page loads
+    const images = document.querySelectorAll('img');
+    images.forEach(img => {
+        if (!img.complete) {
+            img.loading = 'eager';
+        }
+    });
+});
+
+function printInvoice() {
+    // Ensure all images are loaded before printing
+    const images = document.querySelectorAll('img');
+    let loadedImages = 0;
+    
+    if (images.length === 0) {
+        window.print();
+        return;
+    }
+    
+    images.forEach(img => {
+        if (img.complete) {
+            loadedImages++;
+        } else {
+            img.onload = function() {
+                loadedImages++;
+                if (loadedImages === images.length) {
+                    setTimeout(() => window.print(), 100);
+                }
+            };
+            img.onerror = function() {
+                loadedImages++;
+                if (loadedImages === images.length) {
+                    setTimeout(() => window.print(), 100);
+                }
+            };
+        }
+    });
+    
+    if (loadedImages === images.length) {
+        setTimeout(() => window.print(), 100);
+    }
+}
+</script>
+{% endblock %}

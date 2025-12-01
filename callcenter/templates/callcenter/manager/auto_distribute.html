@@ -1,0 +1,454 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Auto Distribute Orders{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/30 to-yellow-50/20">
+    <!-- Enhanced Page Header -->
+    <div class="bg-gradient-to-r from-amber-500 to-yellow-600 shadow-2xl border-b-4 border-amber-400">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div class="space-y-2">
+                    <div class="flex items-center gap-3">
+                        <a href="{% url 'callcenter:manager_dashboard' %}" class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center hover:bg-white/30 transition-all duration-200">
+                            <i class="fas fa-arrow-left text-white text-lg"></i>
+                        </a>
+                        <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                            <i class="fas fa-magic text-white text-xl"></i>
+                        </div>
+            <div>
+                            <h1 class="text-4xl font-bold text-white">Auto Distribute Orders</h1>
+                            <p class="text-amber-100 text-lg">Automatically assign orders to available agents</p>
+                            </div>
+                            </div>
+            </div>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button onclick="startAutoDistribution()" class="inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 border border-green-400/20">
+                        <i class="fas fa-play mr-2"></i>
+                        Start Distribution
+                    </button>
+                    <button onclick="stopDistribution()" class="inline-flex items-center justify-center px-8 py-3 bg-white/20 backdrop-blur-sm text-white font-semibold rounded-xl hover:bg-white/30 transition-all duration-200 border border-white/30">
+                        <i class="fas fa-stop mr-2"></i>
+                        Stop
+                </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Enhanced Distribution Settings -->
+        <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden mb-8">
+            <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                        <i class="fas fa-cog text-slate-900 text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white">Distribution Settings</h3>
+                        <p class="text-slate-300 text-sm">Configure automatic distribution parameters</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Distribution Algorithm</label>
+                        <select id="algorithm" class="block w-full py-3 px-4 border border-slate-300 bg-white rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm transition-all duration-200">
+                            <option value="round_robin">Round Robin</option>
+                            <option value="load_balanced" selected>Load Balanced</option>
+                            <option value="skill_based">Skill Based</option>
+                            <option value="priority_based">Priority Based</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Max Orders per Agent</label>
+                        <input type="number" id="max_orders" value="10" min="1" max="50" class="block w-full py-3 px-4 border border-slate-300 bg-white rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm transition-all duration-200">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Priority Threshold</label>
+                        <select id="priority_threshold" class="block w-full py-3 px-4 border border-slate-300 bg-white rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm transition-all duration-200">
+                            <option value="high">High Priority Only</option>
+                            <option value="medium" selected>Medium & High</option>
+                            <option value="all">All Orders</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Auto-refresh Interval</label>
+                        <select id="refresh_interval" class="block w-full py-3 px-4 border border-slate-300 bg-white rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm transition-all duration-200">
+                            <option value="30">30 seconds</option>
+                            <option value="60" selected>1 minute</option>
+                            <option value="300">5 minutes</option>
+                            <option value="600">10 minutes</option>
+                        </select>
+        </div>
+        
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Batch Size</label>
+                        <input type="number" id="batch_size" value="5" min="1" max="20" class="block w-full py-3 px-4 border border-slate-300 bg-white rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm transition-all duration-200">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Enable Notifications</label>
+                        <div class="flex items-center mt-2">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer" checked>
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                            </label>
+                    </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                    <button onclick="saveSettings()" class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 border border-amber-400/20">
+                        <i class="fas fa-save mr-2"></i>
+                        Save Settings
+                    </button>
+                    <button onclick="resetSettings()" class="inline-flex items-center justify-center px-6 py-3 bg-white text-slate-700 font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 border-2 border-slate-200 hover:border-slate-300">
+                        <i class="fas fa-undo mr-2"></i>
+                        Reset to Default
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Enhanced Distribution Status -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Current Status -->
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-info-circle text-slate-900 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Distribution Status</h3>
+                            <p class="text-slate-300 text-sm">Current system state and progress</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-slate-700">Status</span>
+                            <span id="distribution_status" class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                                Ready
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-slate-700">Orders Processed</span>
+                            <span id="orders_processed" class="text-sm font-semibold text-slate-900">0</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-slate-700">Success Rate</span>
+                            <span id="success_rate" class="text-sm font-semibold text-slate-900">0%</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-slate-700">Last Run</span>
+                            <span id="last_run" class="text-sm text-slate-500">Never</span>
+                    </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-slate-700">Next Run</span>
+                            <span id="next_run" class="text-sm text-slate-500">Not scheduled</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+            <!-- Agent Availability -->
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-users text-slate-900 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Agent Availability</h3>
+                            <p class="text-slate-300 text-sm">Current agent status and capacity</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-slate-700">Available Agents</span>
+                            <span id="available_agents" class="text-sm font-semibold text-slate-900">{{ available_agents|default:"0" }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-slate-700">Busy Agents</span>
+                            <span id="busy_agents" class="text-sm font-semibold text-slate-900">{{ busy_agents|default:"0" }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-slate-700">Total Capacity</span>
+                            <span id="total_capacity" class="text-sm font-semibold text-slate-900">{{ total_capacity|default:"0" }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-slate-700">Used Capacity</span>
+                            <span id="used_capacity" class="text-sm font-semibold text-slate-900">{{ used_capacity|default:"0" }}</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-2">
+                            {% widthratio used_capacity|default:0 total_capacity|default:1 100 as capacity_percentage %}
+                            <div class="bg-gradient-to-r from-amber-400 to-yellow-500 h-2 rounded-full transition-all duration-300" 
+                                 style="width: {% if capacity_percentage > 100 %}100{% else %}{{ capacity_percentage }}{% endif %}%"></div>
+                    </div>
+                        <div class="flex justify-between text-xs text-slate-500">
+                            <span>0%</span>
+                            <span>100%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <!-- Enhanced Distribution Log -->
+        <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+            <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-list text-slate-900 text-lg"></i>
+                            </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Distribution Log</h3>
+                            <p class="text-slate-300 text-sm">Real-time distribution activities</p>
+                                    </div>
+                                </div>
+                    <div class="flex items-center space-x-3">
+                        <button onclick="clearLog()" class="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-all duration-200 text-sm">
+                            Clear Log
+                        </button>
+                        <button onclick="exportLog()" class="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 transition-all duration-200 text-sm">
+                            Export
+                        </button>
+                                </div>
+                            </div>
+                                </div>
+            <div class="p-6">
+                <div id="distribution_log" class="space-y-3 max-h-96 overflow-y-auto">
+                    <div class="text-center text-slate-500 py-8">
+                        <i class="fas fa-info-circle text-2xl mb-2 text-slate-300"></i>
+                        <p class="text-sm">No distribution activity yet</p>
+                        <p class="text-xs">Start the distribution process to see logs here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+        <!-- Enhanced Quick Actions -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <button onclick="testDistribution()" class="p-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-2xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-center">
+                <i class="fas fa-vial text-2xl mb-2"></i>
+                <div class="text-sm font-semibold">Test Run</div>
+                <div class="text-xs opacity-80">Simulate distribution</div>
+            </button>
+            
+            <button onclick="pauseDistribution()" class="p-4 bg-gradient-to-r from-amber-500 to-yellow-600 text-white rounded-2xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-center">
+                <i class="fas fa-pause text-2xl mb-2"></i>
+                <div class="text-sm font-semibold">Pause</div>
+                <div class="text-xs opacity-80">Temporarily stop</div>
+            </button>
+            
+            <button onclick="resumeDistribution()" class="p-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-center">
+                <i class="fas fa-play text-2xl mb-2"></i>
+                <div class="text-sm font-semibold">Resume</div>
+                <div class="text-xs opacity-80">Continue process</div>
+                    </button>
+            
+            <button onclick="viewStatistics()" class="p-4 bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-2xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-center">
+                <i class="fas fa-chart-bar text-2xl mb-2"></i>
+                <div class="text-sm font-semibold">Statistics</div>
+                <div class="text-xs opacity-80">View metrics</div>
+                    </button>
+                </div>
+        </div>
+</div>
+
+<script>
+let distributionRunning = false;
+let distributionInterval = null;
+
+function startAutoDistribution() {
+    if (distributionRunning) {
+        alert('Distribution is already running!');
+        return;
+    }
+    
+    const algorithm = document.getElementById('algorithm').value;
+    const maxOrders = document.getElementById('max_orders').value;
+    const batchSize = document.getElementById('batch_size').value;
+    
+    if (confirm(`Start auto-distribution with ${algorithm} algorithm, max ${maxOrders} orders per agent, batch size ${batchSize}?`)) {
+        distributionRunning = true;
+        updateStatus('Running', 'bg-green-100 text-green-800 border-green-200');
+        startDistributionTimer();
+        addLogEntry('Distribution started', 'success');
+        
+        // Simulate distribution process
+        simulateDistribution();
+    }
+}
+
+function stopDistribution() {
+    if (!distributionRunning) {
+        alert('Distribution is not running!');
+        return;
+    }
+    
+    if (confirm('Stop the distribution process?')) {
+        distributionRunning = false;
+        updateStatus('Stopped', 'bg-red-100 text-red-800 border-red-200');
+        stopDistributionTimer();
+        addLogEntry('Distribution stopped', 'warning');
+    }
+}
+
+function pauseDistribution() {
+    if (!distributionRunning) {
+        alert('Distribution is not running!');
+        return;
+    }
+    
+    distributionRunning = false;
+    updateStatus('Paused', 'bg-amber-100 text-amber-800 border-amber-200');
+    stopDistributionTimer();
+    addLogEntry('Distribution paused', 'info');
+}
+
+function resumeDistribution() {
+    if (distributionRunning) {
+        alert('Distribution is already running!');
+        return;
+    }
+    
+    distributionRunning = true;
+    updateStatus('Running', 'bg-green-100 text-green-800 border-green-200');
+    startDistributionTimer();
+    addLogEntry('Distribution resumed', 'success');
+}
+
+function updateStatus(status, classes) {
+    const statusElement = document.getElementById('distribution_status');
+    statusElement.textContent = status;
+    statusElement.className = `px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${classes}`;
+}
+
+function startDistributionTimer() {
+    const refreshInterval = parseInt(document.getElementById('refresh_interval').value) * 1000;
+    distributionInterval = setInterval(() => {
+        if (distributionRunning) {
+            simulateDistribution();
+        }
+    }, refreshInterval);
+}
+
+function stopDistributionTimer() {
+    if (distributionInterval) {
+        clearInterval(distributionInterval);
+        distributionInterval = null;
+    }
+}
+
+function simulateDistribution() {
+    // Simulate processing orders
+    const processed = Math.floor(Math.random() * 5) + 1;
+    const currentProcessed = parseInt(document.getElementById('orders_processed').textContent);
+    document.getElementById('orders_processed').textContent = currentProcessed + processed;
+    
+    // Update success rate
+    const successRate = Math.floor(Math.random() * 20) + 80;
+    document.getElementById('success_rate').textContent = successRate + '%';
+    
+    // Update last run
+    const now = new Date();
+    document.getElementById('last_run').textContent = now.toLocaleTimeString();
+    
+    // Add log entry
+    addLogEntry(`Processed ${processed} orders successfully`, 'success');
+}
+
+function addLogEntry(message, type) {
+    const logContainer = document.getElementById('distribution_log');
+    const timestamp = new Date().toLocaleTimeString();
+    
+    const logEntry = document.createElement('div');
+    logEntry.className = `flex items-center justify-between p-3 bg-slate-50/50 rounded-xl`;
+    
+    let iconClass = 'fas fa-info-circle text-blue-500';
+    if (type === 'success') iconClass = 'fas fa-check-circle text-green-500';
+    if (type === 'warning') iconClass = 'fas fa-exclamation-triangle text-amber-500';
+    if (type === 'error') iconClass = 'fas fa-times-circle text-red-500';
+    
+    logEntry.innerHTML = `
+        <div class="flex items-center">
+            <i class="${iconClass} mr-3"></i>
+            <span class="text-sm text-slate-700">${message}</span>
+        </div>
+        <span class="text-xs text-slate-500">${timestamp}</span>
+    `;
+    
+    // Remove the "no activity" message if it exists
+    const noActivityMsg = logContainer.querySelector('.text-center');
+    if (noActivityMsg) {
+        noActivityMsg.remove();
+    }
+    
+    logContainer.insertBefore(logEntry, logContainer.firstChild);
+    
+    // Limit log entries to 50
+    const entries = logContainer.querySelectorAll('.flex');
+    if (entries.length > 50) {
+        entries[entries.length - 1].remove();
+    }
+}
+
+function saveSettings() {
+    alert('Settings saved successfully!');
+}
+
+function resetSettings() {
+    if (confirm('Reset all settings to default values?')) {
+        document.getElementById('algorithm').value = 'load_balanced';
+        document.getElementById('max_orders').value = '10';
+        document.getElementById('priority_threshold').value = 'medium';
+        document.getElementById('refresh_interval').value = '60';
+        document.getElementById('batch_size').value = '5';
+        alert('Settings reset to default!');
+    }
+}
+
+function clearLog() {
+    if (confirm('Clear the distribution log?')) {
+        const logContainer = document.getElementById('distribution_log');
+        logContainer.innerHTML = `
+            <div class="text-center text-slate-500 py-8">
+                <i class="fas fa-info-circle text-2xl mb-2 text-slate-300"></i>
+                <p class="text-sm">Log cleared</p>
+            </div>
+        `;
+    }
+}
+
+function exportLog() {
+    alert('Exporting distribution log...');
+}
+
+function testDistribution() {
+    alert('Running test distribution...');
+    simulateDistribution();
+}
+
+function viewStatistics() {
+    alert('Opening statistics view...');
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    updateStatus('Ready', 'bg-amber-100 text-amber-800 border-amber-200');
+});
+</script>
+{% endblock %} 

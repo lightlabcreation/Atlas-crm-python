@@ -1,0 +1,126 @@
+{% extends 'users.html' %}
+
+{% block title %}Registration Successful - Atlas Fulfillment{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex bg-gray-50">
+  <!-- Left Section with Image -->
+  <div class="hidden lg:flex lg:w-1/2 items-center justify-center p-8">
+    <div class="max-w-md text-center">
+      <div class="text-center">
+        <img src="https://i.ibb.co/YT4Ny4L1/10.png" alt="Atlas Service" class="h-24 w-auto mx-auto mb-8">
+        <h1 class="text-4xl font-bold text-black mb-4 leading-tight">YOUR TRUSTED PARTNER FROM<br>SOURCING TO SEAMLESS<br>DELIVERY</h1>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Section with Success Message -->
+  <div class="flex-1 flex items-center justify-center p-4 sm:p-8">
+    <div class="max-w-md w-full space-y-8">
+      <!-- Mobile Header -->
+      <div class="lg:hidden text-center mb-8">
+        <div class="text-center">
+          <img src="https://i.ibb.co/YT4Ny4L1/10.png" alt="Atlas Service" class="h-16 w-auto mx-auto mb-6">
+          <h1 class="text-2xl font-bold text-gray-900 mb-2 leading-tight">YOUR TRUSTED PARTNER FROM<br>SOURCING TO SEAMLESS<br>DELIVERY</h1>
+        </div>
+      </div>
+
+      <!-- Success Message -->
+      <div class="text-center">
+        <!-- Success Icon -->
+        <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 mb-6">
+          <i class="fas fa-check text-4xl text-green-600"></i>
+        </div>
+        
+        <!-- Success Title -->
+        <h2 class="text-3xl font-extrabold text-gray-900 mb-4">
+          Registration Completed Successfully!
+        </h2>
+        
+        <!-- Success Message -->
+        <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+          <div class="flex items-center justify-center mb-4">
+            <i class="fas fa-check-circle text-green-600 text-2xl mr-3"></i>
+            <h3 class="text-lg font-semibold text-green-800">Thank you for registering!</h3>
+          </div>
+          <p class="text-sm text-green-700 leading-relaxed">
+            Your account manager will contact you shortly to complete the verification process and get you started.
+          </p>
+        </div>
+        
+        <!-- Additional Information -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div class="flex items-start">
+            <i class="fas fa-info-circle text-blue-600 mt-1 mr-3"></i>
+            <div class="text-sm text-blue-800">
+              <p class="font-medium mb-2">What happens next?</p>
+              <ul class="list-disc list-inside space-y-1 text-blue-700">
+                <li>Your registration is under review</li>
+                <li>You will receive a confirmation email</li>
+                <li>Our team will contact you within 24 hours</li>
+                <li>You'll be notified once your account is approved</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Contact Information -->
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+          <div class="flex items-center justify-center">
+            <i class="fas fa-phone text-gray-600 mr-2"></i>
+            <p class="text-sm text-gray-700">
+              Need immediate assistance? Contact us at 
+              <a href="tel:+971503565009" class="font-semibold text-gray-900 hover:text-gray-700">
+                +971503565009
+              </a>
+            </p>
+          </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="space-y-3">
+          <a href="{% url 'users:login' %}" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors duration-200">
+            <i class="fas fa-sign-in-alt mr-2"></i>
+            Go to Login Page
+          </a>
+          
+          <a href="{% url 'landing:home' %}" class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors duration-200">
+            <i class="fas fa-home mr-2"></i>
+            Back to Homepage
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Auto-redirect script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Auto-redirect to login page after 10 seconds
+  setTimeout(function() {
+    window.location.href = "{% url 'users:login' %}";
+  }, 10000);
+  
+  // Show countdown
+  let countdown = 10;
+  const countdownElement = document.createElement('div');
+  countdownElement.className = 'text-center mt-4 text-sm text-gray-500';
+  countdownElement.innerHTML = `You will be automatically redirected to the login page in <span class="font-semibold text-yellow-600">${countdown}</span> seconds...`;
+  
+  // Insert countdown after the action buttons
+  const buttonsContainer = document.querySelector('.space-y-3');
+  buttonsContainer.parentNode.insertBefore(countdownElement, buttonsContainer.nextSibling);
+  
+  // Update countdown every second
+  const countdownInterval = setInterval(function() {
+    countdown--;
+    countdownElement.innerHTML = `You will be automatically redirected to the login page in <span class="font-semibold text-yellow-600">${countdown}</span> seconds...`;
+    
+    if (countdown <= 0) {
+      clearInterval(countdownInterval);
+    }
+  }, 1000);
+});
+</script>
+{% endblock %}

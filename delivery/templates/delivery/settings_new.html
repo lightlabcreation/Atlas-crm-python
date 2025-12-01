@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Settings & Profile{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50">
+    <!-- Page Header -->
+    <div class="bg-gradient-to-r from-amber-600 via-yellow-500 to-orange-500 shadow-2xl">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+                <div>
+                    <h1 class="text-4xl font-bold text-white mb-2">Settings & Profile</h1>
+                    <p class="text-amber-100 text-lg">Manage your profile, preferences, and account settings</p>
+                </div>
+                <div class="bg-white/20 backdrop-blur-sm rounded-2xl px-6 py-3 border border-white/30">
+                    <div class="text-center">
+                        <p class="text-white text-sm">Current Time</p>
+                        <p class="text-white font-semibold text-lg" id="current-time"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div class="bg-white/80 backdrop-blur-sm border-b border-amber-200/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <nav class="flex space-x-8 py-4">
+                <a href="{% url 'delivery:dashboard' %}" 
+                   class="text-slate-600 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                    Dashboard
+                </a>
+                <a href="{% url 'delivery:order_list' %}" 
+                   class="text-slate-600 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                    Orders
+                </a>
+                <a href="{% url 'delivery:performance' %}" 
+                   class="text-slate-600 hover:text-amber-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200">
+                    Performance
+                </a>
+                <a href="{% url 'delivery:settings' %}" 
+                   class="text-amber-600 bg-amber-50 px-3 py-2 rounded-md text-sm font-medium">
+                    Settings
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div class="space-y-8">
+            
+            {% if is_delivery_agent %}
+            <!-- Delivery Agent Preferences -->
+            <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-amber-200/50 overflow-hidden">
+                <div class="bg-gradient-to-r from-amber-500 to-yellow-500 px-6 py-4">
+                    <h3 class="text-xl font-bold text-white flex items-center">
+                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Delivery Preferences
+                    </h3>
+                    <p class="text-amber-100 mt-1">Customize your delivery experience and preferences</p>
+                </div>
+                <div class="p-8">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-3">Preferred Delivery Areas</label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    {% for value, label in preferences.AREA_CHOICES %}
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="preferred_areas" value="{{ value }}" 
+                                               {% if value in preferences.preferred_areas %}checked{% endif %}
+                                               class="rounded border-amber-300 text-amber-600 focus:ring-amber-500">
+                                        <span class="ml-2 text-sm text-gray-700">{{ label }}</span>
+                                    </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-3">Vehicle Type</label>
+                                <select name="vehicle_type" class="w-full px-4 py-3 border border-amber-200 rounded-2xl bg-white text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200">
+                                    {% for value, label in preferences.VEHICLE_CHOICES %}
+                                    <option value="{{ value }}" {% if value == preferences.vehicle_type %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-3">Maximum Package Weight (kg)</label>
+                                <input type="number" name="max_package_weight" value="{{ preferences.max_package_weight }}" 
+                                       step="0.1" min="0" max="1000"
+                                       class="w-full px-4 py-3 border border-amber-200 rounded-2xl bg-white text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-3">Working Hours</label>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs text-gray-600 mb-1">Start Time</label>
+                                        <input type="time" name="start_time" value="{{ preferences.start_time|time:'H:i' }}" 
+                                               class="w-full px-3 py-2 border border-amber-200 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs text-gray-600 mb-1">End Time</label>
+                                        <input type="time" name="end_time" value="{{ preferences.end_time|time:'H:i' }}" 
+                                               class="w-full px-3 py-2 border border-amber-200 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-3">Delivery Settings</label>
+                                <div class="space-y-3">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="accept_urgent_deliveries" 
+                                               {% if preferences.accept_urgent_deliveries %}checked{% endif %}
+                                               class="rounded border-amber-300 text-amber-600 focus:ring-amber-500">
+                                        <span class="ml-2 text-sm text-gray-700">Accept urgent deliveries</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="notification_enabled" 
+                                               {% if preferences.notification_enabled %}checked{% endif %}
+                                               class="rounded border-amber-300 text-amber-600 focus:ring-amber-500">
+                                        <span class="ml-2 text-sm text-gray-700">Enable notifications for new orders</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="auto_accept_orders" 
+                                               {% if preferences.auto_accept_orders %}checked{% endif %}
+                                               class="rounded border-amber-300 text-amber-600 focus:ring-amber-500">
+                                        <span class="ml-2 text-sm text-gray-700">Auto-accept assigned orders</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-3">Max Daily Deliveries</label>
+                                    <input type="number" name="max_daily_deliveries" value="{{ preferences.max_daily_deliveries }}" 
+                                           min="1" max="100"
+                                           class="w-full px-4 py-3 border border-amber-200 rounded-2xl bg-white text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-3">Delivery Radius (km)</label>
+                                    <input type="number" name="preferred_delivery_radius" value="{{ preferences.preferred_delivery_radius }}" 
+                                           min="1" max="100"
+                                           class="w-full px-4 py-3 border border-amber-200 rounded-2xl bg-white text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200">
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-end">
+                                <button type="submit" 
+                                        class="px-8 py-3 bg-gradient-to-r from-amber-500 to-yellow-600 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+                                    Save Preferences
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            {% elif is_admin %}
+            <!-- Admin Delivery Agent Management -->
+            <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-amber-200/50 overflow-hidden">
+                <div class="bg-gradient-to-r from-amber-500 to-yellow-500 px-6 py-4">
+                    <h3 class="text-xl font-bold text-white flex items-center">
+                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                        </svg>
+                        Delivery Agent Management
+                    </h3>
+                    <p class="text-amber-100 mt-1">View and manage delivery agent preferences</p>
+                </div>
+                <div class="p-8">
+                    <div class="space-y-6">
+                        {% for agent in delivery_agents %}
+                        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h4 class="text-lg font-semibold text-slate-900">{{ agent.get_full_name|default:agent.username }}</h4>
+                                    <p class="text-sm text-slate-600">{{ agent.email }}</p>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button onclick="viewAgentPreferences({{ agent.id }})" 
+                                            class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                                        View Preferences
+                                    </button>
+                                    <button onclick="editAgentPreferences({{ agent.id }})" 
+                                            class="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors">
+                                        Edit Preferences
+                                    </button>
+                                </div>
+                            </div>
+                            {% if agent.delivery_preferences %}
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                <div>
+                                    <span class="text-slate-600">Vehicle:</span>
+                                    <span class="font-medium">{{ agent.delivery_preferences.get_vehicle_type_display }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-600">Max Weight:</span>
+                                    <span class="font-medium">{{ agent.delivery_preferences.max_package_weight }} kg</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-600">Hours:</span>
+                                    <span class="font-medium">{{ agent.delivery_preferences.start_time }} - {{ agent.delivery_preferences.end_time }}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-600">Max Daily:</span>
+                                    <span class="font-medium">{{ agent.delivery_preferences.max_daily_deliveries }}</span>
+                                </div>
+                            </div>
+                            {% else %}
+                            <p class="text-slate-500 text-sm">No preferences set</p>
+                            {% endif %}
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-8">
+                            <p class="text-slate-500">No delivery agents found</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            {% else %}
+            <!-- Default Settings (Read-only for other users) -->
+            <div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-amber-200/50 overflow-hidden">
+                <div class="bg-gradient-to-r from-amber-500 to-yellow-500 px-6 py-4">
+                    <h3 class="text-xl font-bold text-white flex items-center">
+                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Settings
+                    </h3>
+                    <p class="text-amber-100 mt-1">System settings and configuration</p>
+                </div>
+                <div class="p-8">
+                    <div class="text-center py-8">
+                        <p class="text-slate-500">Settings are not available for your user type</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Update current time
+function updateTime() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('en-US', { 
+        hour12: false, 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+    });
+    document.getElementById('current-time').textContent = timeString;
+}
+
+// Update time every second
+setInterval(updateTime, 1000);
+updateTime();
+
+// Agent preference functions
+function viewAgentPreferences(agentId) {
+    // Implement view agent preferences
+    alert('View preferences for agent ' + agentId);
+}
+
+function editAgentPreferences(agentId) {
+    // Implement edit agent preferences
+    alert('Edit preferences for agent ' + agentId);
+}
+</script>
+{% endblock %}

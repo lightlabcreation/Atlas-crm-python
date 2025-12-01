@@ -1,0 +1,875 @@
+{% extends 'base.html' %}
+{% load role_filters %}
+
+{% block title %}Order Management{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-orange-600">Order Management</h1>
+            <p class="text-gray-600 mt-2">Manage and track all orders with advanced filtering</p>
+        </div>
+        <div class="flex space-x-3">
+            <a href="{% url 'orders:create' %}" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center">
+                <i class="fas fa-plus mr-2"></i>
+                Add New Order
+            </a>
+            <a href="{% url 'orders:import' %}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center">
+                <i class="fas fa-upload mr-2"></i>
+                Import Orders
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-shopping-cart text-blue-600 text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Total Orders</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ total_orders }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-clock text-yellow-600 text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Pending</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ pending_orders }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-orange-500">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-cog text-orange-600 text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Processing</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ processing_orders }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-green-600 text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Delivered</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ delivered_orders }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Status Filters -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="bg-orange-100 border-b border-gray-200 px-6 py-4 -m-6 mb-6">
+            <h3 class="text-lg font-semibold text-orange-600">Quick Status Filters</h3>
+        </div>
+        <div class="flex flex-wrap gap-3 justify-center">
+            <a href="{% url 'orders:list' %}" 
+               class="px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 {% if not current_filters.status %}bg-orange-600 text-white shadow-lg{% else %}bg-gray-100 text-gray-700 hover:bg-gray-200{% endif %}">
+                <i class="fas fa-list mr-2"></i>
+                All Orders ({{ total_orders }})
+            </a>
+            
+            <a href="{% url 'orders:list' %}?status=pending" 
+               class="px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 {% if current_filters.status == 'pending' %}bg-yellow-500 text-white shadow-lg{% else %}bg-yellow-100 text-yellow-800 hover:bg-yellow-200{% endif %}">
+                <i class="fas fa-clock mr-2"></i>
+                Pending ({{ pending_orders }})
+            </a>
+            
+            <a href="{% url 'orders:list' %}?status=confirmed" 
+               class="px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 {% if current_filters.status == 'confirmed' %}bg-blue-500 text-white shadow-lg{% else %}bg-blue-100 text-blue-800 hover:bg-blue-200{% endif %}">
+                <i class="fas fa-check mr-2"></i>
+                Confirmed ({{ confirmed_orders }})
+            </a>
+            
+            <a href="{% url 'orders:list' %}?status=processing" 
+               class="px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 {% if current_filters.status == 'processing' %}bg-purple-500 text-white shadow-lg{% else %}bg-purple-100 text-purple-800 hover:bg-purple-200{% endif %}">
+                <i class="fas fa-cog mr-2"></i>
+                Processing ({{ processing_orders }})
+            </a>
+            
+            <a href="{% url 'orders:list' %}?status=delivered" 
+               class="px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 {% if current_filters.status == 'delivered' %}bg-green-500 text-white shadow-lg{% else %}bg-green-100 text-green-800 hover:bg-green-200{% endif %}">
+                <i class="fas fa-check-circle mr-2"></i>
+                Delivered ({{ delivered_orders }})
+            </a>
+            
+            <a href="{% url 'orders:list' %}?status=cancelled" 
+               class="px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 {% if current_filters.status == 'cancelled' %}bg-red-500 text-white shadow-lg{% else %}bg-red-100 text-red-800 hover:bg-red-200{% endif %}">
+                <i class="fas fa-times-circle mr-2"></i>
+                Cancelled ({{ cancelled_orders }})
+            </a>
+        </div>
+    </div>
+
+    <!-- Advanced Filters -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="bg-orange-100 border-b border-gray-200 px-6 py-4 -m-6 mb-6">
+            <h3 class="text-lg font-semibold text-orange-600">Advanced Filters</h3>
+        </div>
+        
+        <!-- Search Section -->
+        <form method="GET" id="search-form">
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                <div class="flex gap-2">
+                    <input type="text" name="search" placeholder="Search by order code, customer, phone, product..." 
+                           value="{{ current_filters.search }}"
+                           class="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                    <button type="submit" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md flex items-center">
+                        <i class="fas fa-search mr-2"></i>
+                        Search
+                    </button>
+                </div>
+            </div>
+        </form>
+        
+        <!-- Filter Grid -->
+        <form method="GET" id="filter-form">
+            <!-- Hidden search field to maintain search when applying filters -->
+            <input type="hidden" name="search" value="{{ current_filters.search }}">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
+                <!-- Status Filter -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-tasks mr-2 text-orange-600"></i>
+                        Order Status
+                    </label>
+                    <select name="status" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                        <option value="">All Statuses</option>
+                        <option value="pending" {% if current_filters.status == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="confirmed" {% if current_filters.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                        <option value="processing" {% if current_filters.status == 'processing' %}selected{% endif %}>Processing</option>
+                        <option value="packaged" {% if current_filters.status == 'packaged' %}selected{% endif %}>Packaged</option>
+                        <option value="shipped" {% if current_filters.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                        <option value="delivered" {% if current_filters.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                        <option value="cancelled" {% if current_filters.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        <option value="postponed" {% if current_filters.status == 'postponed' %}selected{% endif %}>Postponed</option>
+                    </select>
+                </div>
+                
+                <!-- Workflow Status Filter -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-cogs mr-2 text-orange-600"></i>
+                        Workflow Status
+                    </label>
+                    <select name="workflow_status" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                        <option value="">All Workflow Statuses</option>
+                        <option value="seller_submitted" {% if current_filters.workflow_status == 'seller_submitted' %}selected{% endif %}>Seller Submitted</option>
+                        <option value="callcenter_review" {% if current_filters.workflow_status == 'callcenter_review' %}selected{% endif %}>Call Center Review</option>
+                        <option value="callcenter_approved" {% if current_filters.workflow_status == 'callcenter_approved' %}selected{% endif %}>Call Center Approved</option>
+                        <option value="packaging_in_progress" {% if current_filters.workflow_status == 'packaging_in_progress' %}selected{% endif %}>Packaging In Progress</option>
+                        <option value="packaging_completed" {% if current_filters.workflow_status == 'packaging_completed' %}selected{% endif %}>Packaging Completed</option>
+                        <option value="ready_for_delivery" {% if current_filters.workflow_status == 'ready_for_delivery' %}selected{% endif %}>Ready for Delivery</option>
+                        <option value="delivery_in_progress" {% if current_filters.workflow_status == 'delivery_in_progress' %}selected{% endif %}>Delivery In Progress</option>
+                        <option value="delivery_completed" {% if current_filters.workflow_status == 'delivery_completed' %}selected{% endif %}>Delivery Completed</option>
+                    </select>
+                </div>
+                
+                <!-- Date Filter -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-calendar mr-2 text-orange-600"></i>
+                        Date Range
+                    </label>
+                    <select name="date" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                        <option value="">All Dates</option>
+                        <option value="today" {% if current_filters.date == 'today' %}selected{% endif %}>Today</option>
+                        <option value="yesterday" {% if current_filters.date == 'yesterday' %}selected{% endif %}>Yesterday</option>
+                        <option value="week" {% if current_filters.date == 'week' %}selected{% endif %}>This Week</option>
+                        <option value="month" {% if current_filters.date == 'month' %}selected{% endif %}>This Month</option>
+                        <option value="quarter" {% if current_filters.date == 'quarter' %}selected{% endif %}>This Quarter</option>
+                        <option value="year" {% if current_filters.date == 'year' %}selected{% endif %}>This Year</option>
+                    </select>
+                </div>
+                
+                <!-- Emirate Filter -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-map-marker-alt mr-2 text-orange-600"></i>
+                        Emirate
+                    </label>
+                    <select name="emirate" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                        <option value="">All Emirates</option>
+                        {% for emirate in emirates %}
+                        <option value="{{ emirate }}" {% if current_filters.emirate == emirate %}selected{% endif %}>{{ emirate }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Seller Filter -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-store mr-2 text-orange-600"></i>
+                        Seller
+                    </label>
+                    <select name="seller" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                        <option value="">All Sellers</option>
+                        {% for seller in sellers %}
+                        <option value="{{ seller.id }}" {% if current_filters.seller == seller.id|stringformat:"s" %}selected{% endif %}>
+                            {{ seller.name }} ({{ seller.email }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Agent Filter -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-user-tie mr-2 text-orange-600"></i>
+                        Call Center Agent
+                    </label>
+                    <select name="agent" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                        <option value="">All Agents</option>
+                        {% for agent in agents %}
+                        <option value="{{ agent.id }}" {% if current_filters.agent == agent.id|stringformat:"s" %}selected{% endif %}>
+                            {{ agent.first_name }} {{ agent.last_name }} ({{ agent.email }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Amount Range -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-dollar-sign mr-2 text-orange-600"></i>
+                        Amount Range (AED)
+                    </label>
+                    <div class="flex gap-2">
+                        <input type="number" name="amount_min" placeholder="Min Amount" 
+                               value="{{ current_filters.amount_min }}"
+                               class="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                        <input type="number" name="amount_max" placeholder="Max Amount" 
+                               value="{{ current_filters.amount_max }}"
+                               class="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                    </div>
+                </div>
+                
+                <!-- Payment Status Filter -->
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-credit-card mr-2 text-orange-600"></i>
+                        Payment Status
+                    </label>
+                    <select name="payment_status" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                        <option value="">All Payment Statuses</option>
+                        <option value="paid" {% if current_filters.payment_status == 'paid' %}selected{% endif %}>Paid</option>
+                        <option value="pending" {% if current_filters.payment_status == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="failed" {% if current_filters.payment_status == 'failed' %}selected{% endif %}>Failed</option>
+                        <option value="no_payment" {% if current_filters.payment_status == 'no_payment' %}selected{% endif %}>No Payment</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+                <div class="flex gap-2">
+                    <button type="submit" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-md flex items-center">
+                        <i class="fas fa-filter mr-2"></i>
+                        Apply Filters
+            </button>
+                    <a href="{% url 'orders:list' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-md flex items-center">
+                        <i class="fas fa-times mr-2"></i>
+                        Reset
+                    </a>
+                    {% if current_filters.search or current_filters.status or current_filters.workflow_status or current_filters.date or current_filters.emirate or current_filters.seller or current_filters.agent or current_filters.amount_min or current_filters.amount_max or current_filters.payment_status %}
+                    <div class="bg-orange-100 text-orange-800 px-3 py-2 rounded-md text-sm flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Filters Active
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="text-sm text-gray-500">
+                    <span id="filter-count">{{ orders.paginator.count }}</span> orders
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+            <h2 class="text-lg font-semibold text-gray-900">Orders List</h2>
+                <div class="flex items-center space-x-4">
+                    <!-- Sort Options -->
+                    <div class="flex items-center space-x-2">
+                        <label class="text-sm font-medium text-gray-700">Sort by:</label>
+                        <select id="sort-select" class="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                            <option value="-created_at" {% if current_filters.sort == '-created_at' %}selected{% endif %}>Newest First</option>
+                            <option value="created_at" {% if current_filters.sort == 'created_at' %}selected{% endif %}>Oldest First</option>
+                            <option value="order_code" {% if current_filters.sort == 'order_code' %}selected{% endif %}>Order Code A-Z</option>
+                            <option value="-order_code" {% if current_filters.sort == '-order_code' %}selected{% endif %}>Order Code Z-A</option>
+                            <option value="customer" {% if current_filters.sort == 'customer' %}selected{% endif %}>Customer A-Z</option>
+                            <option value="-customer" {% if current_filters.sort == '-customer' %}selected{% endif %}>Customer Z-A</option>
+                            <option value="-price_per_unit" {% if current_filters.sort == '-price_per_unit' %}selected{% endif %}>Highest Price</option>
+                            <option value="price_per_unit" {% if current_filters.sort == 'price_per_unit' %}selected{% endif %}>Lowest Price</option>
+                            <option value="status" {% if current_filters.sort == 'status' %}selected{% endif %}>Status A-Z</option>
+                            <option value="-status" {% if current_filters.sort == '-status' %}selected{% endif %}>Status Z-A</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex space-x-2">
+                        <button id="export-btn" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md flex items-center text-sm">
+                            <i class="fas fa-download mr-2"></i>
+                            Export Data
+                        </button>
+                        <button id="print-btn" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-md flex items-center text-sm">
+                            <i class="fas fa-print mr-2"></i>
+                            Print
+                        </button>
+                        <button id="refresh-btn" class="bg-orange-600 hover:bg-orange-700 text-white px-3 py-2 rounded-md flex items-center text-sm">
+                            <i class="fas fa-sync-alt mr-2"></i>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overflow-x-auto shadow-sm rounded-lg border border-gray-200">
+            <table class="min-w-full divide-y divide-gray-200 bg-white">
+                <thead class="bg-gradient-to-r from-orange-50 to-amber-50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-hashtag text-orange-600"></i>
+                                <span>Order Code</span>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-user text-orange-600"></i>
+                                <span>Customer</span>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-phone text-orange-600"></i>
+                                <span>Phone</span>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-box text-orange-600"></i>
+                                <span>Product</span>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200">
+                            <div class="flex items-center justify-center space-x-2">
+                                <i class="fas fa-sort-numeric-up text-orange-600"></i>
+                                <span>Qty</span>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200">
+                            <div class="flex items-center justify-end space-x-2">
+                                <i class="fas fa-dollar-sign text-orange-600"></i>
+                                <span>Unit Price</span>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200">
+                            <div class="flex items-center justify-end space-x-2">
+                                <i class="fas fa-money-bill-wave text-orange-600"></i>
+                                <span>Total</span>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200" style="min-width: 140px;">
+                            <div class="flex items-center justify-center space-x-2">
+                                <i class="fas fa-info-circle text-orange-600"></i>
+                                <span>Status</span>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200">
+                            <div class="flex items-center justify-center space-x-2">
+                                <i class="fas fa-tasks text-orange-600"></i>
+                                <span>Workflow</span>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-store text-orange-600"></i>
+                                <span>Seller</span>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-user-tie text-orange-600"></i>
+                                <span>Agent</span>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-map-marker-alt text-orange-600"></i>
+                                <span>Emirate</span>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-calendar-alt text-orange-600"></i>
+                                <span>Date</span>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider sticky right-0 bg-gradient-to-r from-orange-50 to-amber-50">
+                            <div class="flex items-center justify-center space-x-2">
+                                <i class="fas fa-cog text-orange-600"></i>
+                                <span>Actions</span>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for order in orders %}
+                    <tr class="hover:bg-gradient-to-r hover:from-orange-50 hover:to-transparent transition-all duration-200 border-b border-gray-100">
+                        <!-- Order Code -->
+                        <td class="px-6 py-4 whitespace-nowrap border-r border-gray-100">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex-shrink-0">
+                                    <div class="h-10 w-10 rounded-lg bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-md">
+                                        <i class="fas fa-shopping-cart text-white text-sm"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-bold text-gray-900">{{ order.order_code }}</div>
+                                    <div class="text-xs text-gray-500 font-medium">#{{ order.id }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        
+                        <!-- Customer -->
+                        <td class="px-6 py-4 whitespace-nowrap border-r border-gray-100">
+                            <div class="text-sm font-semibold text-gray-900">{{ order.customer|default:"N/A" }}</div>
+                        </td>
+                        
+                        <!-- Phone -->
+                        <td class="px-6 py-4 whitespace-nowrap border-r border-gray-100">
+                            <div class="flex items-center space-x-2">
+                                <i class="fas fa-phone text-gray-400 text-xs"></i>
+                                <span class="text-sm font-medium text-gray-900">{{ order.customer_phone|default:"N/A" }}</span>
+                            </div>
+                        </td>
+                        
+                        <!-- Product -->
+                        <td class="px-6 py-4 whitespace-nowrap border-r border-gray-100">
+                            <div class="max-w-xs">
+                                <div class="text-sm font-semibold text-gray-900 truncate">{{ order.product.name_en|default:"N/A" }}</div>
+                            {% if order.product.name_ar %}
+                                <div class="text-xs text-gray-500 truncate">{{ order.product.name_ar }}</div>
+                            {% endif %}
+                            </div>
+                        </td>
+                        
+                        <!-- Quantity -->
+                        <td class="px-6 py-4 whitespace-nowrap text-center border-r border-gray-100">
+                            <span class="inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-bold bg-blue-100 text-blue-800">
+                                {{ order.quantity }}
+                            </span>
+                        </td>
+                        
+                        <!-- Unit Price -->
+                        <td class="px-6 py-4 whitespace-nowrap text-right border-r border-gray-100">
+                            <div class="text-sm font-bold text-gray-900">AED {{ order.price_per_unit|floatformat:2 }}</div>
+                        </td>
+                        
+                        <!-- Total Amount -->
+                        <td class="px-6 py-4 whitespace-nowrap text-right border-r border-gray-100">
+                            <div class="text-sm font-bold text-green-600">AED {{ order.total_price|floatformat:2 }}</div>
+                        </td>
+                        
+                        <!-- Status -->
+                        <td class="px-6 py-4 whitespace-nowrap text-center border-r border-gray-100" style="min-width: 140px; white-space: nowrap !important;">
+                            {% if order.status == 'pending' %}
+                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-yellow-100 text-yellow-800 shadow-sm whitespace-nowrap">
+                                <i class="fas fa-clock mr-2"></i>Pending
+                            </span>
+                            {% elif order.status == 'confirmed' %}
+                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-blue-100 text-blue-800 shadow-sm whitespace-nowrap">
+                                <i class="fas fa-check mr-2"></i>Confirmed
+                            </span>
+                            {% elif order.status == 'processing' %}
+                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-purple-100 text-purple-800 shadow-sm whitespace-nowrap">
+                                <i class="fas fa-cog mr-2"></i>Processing
+                            </span>
+                            {% elif order.status == 'packaged' %}
+                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-indigo-100 text-indigo-800 shadow-sm whitespace-nowrap">
+                                <i class="fas fa-box mr-2"></i>Packaged
+                            </span>
+                            {% elif order.status == 'shipped' %}
+                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-indigo-100 text-indigo-800 shadow-sm whitespace-nowrap">
+                                <i class="fas fa-shipping-fast mr-2"></i>Shipped
+                            </span>
+                            {% elif order.status == 'delivered' %}
+                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-green-100 text-green-800 shadow-sm whitespace-nowrap">
+                                <i class="fas fa-check-circle mr-2"></i>Delivered
+                            </span>
+                            {% elif order.status == 'cancelled' %}
+                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-red-100 text-red-800 shadow-sm whitespace-nowrap">
+                                <i class="fas fa-times-circle mr-2"></i>Cancelled
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-gray-100 text-gray-800 shadow-sm whitespace-nowrap">
+                                {{ order.status|title }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Workflow Status -->
+                        <td class="px-6 py-4 whitespace-nowrap text-center border-r border-gray-100">
+                            {% if order.workflow_status %}
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                                {{ order.workflow_status|title|truncatechars:20 }}
+                            </span>
+                            {% else %}
+                            <span class="text-xs text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Seller -->
+                        <td class="px-6 py-4 whitespace-nowrap border-r border-gray-100">
+                            {% if order.seller %}
+                            <div class="max-w-xs">
+                                <div class="text-sm font-medium text-gray-900 truncate">{{ order.seller.get_full_name|default:order.seller.username }}</div>
+                                <div class="text-xs text-gray-500 truncate">{{ order.seller.email }}</div>
+                            </div>
+                            {% else %}
+                            <span class="text-xs text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Agent -->
+                        <td class="px-6 py-4 whitespace-nowrap border-r border-gray-100">
+                            {% if order.agent %}
+                            <div class="max-w-xs">
+                                <div class="text-sm font-medium text-gray-900 truncate">{{ order.agent.get_full_name|default:order.agent.username }}</div>
+                                <div class="text-xs text-gray-500 truncate">{{ order.agent.email }}</div>
+                            </div>
+                            {% else %}
+                            <span class="text-xs text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Emirate -->
+                        <td class="px-6 py-4 whitespace-nowrap border-r border-gray-100">
+                            <span class="text-sm font-medium text-gray-900">{{ order.state|default:"-" }}</span>
+                        </td>
+                        
+                        <!-- Date -->
+                        <td class="px-6 py-4 whitespace-nowrap border-r border-gray-100">
+                            <div class="text-sm font-medium text-gray-900">{{ order.created_at|date:"M d, Y" }}</div>
+                            <div class="text-xs text-gray-500">{{ order.created_at|date:"H:i" }}</div>
+                        </td>
+                        
+                        <!-- Actions -->
+                        <td class="px-6 py-4 whitespace-nowrap text-center sticky right-0 bg-white">
+                            <div class="flex items-center justify-center space-x-2">
+                                <a href="{% url 'orders:detail' order.id %}" 
+                                   class="inline-flex items-center px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-semibold shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105" 
+                                   title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'orders:edit' order.id %}" 
+                                   class="inline-flex items-center px-3 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-xs font-semibold shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105" 
+                                   title="Edit Order">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% if user|is_seller and order.status == 'pending' and order.seller == user %}
+                                <a href="{% url 'orders:delete' order.id %}" 
+                                   class="inline-flex items-center px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-semibold shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105" 
+                                   title="Delete Order"
+                                   onclick="return confirm('Are you sure you want to delete this pending order? / هل أنت متأكد من حذف هذه الطلبية المعلقة؟');">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="14" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center">
+                                <div class="h-20 w-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                                    <i class="fas fa-search text-gray-400 text-3xl"></i>
+                                </div>
+                                {% if current_filters.search or current_filters.status or current_filters.workflow_status or current_filters.date or current_filters.emirate or current_filters.seller or current_filters.agent or current_filters.amount_min or current_filters.amount_max or current_filters.payment_status %}
+                                <p class="text-lg font-bold text-gray-900 mb-2">No orders match the selected filters</p>
+                                <p class="text-sm text-gray-500 mb-4">Try adjusting your search criteria or reset the filters</p>
+                                <a href="{% url 'orders:list' %}" class="inline-flex items-center px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
+                                    <i class="fas fa-times mr-2"></i>
+                                    Reset Filters
+                                </a>
+                                {% else %}
+                                <p class="text-lg font-bold text-gray-900 mb-2">No orders found</p>
+                                <p class="text-sm text-gray-500 mb-4">Create your first order to get started</p>
+                                <a href="{% url 'orders:create' %}" class="inline-flex items-center px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200">
+                                    <i class="fas fa-plus mr-2"></i>
+                                    Create New Order
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if orders.has_other_pages %}
+        <div class="px-6 py-4 border-t border-gray-200">
+            <div class="flex items-center justify-between">
+                <div class="text-sm text-gray-700">
+                    Showing {{ orders.start_index }} to {{ orders.end_index }} of {{ orders.paginator.count }} results
+                </div>
+                <div class="flex space-x-2">
+                    {% if orders.has_previous %}
+                        <a href="?page={{ orders.previous_page_number }}" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                            Previous
+                        </a>
+                    {% endif %}
+                    
+                    {% for num in orders.paginator.page_range %}
+                        {% if orders.number == num %}
+                            <span class="px-3 py-2 text-sm font-medium text-white bg-orange-600 border border-orange-600 rounded-md">
+                                {{ num }}
+                            </span>
+                        {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
+                            <a href="?page={{ num }}" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                {{ num }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if orders.has_next %}
+                        <a href="?page={{ orders.next_page_number }}" class="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                            Next
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit form when filters change
+    const filterForm = document.getElementById('filter-form');
+    const filterInputs = filterForm.querySelectorAll('select, input[type="number"]');
+    
+    filterInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            // Add a small delay to prevent too many requests
+            setTimeout(() => {
+                filterForm.submit();
+            }, 300);
+        });
+    });
+    
+    // Handle search input with debouncing
+    const searchForm = document.getElementById('search-form');
+    const searchInput = document.querySelector('input[name="search"]');
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            // Update hidden search field in filter form
+            const hiddenSearchField = filterForm.querySelector('input[name="search"]');
+            if (hiddenSearchField) {
+                hiddenSearchField.value = searchInput.value;
+            }
+            searchForm.submit();
+        }, 1000); // Wait 1 second after user stops typing
+    });
+    
+    // Handle sort selection
+    const sortSelect = document.getElementById('sort-select');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            const url = new URL(window.location);
+            url.searchParams.set('sort', this.value);
+            window.location.href = url.toString();
+        });
+    }
+    
+    // Update hidden search field when filter form is submitted
+    filterForm.addEventListener('submit', function() {
+        const hiddenSearchField = filterForm.querySelector('input[name="search"]');
+        if (hiddenSearchField) {
+            hiddenSearchField.value = searchInput.value;
+        }
+    });
+    
+    // Export functionality
+    document.getElementById('export-btn').addEventListener('click', function() {
+        // Get current filter parameters
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams();
+        
+        for (let [key, value] of formData.entries()) {
+            if (value) {
+                params.append(key, value);
+            }
+        }
+        
+        // Redirect to export URL with current filters
+        window.location.href = '{% url "orders:export" %}?' + params.toString();
+    });
+    
+    // Print functionality
+    document.getElementById('print-btn').addEventListener('click', function() {
+        window.print();
+    });
+    
+    // Refresh functionality
+    document.getElementById('refresh-btn').addEventListener('click', function() {
+        window.location.reload();
+    });
+    
+    // Update filter count display
+    function updateFilterCount() {
+        const countElement = document.getElementById('filter-count');
+        if (countElement) {
+            countElement.textContent = '{{ orders.paginator.count }}';
+        }
+    }
+    
+    updateFilterCount();
+    
+    // Add loading state to form submission
+    filterForm.addEventListener('submit', function() {
+        const submitBtn = filterForm.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Loading...';
+            submitBtn.disabled = true;
+        }
+    });
+    
+    // Add loading state to search form submission
+    searchForm.addEventListener('submit', function() {
+        const submitBtn = searchForm.querySelector('button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Searching...';
+            submitBtn.disabled = true;
+        }
+    });
+    
+});
+</script>
+<style>
+/* Beautiful Table Styles */
+.overflow-x-auto {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #f97316 #fef3c7;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+    height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+    background: #fef3c7;
+    border-radius: 10px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+    background: linear-gradient(to right, #f97316, #fb923c);
+    border-radius: 10px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to right, #ea580c, #f97316);
+}
+
+.overflow-x-auto table {
+    width: 100%;
+    min-width: max-content;
+}
+
+.overflow-x-auto table thead th {
+    white-space: nowrap !important;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: linear-gradient(to right, #fff7ed, #fef3c7) !important;
+}
+
+.overflow-x-auto table tbody td {
+    white-space: nowrap !important;
+}
+
+/* Status Column - Wider and Better Spacing */
+.overflow-x-auto table thead th:nth-child(8),
+.overflow-x-auto table tbody td:nth-child(8) {
+    min-width: 140px !important;
+    width: auto !important;
+}
+
+.overflow-x-auto table tbody td:nth-child(8) span {
+    white-space: nowrap !important;
+    display: inline-flex !important;
+}
+
+.overflow-x-auto table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.overflow-x-auto table tbody tr:hover {
+    background: linear-gradient(to right, #fff7ed, transparent) !important;
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.1);
+}
+
+/* Sticky Actions Column */
+.overflow-x-auto table tbody td:last-child {
+    position: sticky;
+    right: 0;
+    background: white;
+    z-index: 5;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.overflow-x-auto table tbody tr:hover td:last-child {
+    background: linear-gradient(to right, #fff7ed, white);
+}
+
+/* Beautiful Action Buttons */
+.overflow-x-auto table tbody td:last-child a {
+    transition: all 0.2s ease;
+}
+
+.overflow-x-auto table tbody td:last-child a:hover {
+    transform: translateY(-2px);
+}
+
+/* Status Badges */
+.overflow-x-auto table tbody td span[class*="rounded-full"] {
+    transition: all 0.2s ease;
+}
+
+.overflow-x-auto table tbody td span[class*="rounded-full"]:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+</style>
+{% endblock %}

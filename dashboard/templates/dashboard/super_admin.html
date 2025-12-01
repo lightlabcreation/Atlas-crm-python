@@ -1,0 +1,367 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white mt-[3rem]">
+
+    <div class="w-full px-4">
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <!-- Active Users Card -->
+            <div class="bg-white rounded-lg border border-gray-200">
+                <div class="p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Active Users</p>
+                            <p class="text-2xl font-semibold text-gray-900">{{ active_users_count|default:"0" }}</p>
+                        </div>
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-users text-blue-600"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{% url 'users:list' %}" class="text-sm text-blue-600 hover:text-blue-700">
+                            View all users →
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Alerts Card -->
+            <div class="bg-white rounded-lg border border-gray-200">
+                <div class="p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">System Alerts</p>
+                            <p class="text-2xl font-semibold text-gray-900">{{ alerts_count|default:"0" }}</p>
+                        </div>
+                        <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-red-600"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{% url 'dashboard:alerts' %}" class="text-sm text-red-600 hover:text-red-700">
+                            View all alerts →
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Sales Card -->
+            <div class="bg-white rounded-lg border border-gray-200">
+                <div class="p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Total Sales</p>
+                            <p class="text-2xl font-semibold text-gray-900">{{ total_sales|default:"AED 0" }}</p>
+                        </div>
+                        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-chart-line text-green-600"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{% url 'finance:accountant_dashboard' %}" class="text-sm text-green-600 hover:text-green-700">
+                            View details →
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Performance Card -->
+            <div class="bg-white rounded-lg border border-gray-200">
+                <div class="p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">System Performance</p>
+                            <p class="text-2xl font-semibold text-gray-900">{{ system_performance|default:"0" }}%</p>
+                        </div>
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-tachometer-alt text-purple-600"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <!-- User Activity Chart -->
+            <div class="bg-white rounded-lg border border-gray-200">
+                <div class="px-4 py-3 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">User Activity</h3>
+                    <p class="text-sm text-gray-500">Monthly user activity overview</p>
+                </div>
+                <div class="p-4">
+                    <div style="position: relative; height: 250px;">
+                        <canvas id="userActivityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Performance Chart -->
+            <div class="bg-white rounded-lg border border-gray-200">
+                <div class="px-4 py-3 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">System Performance</h3>
+                    <p class="text-sm text-gray-500">System response time metrics</p>
+                </div>
+                <div class="p-4">
+                    <div style="position: relative; height: 250px;">
+                        <canvas id="systemPerformanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="mt-6">
+            <div class="bg-white rounded-lg border border-gray-200">
+                <div class="px-4 py-3 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
+                    <p class="text-sm text-gray-500">Common administrative tasks</p>
+                </div>
+                <div class="px-4 py-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <a href="{% url 'users:create' %}" class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100">
+                            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-user-plus text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-900">Add User</h4>
+                                <p class="text-xs text-gray-500">Create new user</p>
+                            </div>
+                        </a>
+                        
+                        <a href="{% url 'orders:list' %}" class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100">
+                            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-shopping-cart text-green-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-900">View Orders</h4>
+                                <p class="text-xs text-gray-500">Manage orders</p>
+                            </div>
+                        </a>
+                        
+                        <a href="{% url 'callcenter:dashboard' %}" class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100">
+                            <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-headset text-yellow-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-900">Call Center</h4>
+                                <p class="text-xs text-gray-500">Manage call center</p>
+                            </div>
+                        </a>
+                        
+                        <a href="{% url 'dashboard:help' %}" class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100">
+                            <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-question-circle text-orange-600"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-900">Help</h4>
+                                <p class="text-xs text-gray-500">Get support</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get real data from Django context
+    let userActivityData = JSON.parse('{{ user_activity_data|escapejs }}');
+    let systemPerformanceData = JSON.parse('{{ system_performance_data|escapejs }}');
+    
+    console.log('Real User Activity Data:', userActivityData);
+    console.log('Real System Performance Data:', systemPerformanceData);
+    console.log('Data types:', typeof userActivityData, typeof systemPerformanceData);
+    
+    // Fallback data if real data is not available
+    if (!userActivityData || userActivityData.length === 0) {
+        console.warn('No user activity data available, using fallback data');
+        userActivityData = [
+            {month: 'Jan', active_users: 5, new_registrations: 1},
+            {month: 'Feb', active_users: 6, new_registrations: 2},
+            {month: 'Mar', active_users: 7, new_registrations: 1},
+            {month: 'Apr', active_users: 8, new_registrations: 3},
+            {month: 'May', active_users: 8, new_registrations: 2},
+            {month: 'Jun', active_users: 9, new_registrations: 1},
+            {month: 'Jul', active_users: 8, new_registrations: 2}
+        ];
+    }
+    
+    if (!systemPerformanceData || systemPerformanceData.length === 0) {
+        console.warn('No system performance data available, using fallback data');
+        systemPerformanceData = [
+            {day: 'Mon', response_time: 45},
+            {day: 'Tue', response_time: 52},
+            {day: 'Wed', response_time: 48},
+            {day: 'Thu', response_time: 55},
+            {day: 'Fri', response_time: 50},
+            {day: 'Sat', response_time: 47},
+            {day: 'Sun', response_time: 53}
+        ];
+    }
+    
+    // User Activity Chart - Line Chart with Real Data
+    const userActivityCtx = document.getElementById('userActivityChart');
+    if (userActivityCtx) {
+        new Chart(userActivityCtx.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: userActivityData.map(item => item.month),
+                datasets: [{
+                    label: 'Active Users',
+                    data: userActivityData.map(item => item.active_users),
+                    borderColor: '#3B82F6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#3B82F6',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6
+                }, {
+                    label: 'New Registrations',
+                    data: userActivityData.map(item => item.new_registrations),
+                    borderColor: '#10B981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#10B981',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            color: '#6B7280'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#6B7280'
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
+            }
+        });
+    }
+
+    // System Performance Chart - Bar Chart with Real Data
+    const systemPerformanceCtx = document.getElementById('systemPerformanceChart');
+    if (systemPerformanceCtx) {
+        new Chart(systemPerformanceCtx.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: systemPerformanceData.map(item => item.day),
+                datasets: [{
+                    label: 'Response Time (ms)',
+                    data: systemPerformanceData.map(item => item.response_time),
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(139, 92, 246, 0.8)',
+                        'rgba(236, 72, 153, 0.8)',
+                        'rgba(6, 182, 212, 0.8)'
+                    ],
+                    borderColor: [
+                        '#3B82F6',
+                        '#10B981',
+                        '#F59E0B',
+                        '#EF4444',
+                        '#8B5CF6',
+                        '#EC4899',
+                        '#06B6D4'
+                    ],
+                    borderWidth: 2,
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            color: '#6B7280'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Response Time (ms)',
+                            color: '#6B7280',
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#6B7280'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Days of Week',
+                            color: '#6B7280',
+                            font: {
+                                size: 12
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,312 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Order - #{{ order.order_code }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-edit text-orange-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h1 class="text-2xl font-bold text-orange-500">Edit Order</h1>
+                        <p class="text-gray-600">Order #{{ order.order_code }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'callcenter_manager:order_detail' order.id %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Order
+                    </a>
+                    <a href="{% url 'callcenter_manager:orders_management' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-list mr-2"></i>
+                        All Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Order Status Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle text-blue-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h2 class="text-xl font-bold text-gray-900">Current Order Status</h2>
+                        <p class="text-gray-600">Order information and current status</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <span class="px-4 py-2 text-sm font-medium rounded-full
+                        {% if order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                        {% elif order.status == 'processing' %}bg-blue-100 text-blue-800
+                        {% elif order.status == 'confirmed' %}bg-green-100 text-green-800
+                        {% elif order.status == 'completed' %}bg-green-100 text-green-800
+                        {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ order.get_status_display }}
+                    </span>
+                    <p class="text-sm text-gray-500 mt-1">{{ order.created_at|date:"M d, Y H:i" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Form -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+            <div class="flex items-center mb-8">
+                <i class="fas fa-edit text-orange-600 text-xl mr-3"></i>
+                <h3 class="text-lg font-medium text-gray-900">Edit Order Information</h3>
+            </div>
+
+            <form method="post" class="space-y-8">
+                {% csrf_token %}
+                
+                <!-- Basic Information Section -->
+                <div class="border-b border-gray-200 pb-8">
+                    <h4 class="text-lg font-medium text-gray-900 mb-6">Basic Information</h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Order Code (Read-only) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Order Code</label>
+                            <input type="text" value="{{ order.order_code }}" readonly 
+                                   class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md text-gray-500 cursor-not-allowed">
+                        </div>
+                        
+                        <!-- Order Date -->
+                        <div>
+                            <label for="id_date" class="block text-sm font-medium text-gray-700 mb-2">Order Date</label>
+                            <input type="date" name="date" id="id_date" value="{{ order.date|date:'Y-m-d' }}"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        
+                        <!-- Customer Name -->
+                        <div>
+                            <label for="id_customer" class="block text-sm font-medium text-gray-700 mb-2">Customer Name <span class="text-red-500">*</span></label>
+                            <input type="text" name="customer" id="id_customer" value="{{ order.customer }}" required
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        
+                        <!-- Customer Phone -->
+                        <div>
+                            <label for="id_customer_phone" class="block text-sm font-medium text-gray-700 mb-2">Customer Phone <span class="text-red-500">*</span></label>
+                            <input type="tel" name="customer_phone" id="id_customer_phone" value="{{ order.customer_phone }}" required
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        
+                        
+                        <!-- Status -->
+                        <div>
+                            <label for="id_status" class="block text-sm font-medium text-gray-700 mb-2">Status <span class="text-red-500">*</span></label>
+                            <select name="status" id="id_status" required
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                {% for status_code, status_display in order_status_choices %}
+                                    <option value="{{ status_code }}" {% if order.status == status_code %}selected{% endif %}>
+                                        {{ status_display }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Information Section -->
+                <div class="border-b border-gray-200 pb-8">
+                    <h4 class="text-lg font-medium text-gray-900 mb-6">Product Information</h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Product Name (Read-only) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
+                            <input type="text" value="{% if order.product %}{{ order.product.name_en }}{% else %}No Product{% endif %}" readonly 
+                                   class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md text-gray-500 cursor-not-allowed">
+                        </div>
+                        
+                        <!-- Quantity -->
+                        <div>
+                            <label for="id_quantity" class="block text-sm font-medium text-gray-700 mb-2">Quantity <span class="text-red-500">*</span></label>
+                            <input type="number" name="quantity" id="id_quantity" value="{{ order.quantity }}" min="1" required
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        
+                        <!-- Price per Unit -->
+                        <div>
+                            <label for="id_price_per_unit" class="block text-sm font-medium text-gray-700 mb-2">Price per Unit (AED) <span class="text-red-500">*</span></label>
+                            <input type="number" name="price_per_unit" id="id_price_per_unit" value="{{ order.price_per_unit }}" step="0.01" min="0" required
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        
+                        <!-- Total Price (Calculated) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Total Price (AED)</label>
+                            <input type="text" id="total_price" readonly 
+                                   class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-md text-gray-500 cursor-not-allowed">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Information Section -->
+                <div class="border-b border-gray-200 pb-8">
+                    <h4 class="text-lg font-medium text-gray-900 mb-6">Address Information</h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- City -->
+                        <div>
+                            <label for="id_city" class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                            <input type="text" name="city" id="id_city" value="{{ order.city }}"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        
+                        <!-- State -->
+                        <div>
+                            <label for="id_state" class="block text-sm font-medium text-gray-700 mb-2">State/Province</label>
+                            <input type="text" name="state" id="id_state" value="{{ order.state }}"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        
+                        <!-- Country -->
+                        <div>
+                            <label for="id_country" class="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                            <select name="country" id="id_country"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                {% for country_code, country_name in country_choices %}
+                                    <option value="{{ country_code }}" {% if order.country == country_code %}selected{% endif %}>
+                                        {{ country_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- ZIP Code -->
+                        <div>
+                            <label for="id_zip_code" class="block text-sm font-medium text-gray-700 mb-2">ZIP Code</label>
+                            <input type="text" name="zip_code" id="id_zip_code" value="{{ order.zip_code }}"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Assignment Section -->
+                <div class="border-b border-gray-200 pb-8">
+                    <h4 class="text-lg font-medium text-gray-900 mb-6">Assignment</h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Seller -->
+                        <div>
+                            <label for="id_seller" class="block text-sm font-medium text-gray-700 mb-2">Seller</label>
+                            <select name="seller" id="id_seller"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select a seller</option>
+                                {% for seller in sellers %}
+                                    <option value="{{ seller.id }}" {% if order.seller == seller %}selected{% endif %}>
+                                        {{ seller.get_full_name|default:seller.email }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Agent -->
+                        <div>
+                            <label for="id_agent" class="block text-sm font-medium text-gray-700 mb-2">Call Center Agent</label>
+                            <select name="agent" id="id_agent"
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select an agent</option>
+                                {% for agent in agents %}
+                                    <option value="{{ agent.id }}" {% if order.agent == agent %}selected{% endif %}>
+                                        {{ agent.get_full_name|default:agent.email }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes Section -->
+                <div class="pb-8">
+                    <h4 class="text-lg font-medium text-gray-900 mb-6">Notes & Comments</h4>
+                    
+                    <div class="space-y-6">
+                        <!-- Customer Notes -->
+                        <div>
+                            <label for="id_notes" class="block text-sm font-medium text-gray-700 mb-2">Customer Notes</label>
+                            <textarea name="notes" id="id_notes" rows="4"
+                                      class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                      placeholder="Customer notes or special instructions">{{ order.notes }}</textarea>
+                        </div>
+                        
+                        <!-- Internal Notes -->
+                        <div>
+                            <label for="id_internal_notes" class="block text-sm font-medium text-gray-700 mb-2">Internal Notes</label>
+                            <textarea name="internal_notes" id="id_internal_notes" rows="4"
+                                      class="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                                      placeholder="Internal notes for team members">{{ order.internal_notes }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                    <a href="{% url 'callcenter_manager:order_detail' order.id %}" 
+                       class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-md text-sm font-medium">
+Cancel                    </a>
+                    <button type="submit" 
+                            class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-md text-sm font-medium">
+                        <i class="fas fa-save mr-2"></i>
+Save Changes                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-calculate total price
+document.addEventListener('DOMContentLoaded', function() {
+    const quantityInput = document.getElementById('id_quantity');
+    const priceInput = document.getElementById('id_price_per_unit');
+    const totalInput = document.getElementById('total_price');
+    
+    function calculateTotal() {
+        const quantity = parseFloat(quantityInput.value) || 0;
+        const price = parseFloat(priceInput.value) || 0;
+        const total = quantity * price;
+        totalInput.value = total.toFixed(2);
+    }
+    
+    quantityInput.addEventListener('input', calculateTotal);
+    priceInput.addEventListener('input', calculateTotal);
+    
+    // Calculate on page load
+    calculateTotal();
+});
+
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    const requiredFields = ['customer', 'customer_phone', 'product_name', 'quantity', 'price_per_unit'];
+    let isValid = true;
+    
+    requiredFields.forEach(function(fieldName) {
+        const field = document.getElementById('id_' + fieldName);
+        if (!field.value.trim()) {
+            field.classList.add('border-red-500');
+            isValid = false;
+        } else {
+            field.classList.remove('border-red-500');
+        }
+    });
+    
+    if (!isValid) {
+        e.preventDefault();
+        alert('Please fill in all required fields.');
+    }
+});
+</script>
+{% endblock %}

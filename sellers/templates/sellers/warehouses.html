@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Warehouses - Seller{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200">
+    <!-- Enhanced Page Header -->
+    <div class="relative overflow-hidden bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-b border-amber-500/20 shadow-2xl">
+        <div class="absolute inset-0 bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-amber-500/10"></div>
+        <div class="relative max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-amber-500/25">
+                        <i class="fas fa-warehouse text-3xl text-slate-900"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 bg-clip-text text-transparent">
+                            Warehouses
+                        </h1>
+                        <p class="mt-2 text-lg text-slate-300 font-medium">Manage your warehouse locations and inventory</p>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                    <a href="{% url 'inventory:add_warehouse' %}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-900 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                        <i class="fas fa-plus mr-2"></i>
+                        Add Warehouse
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-8">
+        <!-- Warehouses Grid -->
+        {% if warehouses %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for warehouse in warehouses %}
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden hover:shadow-3xl transition-all duration-300 transform hover:scale-105">
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-6 border-b border-blue-400/50">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                                <i class="fas fa-warehouse text-white text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-white">{{ warehouse.name }}</h3>
+                                <p class="text-blue-100 text-sm">{{ warehouse.location }}</p>
+                            </div>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/20 text-white">
+                            {{ warehouse.status|default:"Active" }}
+                        </span>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-slate-600">Total Products</span>
+                            <span class="text-lg font-bold text-slate-900">{{ warehouse.total_products|default:0 }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-slate-600">Available Stock</span>
+                            <span class="text-lg font-bold text-green-600">{{ warehouse.available_stock|default:0 }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-slate-600">Low Stock Items</span>
+                            <span class="text-lg font-bold text-orange-600">{{ warehouse.low_stock_items|default:0 }}</span>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex space-x-2">
+                        <a href="{% url 'inventory:warehouse_detail' warehouse.id %}" class="flex-1 text-center px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-eye mr-2"></i>
+                            View
+                        </a>
+                        <a href="{% url 'inventory:edit_warehouse' warehouse.id %}" class="flex-1 text-center px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors duration-200">
+                            <i class="fas fa-edit mr-2"></i>
+                            Edit
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+            <div class="p-12 text-center">
+                <div class="w-24 h-24 bg-gradient-to-br from-slate-300 to-slate-400 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-warehouse text-slate-600 text-3xl"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-900 mb-4">No Warehouses Found</h3>
+                <p class="text-slate-600 mb-8">Start by adding your first warehouse to manage inventory locations.</p>
+                <a href="{% url 'inventory:add_warehouse' %}" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-900 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                    <i class="fas fa-plus mr-2"></i>
+                    Add Your First Warehouse
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Update Order Statuses - Delivery Manager{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white">
+    <!-- Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-edit text-purple-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-purple-600">Update Order Statuses</h1>
+                        <p class="mt-1 text-sm text-gray-500">Update order statuses</p>
+                    </div>
+                </div>
+                <a href="{% url 'delivery:manager_dashboard' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Barcode Scanner Section -->
+        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fas fa-barcode text-purple-600 text-xl mr-3"></i>
+                    <div>
+                        <h3 class="text-sm font-medium text-purple-900">Scan Order Barcode</h3>
+                        <p class="text-xs text-purple-700">Use barcode scanner to quickly find orders</p>
+                    </div>
+                </div>
+                <button type="button" id="cameraBtn" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                    <i class="fas fa-camera mr-2"></i>
+                    Open Scanner
+                </button>
+            </div>
+            <div id="cameraContainer" class="mt-4 hidden">
+                <video id="barcodeCamera" width="100%" height="300" style="border: 1px solid #ccc; border-radius: 8px;"></video>
+                <div class="mt-2 flex gap-2">
+                    <input type="text" id="barcodeInput" placeholder="Or enter order code manually" class="flex-1 border-gray-300 rounded-md px-3 py-2 text-sm">
+                    <button type="button" id="stopCameraBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-stop mr-2"></i>
+                        Stop Camera
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+            <form method="GET" class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select name="status" class="w-full border-gray-300 rounded-md shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                            <option value="">All Statuses</option>
+                            {% for value, label in statuses %}
+                            <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Shipping Company</label>
+                        <select name="company" class="w-full border-gray-300 rounded-md shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                            <option value="">All Companies</option>
+                            {% for company in companies %}
+                            <option value="{{ company.id }}" {% if filters.company == company.id|stringformat:"s" %}selected{% endif %}>{{ company.name_en }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                        <input type="text" name="search" value="{{ filters.search }}" placeholder="Order Code/Customer/Phone" class="w-full border-gray-300 rounded-md shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-search mr-2"></i>
+                        Search
+                    </button>
+                    <a href="{% url 'delivery:manager_update_orders' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-redo mr-2"></i>
+                        Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Batch Update Form -->
+        <form method="POST" id="batchUpdateForm" class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6 p-6">
+            {% csrf_token %}
+            <input type="hidden" name="batch_update" value="true">
+            <div class="flex items-center gap-4">
+                <select name="batch_status" required class="border-gray-300 rounded-md shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                    <option value="">-- Select New Status --</option>
+                    {% for value, label in statuses %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md text-sm font-medium">
+                    <i class="fas fa-save mr-2"></i>
+                    Save Updates for Selected
+                </button>
+                <span class="text-sm text-gray-500" id="selectedCount">0 orders selected</span>
+            </div>
+        </form>
+
+        <!-- Orders Table -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-gray-900">Orders</h2>
+                <button type="button" onclick="selectAllOrders()" class="text-sm text-blue-600 hover:text-blue-700">
+                    <i class="fas fa-check-square mr-1"></i>
+                    Select All
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <input type="checkbox" id="selectAll" onchange="toggleAll(this)">
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Code</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shipping Company</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Change Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for order in page_obj %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <input type="checkbox" name="selected_orders" value="{{ order.id }}" class="order-select-checkbox rounded border-gray-300 text-purple-600 focus:ring-purple-500" onchange="updateSelectedCount()">
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ order.order_code }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.customer }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                                    {% if order.status == 'delivered' %}bg-green-100 text-green-800
+                                    {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                                    {% elif order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {% if order.delivery %}
+                                    {{ order.delivery.delivery_company.name_en }}
+                                {% else %}
+                                    <span class="text-gray-400">Not Assigned</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <form method="POST" class="inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="order_id" value="{{ order.id }}">
+                                    <select name="new_status" class="text-sm border-gray-300 rounded-md shadow-sm focus:border-purple-500 focus:ring-purple-500" onchange="this.form.submit()">
+                                        {% for value, label in statuses %}
+                                        <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">No orders found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <div class="px-6 py-4 border-t border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-700">
+                        Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} orders
+                    </div>
+                    <div class="flex gap-2">
+                        {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            Previous
+                        </a>
+                        {% endif %}
+                        {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            Next
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Barcode Scanner for Delivery
+let stream = null;
+let barcodeDetector = null;
+
+if ('BarcodeDetector' in window) {
+    barcodeDetector = new BarcodeDetector({ formats: ['qr_code', 'ean_13', 'code_128', 'code_39'] });
+}
+
+document.getElementById('cameraBtn')?.addEventListener('click', async function() {
+    const cameraContainer = document.getElementById('cameraContainer');
+    const video = document.getElementById('barcodeCamera');
+    
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }
+        });
+        
+        video.srcObject = stream;
+        video.play();
+        cameraContainer.classList.remove('hidden');
+        this.style.display = 'none';
+        
+        if (barcodeDetector) {
+            detectBarcode(video);
+        } else {
+            alert('Barcode detection not supported. Please enter order code manually.');
+        }
+    } catch (error) {
+        console.error('Error accessing camera:', error);
+        alert('Unable to access camera. Please use manual input.');
+    }
+});
+
+document.getElementById('stopCameraBtn')?.addEventListener('click', function() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+    document.getElementById('barcodeCamera').srcObject = null;
+    document.getElementById('cameraContainer').classList.add('hidden');
+    document.getElementById('cameraBtn').style.display = 'block';
+});
+
+async function detectBarcode(video) {
+    if (!barcodeDetector) return;
+    
+    try {
+        const barcodes = await barcodeDetector.detect(video);
+        
+        if (barcodes.length > 0) {
+            const barcodeValue = barcodes[0].rawValue;
+            document.getElementById('barcodeInput').value = barcodeValue;
+            document.querySelector('input[name="search"]').value = barcodeValue;
+            document.querySelector('form[method="GET"]').submit();
+            document.getElementById('stopCameraBtn').click();
+        }
+    } catch (error) {
+        console.error('Barcode detection error:', error);
+    }
+    
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        requestAnimationFrame(() => detectBarcode(video));
+    } else {
+        video.addEventListener('loadeddata', () => {
+            requestAnimationFrame(() => detectBarcode(video));
+        });
+    }
+}
+
+// Manual barcode input
+document.getElementById('barcodeInput')?.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        const orderCode = this.value.trim();
+        if (orderCode) {
+            document.querySelector('input[name="search"]').value = orderCode;
+            document.querySelector('form[method="GET"]').submit();
+        }
+    }
+});
+
+function toggleAll(checkbox) {
+    document.querySelectorAll('.order-select-checkbox').forEach(cb => {
+        cb.checked = checkbox.checked;
+    });
+    updateSelectedCount();
+}
+
+function selectAllOrders() {
+    document.querySelectorAll('.order-select-checkbox').forEach(cb => {
+        cb.checked = true;
+    });
+    document.getElementById('selectAll').checked = true;
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    const count = document.querySelectorAll('.order-select-checkbox:checked').length;
+    document.getElementById('selectedCount').textContent = count + ' orders selected';
+}
+
+document.getElementById('batchUpdateForm').addEventListener('submit', function(e) {
+    const checked = document.querySelectorAll('.order-select-checkbox:checked');
+    if (checked.length === 0) {
+        e.preventDefault();
+        alert('Please select at least one order');
+        return false;
+    }
+    const status = document.querySelector('[name="batch_status"]').value;
+    if (!status) {
+        e.preventDefault();
+        alert('Please select a new status');
+        return false;
+    }
+});
+</script>
+{% endblock %}

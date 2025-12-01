@@ -1,0 +1,451 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Start Packaging - {{ order.order_code }}{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">
+            Start Packaging: {{ order.order_code }}
+        </h1>
+        <div class="flex gap-2">
+            <a href="{% url 'packaging:order_detail' order.id %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors flex items-center">
+                <i class="fas fa-arrow-left mr-2"></i> Back to Order Details
+            </a>
+        </div>
+    </div>
+    
+    <!-- Barcode Scanner Section -->
+    <div class="bg-blue-50 border border-blue-200 rounded-md p-4 mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                <i class="fas fa-barcode text-blue-600 text-xl mr-3"></i>
+                <div>
+                    <h3 class="text-sm font-medium text-blue-900">Scan Order Barcode</h3>
+                    <p class="text-xs text-blue-700">Use barcode scanner to quickly find orders</p>
+                </div>
+            </div>
+            <button type="button" id="cameraBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                <i class="fas fa-camera mr-2"></i>
+                Open Scanner
+            </button>
+        </div>
+        <div id="cameraContainer" class="mt-4 hidden">
+            <video id="barcodeCamera" width="100%" height="300" style="border: 1px solid #ccc; border-radius: 8px;"></video>
+            <div class="mt-2 flex gap-2">
+                <input type="text" id="barcodeInput" placeholder="Or enter order code manually" class="flex-1 border-gray-300 rounded-md px-3 py-2 text-sm">
+                <button type="button" id="stopCameraBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                    <i class="fas fa-stop mr-2"></i>
+                    Stop Camera
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Start Packaging Form -->
+        <div class="lg:col-span-2">
+            <div class="bg-white border border-gray-200 rounded-md mb-6">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-medium text-gray-800">Start Packaging Process</h2>
+                </div>
+                
+                <div class="p-6">
+                    <form method="post" id="packagingForm">
+                        {% csrf_token %}
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-800 mb-4">Order Information</h3>
+                                <div class="bg-gray-50 border border-gray-200 rounded-md p-4">
+                                    <div class="grid grid-cols-2 gap-6">
+                                        <div>
+                                            <div class="text-sm text-gray-500">Order Code</div>
+                                            <div class="font-medium text-gray-900">{{ order.order_code }}</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm text-gray-500">Customer</div>
+                                            <div class="font-medium text-gray-900">{{ order.customer }}</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm text-gray-500">Quantity</div>
+                                            <div class="font-medium text-gray-900">{{ order.quantity }}</div>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm text-gray-500">Product</div>
+                                            <div class="font-medium text-gray-900">
+                                                {% if order.items.all %}
+                                                    {{ order.items.first.product.name_en|default:order.items.first.product.name_ar|default:"N/A" }}
+                                                {% elif order.product %}
+                                                    {{ order.product.name_en|default:order.product.name_ar|default:"N/A" }}
+                                                {% else %}
+                                                    N/A
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="package_type" class="block text-sm font-medium text-gray-700 mb-1">Package Type</label>
+                                <select name="package_type" id="package_type" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                                    <option value="box" {% if recommended_package_type == 'box' %}selected{% endif %}>Box</option>
+                                    <option value="envelope" {% if recommended_package_type == 'envelope' %}selected{% endif %}>Envelope</option>
+                                    <option value="polybag">Polybag</option>
+                                    <option value="tube">Tube</option>
+                                    <option value="custom" {% if recommended_package_type == 'custom' %}selected{% endif %}>Custom</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Dimensions (cm)</label>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <div>
+                                        <input type="number" name="length" id="length" step="0.1" min="0" placeholder="Length" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                                        <div class="text-xs text-gray-500 mt-1">Length</div>
+                                    </div>
+                                    <div>
+                                        <input type="number" name="width" id="width" step="0.1" min="0" placeholder="Width" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                                        <div class="text-xs text-gray-500 mt-1">Width</div>
+                                    </div>
+                                    <div>
+                                        <input type="number" name="height" id="height" step="0.1" min="0" placeholder="Height" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                                        <div class="text-xs text-gray-500 mt-1">Height</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="estimated_weight" class="block text-sm font-medium text-gray-700 mb-1">Estimated Weight (kg) <span class="text-gray-400 text-xs">(Optional)</span></label>
+                                <input type="number" name="estimated_weight" id="estimated_weight" step="0.01" min="0" placeholder="e.g., 1.5" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                            </div>
+
+                            {% if materials %}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Packaging Materials</label>
+                                <div id="materialsContainer" class="space-y-3">
+                                    <div class="flex items-center gap-3">
+                                        <select name="material_select" id="materialSelect" class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                                            <option value="">-- Select Material --</option>
+                                            {% for material in materials %}
+                                            <option value="{{ material.id }}">{{ material.name }} (Stock: {{ material.current_stock }} {{ material.unit }})</option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="button" onclick="addMaterialRow()" class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium">
+                                            <i class="fas fa-plus mr-1"></i> Add
+                                        </button>
+                                    </div>
+                                    <div id="materialsList" class="space-y-2">
+                                        <!-- Material rows will be added here dynamically -->
+                                    </div>
+                                </div>
+                                <input type="hidden" name="materials_used_json" id="materialsUsedJson" value="{}">
+                            </div>
+                            {% endif %}
+                            
+                            <div>
+                                <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
+                                <textarea name="notes" id="notes" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" placeholder="Any special packaging requirements..."></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <a href="{% url 'packaging:order_detail' order.id %}" class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
+                                Cancel
+                            </a>
+                            <button type="button" onclick="showConfirmModal(); return false;" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-medium transition-colors">
+                                <i class="fas fa-box mr-2"></i> Start Packaging
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column - Optional Info -->
+        <div class="lg:col-span-1">
+            <div class="bg-white border border-gray-200 rounded-md mb-6">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-medium text-gray-800">Packaging Tips</h2>
+                </div>
+                
+                <div class="p-6">
+                    <div class="space-y-4 text-sm">
+                        <div>
+                            <div class="text-sm text-gray-500 mb-2">Package Selection</div>
+                            <div class="text-gray-900">Choose the appropriate package type based on product size and fragility.</div>
+                        </div>
+                        
+                        <div>
+                            <div class="text-sm text-gray-500 mb-2">Dimensions</div>
+                            <div class="text-gray-900">Measure length, width, and height accurately to ensure proper fit.</div>
+                        </div>
+                        
+                        <div>
+                            <div class="text-sm text-gray-500 mb-2">Weight</div>
+                            <div class="text-gray-900">Estimate the package weight including all materials and contents.</div>
+                        </div>
+                        
+                        <div>
+                            <div class="text-sm text-gray-500 mb-2">Materials</div>
+                            <div class="text-gray-900">Select materials from inventory if available. This helps track usage.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50 items-center justify-center" style="display: none;">
+    <div class="p-4">
+        <div class="bg-white rounded-md shadow-xl max-w-md w-full border border-gray-200">
+            <div class="p-6 text-center">
+                <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-question-circle text-yellow-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Confirm Start Packaging</h3>
+                <p class="text-gray-600 mb-6 text-sm">Are you sure you want to start packaging this order? The order status will be changed.</p>
+                <div class="flex gap-3 justify-center">
+                    <button type="button" onclick="confirmStartPackaging(); return false;" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-medium transition-colors">
+                        <i class="fas fa-box mr-2"></i> Start Packaging
+                    </button>
+                    <button type="button" onclick="closeConfirmModal(); return false;" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded text-sm font-medium transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showConfirmModal(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    const modal = document.getElementById('confirmModal');
+    if (!modal) {
+        alert('Error: Confirmation modal not found');
+        return false;
+    }
+    
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+    return false;
+}
+
+function closeConfirmModal() {
+    const modal = document.getElementById('confirmModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    }
+}
+
+function confirmStartPackaging() {
+    const form = document.getElementById('packagingForm');
+    if (!form) {
+        alert('Error: Form not found');
+        return false;
+    }
+    
+    // Collect materials data before submit
+    collectMaterialsData();
+    
+    closeConfirmModal();
+    
+    setTimeout(() => {
+        form.submit();
+    }, 100);
+    
+    return false;
+}
+
+// Materials Management
+let materialRowCount = 0;
+const availableMaterials = {
+    {% for material in materials %}
+    {{ material.id }}: {
+        id: {{ material.id }},
+        name: "{{ material.name }}",
+        type: "{{ material.material_type }}",
+        stock: {{ material.current_stock }},
+        unit: "{{ material.unit }}"
+    },
+    {% endfor %}
+};
+
+function addMaterialRow() {
+    const materialSelect = document.getElementById('materialSelect');
+    const selectedMaterialId = materialSelect.value;
+    
+    if (!selectedMaterialId) {
+        alert('Please select a material first');
+        return;
+    }
+    
+    const selectedMaterial = availableMaterials[selectedMaterialId];
+    if (!selectedMaterial) {
+        alert('Selected material not found');
+        return;
+    }
+    
+    // Check if this material is already added
+    const existingRows = document.querySelectorAll('[id^="material_row_"]');
+    for (let row of existingRows) {
+        const materialIdInput = row.querySelector('input[type="hidden"][name^="material_id_"]');
+        if (materialIdInput && materialIdInput.value === selectedMaterialId) {
+            alert('This material is already added. Please increase the quantity instead.');
+            return;
+        }
+    }
+    
+    const materialsList = document.getElementById('materialsList');
+    const rowId = 'material_row_' + materialRowCount++;
+    
+    const row = document.createElement('div');
+    row.id = rowId;
+    row.className = 'flex items-center gap-3 p-3 bg-gray-50 rounded-md border border-gray-200';
+    row.innerHTML = `
+        <div class="flex-1">
+            <div class="font-medium text-gray-900">${selectedMaterial.name}</div>
+            <div class="text-xs text-gray-500">Type: ${selectedMaterial.type} | Stock: ${selectedMaterial.stock} ${selectedMaterial.unit}</div>
+        </div>
+        <input type="hidden" name="material_id_${rowId}" value="${selectedMaterial.id}">
+        <input type="number" name="material_qty_${rowId}" id="material_qty_${rowId}" min="1" max="${selectedMaterial.stock}" placeholder="Qty" class="w-24 px-2 py-2 text-sm border border-gray-300 rounded-md" onchange="updateMaterialsData()" required>
+        <span class="text-xs text-gray-500 w-16" id="material_unit_${rowId}">${selectedMaterial.unit}</span>
+        <button type="button" onclick="removeMaterialRow('${rowId}')" class="text-red-600 hover:text-red-800">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    materialsList.appendChild(row);
+    materialSelect.value = '';
+    updateMaterialsData();
+}
+
+function updateMaterialQuantity(select, rowId) {
+    // This function is no longer needed as materials are selected directly
+    // But keeping it for compatibility
+    updateMaterialsData();
+}
+
+function removeMaterialRow(rowId) {
+    const row = document.getElementById(rowId);
+    if (row) {
+        row.remove();
+        updateMaterialsData();
+    }
+}
+
+function collectMaterialsData() {
+    const materialsData = {};
+    const rows = document.querySelectorAll('[id^="material_row_"]');
+    
+    rows.forEach(row => {
+        const materialIdInput = row.querySelector('input[type="hidden"][name^="material_id_"]');
+        const qtyInput = row.querySelector('input[type="number"]');
+        
+        if (materialIdInput && materialIdInput.value && qtyInput && qtyInput.value && parseInt(qtyInput.value) > 0) {
+            materialsData[materialIdInput.value] = parseInt(qtyInput.value);
+        }
+    });
+    
+    document.getElementById('materialsUsedJson').value = JSON.stringify(materialsData);
+}
+
+function updateMaterialsData() {
+    collectMaterialsData();
+}
+
+// Barcode Scanner
+let stream = null;
+let barcodeDetector = null;
+
+if ('BarcodeDetector' in window) {
+    barcodeDetector = new BarcodeDetector({ formats: ['qr_code', 'ean_13', 'code_128', 'code_39'] });
+}
+
+document.getElementById('cameraBtn')?.addEventListener('click', async function() {
+    const cameraContainer = document.getElementById('cameraContainer');
+    const video = document.getElementById('barcodeCamera');
+    
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }
+        });
+        
+        video.srcObject = stream;
+        video.play();
+        cameraContainer.classList.remove('hidden');
+        this.style.display = 'none';
+        
+        if (barcodeDetector) {
+            detectBarcode(video);
+        } else {
+            alert('Barcode detection not supported. Please enter order code manually.');
+        }
+    } catch (error) {
+        console.error('Error accessing camera:', error);
+        alert('Unable to access camera. Please use manual input.');
+    }
+});
+
+document.getElementById('stopCameraBtn')?.addEventListener('click', function() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+    document.getElementById('barcodeCamera').srcObject = null;
+    document.getElementById('cameraContainer').classList.add('hidden');
+    document.getElementById('cameraBtn').style.display = 'block';
+});
+
+async function detectBarcode(video) {
+    if (!barcodeDetector) return;
+    
+    try {
+        const barcodes = await barcodeDetector.detect(video);
+        
+        if (barcodes.length > 0) {
+            const barcodeValue = barcodes[0].rawValue;
+            document.getElementById('barcodeInput').value = barcodeValue;
+            // You can add logic here to search for the order
+            document.getElementById('stopCameraBtn').click();
+        }
+    } catch (error) {
+        console.error('Barcode detection error:', error);
+    }
+    
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        requestAnimationFrame(() => detectBarcode(video));
+    } else {
+        video.addEventListener('loadeddata', () => {
+            requestAnimationFrame(() => detectBarcode(video));
+        });
+    }
+}
+
+// Manual barcode input
+document.getElementById('barcodeInput')?.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        const orderCode = this.value.trim();
+        if (orderCode) {
+            // Redirect to order if found, or show message
+            window.location.href = `{% url 'packaging:orders' %}?search=${orderCode}`;
+        }
+    }
+});
+</script>
+{% endblock %}

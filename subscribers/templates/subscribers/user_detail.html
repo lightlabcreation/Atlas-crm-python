@@ -1,0 +1,377 @@
+{% extends 'base.html' %}
+
+{% block title %}User Details - {{ user_obj.full_name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Page Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-user text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">User Details</h1>
+                        <p class="mt-1 text-sm text-gray-500">{{ user_obj.full_name }}</p>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'subscribers:list' %}" class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200 font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Subscribers
+                    </a>
+                    <a href="{% url 'subscribers:edit_user' user_obj.id %}" class="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors duration-200 font-medium">
+                        <i class="fas fa-edit mr-2"></i>
+                        Edit User
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Breadcrumb -->
+    <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+        <nav class="flex" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="{% url 'dashboard:index' %}" class="text-sm font-medium text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-home mr-2"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
+                        <a href="{% url 'subscribers:list' %}" class="text-sm font-medium text-gray-500 hover:text-gray-700">Subscribers</a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
+                        <span class="text-sm font-medium text-gray-900">{{ user_obj.full_name }}</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- User Profile Card -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <!-- Profile Header -->
+                    <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-8 text-center">
+                        <div class="inline-flex items-center justify-center w-20 h-20 bg-white bg-opacity-20 rounded-full mb-4">
+                            {% if user_obj.profile_image %}
+                                <img class="w-20 h-20 rounded-full object-cover" src="{{ user_obj.profile_image.url }}" alt="{{ user_obj.full_name }}">
+                            {% else %}
+                                <span class="text-2xl font-bold text-white">{{ user_obj.get_initials }}</span>
+                            {% endif %}
+                        </div>
+                        <h2 class="text-xl font-bold text-white">{{ user_obj.full_name }}</h2>
+                        <p class="text-orange-100">{{ user_obj.email }}</p>
+                    </div>
+
+                    <!-- Status Badge -->
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-center">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                                {% if user_obj.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                <span class="w-2 h-2 rounded-full mr-2
+                                    {% if user_obj.is_active %}bg-green-400{% else %}bg-red-400{% endif %}"></span>
+                                {% if user_obj.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="px-6 py-4">
+                        <div class="grid grid-cols-2 gap-4 text-center">
+                            <div>
+                                <div class="text-2xl font-bold text-gray-900">{{ user_obj.user_roles.count }}</div>
+                                <div class="text-sm text-gray-500">Roles</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-gray-900">{{ login_count|default:"0" }}</div>
+                                <div class="text-sm text-gray-500">Logins</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                        <div class="space-y-3">
+                            <a href="{% url 'subscribers:edit_user' user_obj.id %}" class="w-full flex items-center px-4 py-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                                <div class="flex-shrink-0 w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-edit text-yellow-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium">Edit User</div>
+                                    <div class="text-sm text-gray-500">Update user information</div>
+                                </div>
+                            </a>
+                            
+                            <button onclick="toggleUserStatus()" class="w-full flex items-center px-4 py-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                                <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-power-off text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium">{% if user_obj.is_active %}Deactivate User{% else %}Activate User{% endif %}</div>
+                                    <div class="text-sm text-gray-500">Toggle user status</div>
+                                </div>
+                            </button>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Personal Information -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-user text-yellow-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Personal Information</h3>
+                                <p class="text-sm text-gray-500">User profile and contact details</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="space-y-6">
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-user text-yellow-600"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
+                                        <p class="text-lg font-medium text-gray-900">{{ user_obj.full_name }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-envelope text-blue-600"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+                                        <p class="text-lg font-medium text-gray-900">{{ user_obj.email }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-phone text-green-600"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
+                                        <p class="text-lg font-medium text-gray-900">{{ user_obj.phone_number|default:"Not provided" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-6">
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-building text-purple-600"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Company</label>
+                                        <p class="text-lg font-medium text-gray-900">{{ user_obj.company_name|default:"Not specified" }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-map-marker-alt text-red-600"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
+                                        <p class="text-lg font-medium text-gray-900">{{ user_obj.country|default:"Not specified" }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-calendar text-gray-600"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <label class="block text-sm font-semibold text-gray-700 mb-2">Member Since</label>
+                                        <p class="text-lg font-medium text-gray-900">{{ user_obj.date_joined|date:"F Y" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Roles -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-user-tag text-purple-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">User Roles</h3>
+                                <p class="text-sm text-gray-500">Assigned roles and permissions</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        {% if user_roles %}
+                            <div class="space-y-4">
+                                {% for user_role in user_roles %}
+                                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center space-x-4">
+                                            <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-shield-alt text-yellow-600"></i>
+                                            </div>
+                                            <div>
+                                                <h4 class="text-lg font-semibold text-gray-900">{{ user_role.role.name }}</h4>
+                                                <p class="text-gray-600 text-sm">{{ user_role.role.description|default:"No description available" }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-col items-end space-y-2">
+                                            {% if user_role.is_primary %}
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
+                                                <i class="fas fa-star mr-1"></i>
+                                                Primary
+                                            </span>
+                                            {% endif %}
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
+                                                {% if user_role.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                                <span class="w-2 h-2 rounded-full mr-2
+                                                    {% if user_role.is_active %}bg-green-400{% else %}bg-red-400{% endif %}"></span>
+                                                {% if user_role.is_active %}Active{% else %}Inactive{% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-12">
+                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-user-slash text-2xl text-gray-400"></i>
+                                </div>
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">No roles assigned</h3>
+                                <p class="text-gray-500">This user doesn't have any roles assigned yet.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-history text-blue-600 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                                <p class="text-sm text-gray-500">Latest user actions and events</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        {% if recent_activities %}
+                            <div class="space-y-4">
+                                {% for activity in recent_activities %}
+                                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                    <div class="flex items-start space-x-4">
+                                        <div class="flex-shrink-0 w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-{% if activity.action == 'login' %}sign-in-alt{% elif activity.action == 'logout' %}sign-out-alt{% elif activity.action == 'create' %}plus{% elif activity.action == 'update' %}edit{% elif activity.action == 'delete' %}trash{% else %}circle{% endif %} text-yellow-600 text-sm"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-semibold text-gray-900">{{ activity.description|default:activity.action|title }}</p>
+                                            <p class="text-xs text-gray-500 mt-1">
+                                                <i class="fas fa-clock mr-1"></i>
+                                                {{ activity.timestamp|date:"M d, Y H:i" }}
+                                            </p>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                                {{ activity.action|title }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-12">
+                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <i class="fas fa-clock text-2xl text-gray-400"></i>
+                                </div>
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">No recent activity</h3>
+                                <p class="text-gray-500">This user hasn't had any recent activity.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleUserStatus() {
+    const userId = {{ user_obj.id }};
+    
+    fetch(`/subscribers/user/${userId}/toggle-status/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error updating user status', 'error');
+    });
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+    }`;
+    notification.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+</script>
+{% endblock %}

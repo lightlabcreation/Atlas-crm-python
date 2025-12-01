@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Company Detail{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+  <div class="mb-4 flex items-center justify-between">
+    <h1 class="text-xl font-semibold text-gray-800">{{ company.name_en|default:company.name_ar }}</h1>
+    <a href="{% url 'delivery:companies' %}" class="px-3 py-2 bg-white text-gray-700 text-sm rounded-md border">Back</a>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-lg border shadow-sm p-4"><div class="text-xs text-gray-500">Total</div><div class="text-2xl font-semibold">{{ total }}</div></div>
+    <div class="bg-white rounded-lg border shadow-sm p-4"><div class="text-xs text-gray-500">Delivered</div><div class="text-2xl font-semibold text-green-700">{{ delivered }}</div></div>
+    <div class="bg-white rounded-lg border shadow-sm p-4"><div class="text-xs text-gray-500">Returned</div><div class="text-2xl font-semibold text-red-700">{{ returned }}</div></div>
+    <div class="bg-white rounded-lg border shadow-sm p-4"><div class="text-xs text-gray-500">Success Rate</div><div class="text-2xl font-semibold">{{ success_rate }}%</div></div>
+  </div>
+
+  <div class="bg-white rounded-lg border shadow-sm overflow-hidden">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="p-2 text-left">Date</th>
+          <th class="p-2 text-left">Order</th>
+          <th class="p-2 text-left">Status</th>
+          <th class="p-2 text-left">Courier</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+        <tr class="border-t">
+          <td class="p-2">{{ r.assigned_at|date:"Y-m-d H:i" }}</td>
+          <td class="p-2">{{ r.order.order_code }}</td>
+          <td class="p-2">{{ r.status }}</td>
+          <td class="p-2">{{ r.courier.user.full_name|default:r.courier.user.username }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="p-4 text-center text-gray-500">No records</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+

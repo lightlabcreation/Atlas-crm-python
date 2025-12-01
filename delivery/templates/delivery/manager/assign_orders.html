@@ -1,0 +1,383 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Assign Orders - Delivery Manager{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white">
+    <!-- Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-tasks text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">Assign Orders</h1>
+                        <p class="mt-1 text-sm text-gray-500">Assign orders to shipping companies</p>
+                    </div>
+                </div>
+                <a href="{% url 'delivery:manager_dashboard' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Barcode Scanner Section -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Order Search</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Barcode Camera -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Scan Barcode / Order Code</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="barcodeInput" placeholder="Enter order code or scan barcode" class="flex-1 border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                        <button type="button" id="cameraBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            <i class="fas fa-camera mr-2"></i>
+                            Camera
+                        </button>
+                    </div>
+                    <div id="cameraContainer" class="mt-4 hidden">
+                        <video id="barcodeCamera" width="100%" height="300" style="border: 1px solid #ccc; border-radius: 8px;"></video>
+                        <button type="button" id="stopCameraBtn" class="mt-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            <i class="fas fa-stop mr-2"></i>
+                            Stop Camera
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Order Code Dropdown -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Or Select from List</label>
+                    <select id="orderCodeDropdown" class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500">
+                        <option value="">-- Select Order Code --</option>
+                        {% for order in unassigned_orders %}
+                        <option value="{{ order.order_code }}">{{ order.order_code }} - {{ order.customer }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <p class="text-sm text-blue-800">
+                    <i class="fas fa-keyboard mr-2"></i>
+                    <strong>Keyboard Shortcuts:</strong> Press <kbd class="px-2 py-1 bg-white border border-gray-300 rounded">Ctrl+F</kbd> to focus search, <kbd class="px-2 py-1 bg-white border border-gray-300 rounded">Enter</kbd> to select, <kbd class="px-2 py-1 bg-white border border-gray-300 rounded">Esc</kbd> to clear
+                </p>
+            </div>
+        </div>
+
+        <form method="POST" id="assignForm">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <!-- Company Selection -->
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Select Shipping Company</h2>
+                    <select name="company_id" id="company_id" required class="w-full border-gray-300 rounded-md shadow-sm focus:border-orange-500 focus:ring-orange-500 mb-4">
+                        <option value="">-- Select Company --</option>
+                        {% for company in companies %}
+                        <option value="{{ company.id }}">{{ company.name_en }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-check mr-2"></i>
+                        Assign Selected Orders
+                    </button>
+                </div>
+
+                <!-- Orders List -->
+                <div class="lg:col-span-2 bg-white rounded-lg border border-gray-200 shadow-sm">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <h2 class="text-lg font-semibold text-gray-900">Orders Ready for Assignment</h2>
+                            <div class="text-sm text-gray-600">
+                                <span class="font-medium">{{ unassigned_orders.count }}</span> unassigned orders available
+                            </div>
+                        </div>
+                        {% if total_ready_orders %}
+                        <div class="text-xs text-gray-500 bg-gray-50 p-2 rounded">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Total ready orders: {{ total_ready_orders }} | 
+                            Already assigned: {{ orders_with_delivery }} | 
+                            Available: {{ orders_without_delivery }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="px-6 py-2 border-b border-gray-200 flex gap-2">
+                        <button type="button" onclick="selectAll()" class="text-sm text-blue-600 hover:text-blue-700">
+                            <i class="fas fa-check-square mr-1"></i>
+                            Select All
+                        </button>
+                        <button type="button" onclick="deselectAll()" class="text-sm text-gray-600 hover:text-gray-700">
+                            <i class="fas fa-square mr-1"></i>
+                            Deselect All
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50 sticky top-0">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <input type="checkbox" id="selectAllCheckbox" onchange="toggleAll(this)">
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Code</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Workflow</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {% for order in unassigned_orders %}
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <input type="checkbox" name="order_ids" value="{{ order.id }}" class="order-checkbox rounded border-gray-300 text-orange-600 focus:ring-orange-500">
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ order.order_code }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.customer }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                                            {{ order.get_workflow_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                                            {% if order.status == 'delivered' %}bg-green-100 text-green-800
+                                            {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                                            {% elif order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ order.total_price_aed }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.date|date:"Y-m-d" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="px-6 py-4 text-center">
+                                        <div class="py-8">
+                                            <i class="fas fa-inbox text-gray-400 text-4xl mb-4"></i>
+                                            <p class="text-gray-500 font-medium mb-2">No orders ready for assignment</p>
+                                            <p class="text-sm text-gray-400">
+                                                Orders must have one of these workflow statuses:<br>
+                                                <span class="font-mono text-xs">ready_for_delivery</span>, 
+                                                <span class="font-mono text-xs">packaging_completed</span>, or 
+                                                <span class="font-mono text-xs">packaging_in_progress</span><br>
+                                                and must not be assigned to any delivery company yet.
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+let stream = null;
+let barcodeDetector = null;
+
+// Initialize Barcode Detector API if available
+if ('BarcodeDetector' in window) {
+    barcodeDetector = new BarcodeDetector({ formats: ['qr_code', 'ean_13', 'code_128'] });
+}
+
+function selectAll() {
+    document.querySelectorAll('.order-checkbox').forEach(checkbox => {
+        checkbox.checked = true;
+    });
+    document.getElementById('selectAllCheckbox').checked = true;
+}
+
+function deselectAll() {
+    document.querySelectorAll('.order-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    document.getElementById('selectAllCheckbox').checked = false;
+}
+
+function toggleAll(checkbox) {
+    document.querySelectorAll('.order-checkbox').forEach(cb => {
+        cb.checked = checkbox.checked;
+    });
+}
+
+// Find and select order by code
+function findAndSelectOrder(orderCode) {
+    if (!orderCode) return;
+    
+    // Try to find checkbox by order code
+    const rows = document.querySelectorAll('tbody tr');
+    let found = false;
+    
+    rows.forEach(row => {
+        const orderCodeCell = row.querySelector('td:nth-child(2)');
+        if (orderCodeCell && orderCodeCell.textContent.trim() === orderCode.trim()) {
+            const checkbox = row.querySelector('.order-checkbox');
+            if (checkbox) {
+                checkbox.checked = true;
+                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                row.style.backgroundColor = '#fef3c7';
+                setTimeout(() => {
+                    row.style.backgroundColor = '';
+                }, 2000);
+                found = true;
+            }
+        }
+    });
+    
+    if (!found) {
+        alert('Order code not found in the list');
+    }
+}
+
+// Barcode Input Handler
+document.getElementById('barcodeInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        const orderCode = this.value.trim();
+        if (orderCode) {
+            findAndSelectOrder(orderCode);
+            this.value = '';
+        }
+    }
+});
+
+// Order Code Dropdown Handler
+document.getElementById('orderCodeDropdown').addEventListener('change', function(e) {
+    if (this.value) {
+        findAndSelectOrder(this.value);
+        this.value = '';
+    }
+});
+
+// Camera Button Handler
+document.getElementById('cameraBtn').addEventListener('click', async function() {
+    const cameraContainer = document.getElementById('cameraContainer');
+    const video = document.getElementById('barcodeCamera');
+    
+    try {
+        // Request camera access
+        stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            } 
+        });
+        
+        video.srcObject = stream;
+        video.play();
+        cameraContainer.classList.remove('hidden');
+        this.style.display = 'none';
+        
+        // Start barcode detection
+        if (barcodeDetector) {
+            detectBarcode(video);
+        } else {
+            // Fallback: Use manual input
+            alert('Barcode detection not supported. Please enter order code manually.');
+        }
+    } catch (error) {
+        console.error('Error accessing camera:', error);
+        alert('Unable to access camera. Please use manual input.');
+    }
+});
+
+// Stop Camera Button
+document.getElementById('stopCameraBtn').addEventListener('click', function() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+    document.getElementById('barcodeCamera').srcObject = null;
+    document.getElementById('cameraContainer').classList.add('hidden');
+    document.getElementById('cameraBtn').style.display = 'block';
+});
+
+// Barcode Detection Function
+async function detectBarcode(video) {
+    if (!barcodeDetector) return;
+    
+    try {
+        const barcodes = await barcodeDetector.detect(video);
+        
+        if (barcodes.length > 0) {
+            const barcodeValue = barcodes[0].rawValue;
+            document.getElementById('barcodeInput').value = barcodeValue;
+            findAndSelectOrder(barcodeValue);
+            
+            // Stop camera after successful scan
+            document.getElementById('stopCameraBtn').click();
+        }
+    } catch (error) {
+        console.error('Barcode detection error:', error);
+    }
+    
+    // Continue detection
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        requestAnimationFrame(() => detectBarcode(video));
+    } else {
+        video.addEventListener('loadeddata', () => {
+            requestAnimationFrame(() => detectBarcode(video));
+        });
+    }
+}
+
+// Keyboard Shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl+F to focus search
+    if (e.ctrlKey && e.key === 'f') {
+        e.preventDefault();
+        document.getElementById('barcodeInput').focus();
+    }
+    
+    // Esc to clear
+    if (e.key === 'Escape') {
+        document.getElementById('barcodeInput').value = '';
+        document.getElementById('orderCodeDropdown').value = '';
+        if (stream) {
+            document.getElementById('stopCameraBtn').click();
+        }
+    }
+    
+    // Enter in barcode input (already handled above)
+    // Ctrl+A to select all orders
+    if (e.ctrlKey && e.key === 'a' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        selectAll();
+    }
+});
+
+// Form Validation
+document.getElementById('assignForm').addEventListener('submit', function(e) {
+    const checked = document.querySelectorAll('.order-checkbox:checked');
+    if (checked.length === 0) {
+        e.preventDefault();
+        alert('Please select at least one order');
+        return false;
+    }
+    const companyId = document.getElementById('company_id').value;
+    if (!companyId) {
+        e.preventDefault();
+        alert('Please select a shipping company');
+        return false;
+    }
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,530 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}All Orders - Delivery Manager{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white">
+    <!-- Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-list text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-blue-600">All Orders</h1>
+                        <p class="mt-1 text-sm text-gray-500">Filter and view all orders</p>
+                    </div>
+                </div>
+                <a href="{% url 'delivery:manager_dashboard' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Barcode Scanner Section -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <i class="fas fa-barcode text-blue-600 text-xl mr-3"></i>
+                    <div>
+                        <h3 class="text-sm font-medium text-blue-900">Scan Order Barcode</h3>
+                        <p class="text-xs text-blue-700">Use barcode scanner to quickly find orders</p>
+                    </div>
+                </div>
+                <button type="button" id="cameraBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                    <i class="fas fa-camera mr-2"></i>
+                    Open Scanner
+                </button>
+            </div>
+            <div id="cameraContainer" class="mt-4 hidden">
+                <video id="barcodeCamera" width="100%" height="300" style="border: 1px solid #ccc; border-radius: 8px;"></video>
+                <div class="mt-2 flex gap-2">
+                    <input type="text" id="barcodeInput" placeholder="Or enter order code manually" class="flex-1 border-gray-300 rounded-md px-3 py-2 text-sm">
+                    <button type="button" id="stopCameraBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-stop mr-2"></i>
+                        Stop Camera
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Search Filters</h2>
+            </div>
+            <form method="GET" class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select name="status" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <option value="">All Statuses</option>
+                            {% for value, label in statuses %}
+                            <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Shipping Company</label>
+                        <select name="company" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <option value="">All Companies</option>
+                            {% for company in companies %}
+                            <option value="{{ company.id }}" {% if filters.company == company.id|stringformat:"s" %}selected{% endif %}>{{ company.name_en }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                        <input type="text" name="location" value="{{ filters.location }}" placeholder="City/Emirate/Area" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Seller</label>
+                        <select name="seller" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <option value="">All Sellers</option>
+                            {% for seller in sellers %}
+                            <option value="{{ seller.id }}" {% if filters.seller == seller.id|stringformat:"s" %}selected{% endif %}>{{ seller.get_full_name|default:seller.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Min Price</label>
+                        <input type="number" name="price_min" value="{{ filters.price_min }}" placeholder="AED" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Max Price</label>
+                        <input type="number" name="price_max" value="{{ filters.price_max }}" placeholder="AED" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Min Quantity</label>
+                        <input type="number" name="quantity_min" value="{{ filters.quantity_min }}" placeholder="Quantity" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Max Quantity</label>
+                        <input type="number" name="quantity_max" value="{{ filters.quantity_max }}" placeholder="Quantity" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Order Type</label>
+                        <select name="order_type" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <option value="">All Types</option>
+                            {% for value, label in workflow_statuses %}
+                            <option value="{{ value }}" {% if filters.order_type == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                        <input type="text" name="search" value="{{ filters.search }}" placeholder="Order Code/Customer/Phone" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-search mr-2"></i>
+                        Search
+                    </button>
+                    <a href="{% url 'delivery:manager_all_orders' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-redo mr-2"></i>
+                        Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Orders</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Code</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Workflow</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Qty</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Products</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Seller</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shipping Co.</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for order in page_obj %}
+                        <tr class="hover:bg-gray-50 order-row cursor-pointer" data-order-id="{{ order.id }}" onclick="toggleOrderDetails('{{ order.id }}')">
+                            <td class="px-3 py-2 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <i class="fas fa-chevron-right text-gray-400 mr-2 transition-transform order-chevron-{{ order.id }}"></i>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">{{ order.order_code }}</div>
+                                        {% if order.tracking_number %}
+                                        <div class="text-xs text-gray-500">Track: {{ order.tracking_number }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-3 py-2">
+                                <div class="text-sm font-medium text-gray-900">{{ order.customer }}</div>
+                                {% if order.customer_phone %}
+                                <div class="text-xs text-gray-500">{{ order.customer_phone }}</div>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {% if order.customer_phone %}
+                                    <a href="tel:{{ order.customer_phone }}" class="text-blue-600 hover:text-blue-800">{{ order.customer_phone }}</a>
+                                {% else %}
+                                    <span class="text-gray-400">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-3 py-2 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                                    {% if order.status == 'delivered' %}bg-green-100 text-green-800
+                                    {% elif order.status == 'cancelled' %}bg-red-100 text-red-800
+                                    {% elif order.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="px-3 py-2 whitespace-nowrap">
+                                <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700">
+                                    {{ order.get_workflow_status_display }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ order.total_price_aed }}</td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ order.quantity }}</td>
+                            <td class="px-3 py-2">
+                                {% if order.items.all %}
+                                    <div class="text-sm text-gray-900">
+                                        {% for item in order.items.all|slice:":2" %}
+                                            <div class="mb-1">
+                                                {% if item.product.name_en %}
+                                                    {{ item.product.name_en }}
+                                                {% elif item.product.name_ar %}
+                                                    {{ item.product.name_ar }}
+                                                {% else %}
+                                                    Product #{{ item.product.id }}
+                                                {% endif %}
+                                                <span class="text-gray-500">x{{ item.quantity }}</span>
+                                            </div>
+                                        {% endfor %}
+                                        {% if order.items.count > 2 %}
+                                            <div class="text-xs text-gray-500 mt-1">+{{ order.items.count|add:"-2" }} more item{{ order.items.count|add:"-2"|pluralize }}</div>
+                                        {% endif %}
+                                    </div>
+                                {% elif order.product %}
+                                    <div class="text-sm text-gray-900">
+                                        {% if order.product.name_en %}
+                                            {{ order.product.name_en }}
+                                        {% elif order.product.name_ar %}
+                                            {{ order.product.name_ar }}
+                                        {% else %}
+                                            Product #{{ order.product.id }}
+                                        {% endif %}
+                                        <span class="text-gray-500">x{{ order.quantity }}</span>
+                                    </div>
+                                {% else %}
+                                    <span class="text-gray-400 text-xs">No products</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-3 py-2 whitespace-nowrap">
+                                {% if order.seller %}
+                                    <div class="text-sm text-gray-900">{{ order.seller.get_full_name|default:order.seller.username }}</div>
+                                    {% if order.seller_email %}
+                                    <div class="text-xs text-gray-500">{{ order.seller_email }}</div>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-gray-400 text-xs">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-3 py-2">
+                                <div class="text-sm text-gray-900">
+                                    {% if order.emirate %}
+                                        {{ order.emirate }}{% if order.region %}, {{ order.region }}{% endif %}
+                                    {% elif order.city %}
+                                        {{ order.city }}{% if order.state %}, {{ order.state }}{% endif %}
+                                    {% endif %}
+                                </div>
+                                {% if order.delivery_area %}
+                                <div class="text-xs text-gray-500">{{ order.delivery_area }}</div>
+                                {% endif %}
+                                {% if order.shipping_address %}
+                                <div class="text-xs text-gray-400 truncate max-w-xs">{{ order.shipping_address|truncatewords:5 }}</div>
+                                {% endif %}
+                            </td>
+                            <td class="px-3 py-2 whitespace-nowrap">
+                                {% if order.delivery %}
+                                    <div class="text-sm text-gray-900">{{ order.delivery.delivery_company.name_en }}</div>
+                                    {% if order.delivery.tracking_number %}
+                                    <div class="text-xs text-gray-500">{{ order.delivery.tracking_number }}</div>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="text-gray-400 text-xs">Not Assigned</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{{ order.date|date:"Y-m-d H:i" }}</td>
+                        </tr>
+                        <!-- Expandable Details Row -->
+                        <tr id="order-details-{{ order.id }}" class="hidden order-details-row bg-gray-50">
+                            <td colspan="12" class="px-6 py-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-gray-700 mb-2">Customer Information</h4>
+                                        <div class="space-y-1 text-sm text-gray-600">
+                                            <p><strong>Name:</strong> {{ order.customer }}</p>
+                                            <p><strong>Phone:</strong> {{ order.customer_phone|default:"-" }}</p>
+                                            {% if order.shipping_address %}
+                                            <p><strong>Address:</strong> {{ order.shipping_address }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-gray-700 mb-2">Location Details</h4>
+                                        <div class="space-y-1 text-sm text-gray-600">
+                                            {% if order.emirate %}
+                                            <p><strong>Emirate:</strong> {{ order.emirate }}</p>
+                                            {% endif %}
+                                            {% if order.region %}
+                                            <p><strong>Region:</strong> {{ order.region }}</p>
+                                            {% endif %}
+                                            {% if order.city %}
+                                            <p><strong>City:</strong> {{ order.city }}</p>
+                                            {% endif %}
+                                            {% if order.delivery_area %}
+                                            <p><strong>Delivery Area:</strong> {{ order.delivery_area }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-gray-700 mb-2">Order Items</h4>
+                                        <div class="space-y-1 text-sm text-gray-600">
+                                            {% if order.items.all %}
+                                                {% for item in order.items.all %}
+                                                <p>
+                                                    {% if item.product.name_en %}
+                                                        {{ item.product.name_en }}
+                                                    {% elif item.product.name_ar %}
+                                                        {{ item.product.name_ar }}
+                                                    {% else %}
+                                                        Product #{{ item.product.id }}
+                                                    {% endif %}
+                                                     - Qty: {{ item.quantity }} - Price: {{ item.total_price_aed }}
+                                                </p>
+                                                {% endfor %}
+                                            {% elif order.product %}
+                                                <p>
+                                                    {% if order.product.name_en %}
+                                                        {{ order.product.name_en }}
+                                                    {% elif order.product.name_ar %}
+                                                        {{ order.product.name_ar }}
+                                                    {% else %}
+                                                        Product #{{ order.product.id }}
+                                                    {% endif %}
+                                                     - Qty: {{ order.quantity }} - Price: {{ order.total_price_aed }}
+                                                </p>
+                                            {% endif %}
+                                            <p class="font-semibold text-gray-900"><strong>Total:</strong> {{ order.total_price_aed }}</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-gray-700 mb-2">Seller Information</h4>
+                                        <div class="space-y-1 text-sm text-gray-600">
+                                            {% if order.seller %}
+                                            <p><strong>Name:</strong> {{ order.seller.get_full_name|default:order.seller.username }}</p>
+                                            {% endif %}
+                                            {% if order.seller_email %}
+                                            <p><strong>Email:</strong> {{ order.seller_email }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-gray-700 mb-2">Delivery Information</h4>
+                                        <div class="space-y-1 text-sm text-gray-600">
+                                            {% if order.delivery %}
+                                            <p><strong>Company:</strong> {{ order.delivery.delivery_company.name_en }}</p>
+                                            {% if order.delivery.tracking_number %}
+                                            <p><strong>Tracking:</strong> {{ order.delivery.tracking_number }}</p>
+                                            {% endif %}
+                                            <p><strong>Status:</strong> {{ order.delivery.get_status_display }}</p>
+                                            {% else %}
+                                            <p class="text-gray-400">Not assigned to delivery company</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-gray-700 mb-2">Additional Notes</h4>
+                                        <div class="space-y-1 text-sm text-gray-600">
+                                            {% if order.notes %}
+                                            <p><strong>Notes:</strong> {{ order.notes|truncatewords:20 }}</p>
+                                            {% endif %}
+                                            {% if order.internal_notes %}
+                                            <p><strong>Internal Notes:</strong> {{ order.internal_notes|truncatewords:20 }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="12" class="px-6 py-4 text-center text-gray-500">No orders found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <div class="px-6 py-4 border-t border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="text-sm text-gray-700">
+                        Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} orders
+                    </div>
+                    <div class="flex gap-2">
+                        {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            Previous
+                        </a>
+                        {% endif %}
+                        {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            Next
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Barcode Scanner for Delivery
+let stream = null;
+let barcodeDetector = null;
+
+if ('BarcodeDetector' in window) {
+    barcodeDetector = new BarcodeDetector({ formats: ['qr_code', 'ean_13', 'code_128', 'code_39'] });
+}
+
+document.getElementById('cameraBtn')?.addEventListener('click', async function() {
+    const cameraContainer = document.getElementById('cameraContainer');
+    const video = document.getElementById('barcodeCamera');
+    
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }
+        });
+        
+        video.srcObject = stream;
+        video.play();
+        cameraContainer.classList.remove('hidden');
+        this.style.display = 'none';
+        
+        if (barcodeDetector) {
+            detectBarcode(video);
+        } else {
+            alert('Barcode detection not supported. Please enter order code manually.');
+        }
+    } catch (error) {
+        console.error('Error accessing camera:', error);
+        alert('Unable to access camera. Please use manual input.');
+    }
+});
+
+document.getElementById('stopCameraBtn')?.addEventListener('click', function() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+    document.getElementById('barcodeCamera').srcObject = null;
+    document.getElementById('cameraContainer').classList.add('hidden');
+    document.getElementById('cameraBtn').style.display = 'block';
+});
+
+async function detectBarcode(video) {
+    if (!barcodeDetector) return;
+    
+    try {
+        const barcodes = await barcodeDetector.detect(video);
+        
+        if (barcodes.length > 0) {
+            const barcodeValue = barcodes[0].rawValue;
+            document.getElementById('barcodeInput').value = barcodeValue;
+            document.querySelector('input[name="search"]').value = barcodeValue;
+            document.querySelector('form[method="GET"]').submit();
+            document.getElementById('stopCameraBtn').click();
+        }
+    } catch (error) {
+        console.error('Barcode detection error:', error);
+    }
+    
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        requestAnimationFrame(() => detectBarcode(video));
+    } else {
+        video.addEventListener('loadeddata', () => {
+            requestAnimationFrame(() => detectBarcode(video));
+        });
+    }
+}
+
+// Manual barcode input
+document.getElementById('barcodeInput')?.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        const orderCode = this.value.trim();
+        if (orderCode) {
+            document.querySelector('input[name="search"]').value = orderCode;
+            document.querySelector('form[method="GET"]').submit();
+        }
+    }
+});
+
+function toggleOrderDetails(orderId) {
+    const detailsRow = document.getElementById('order-details-' + orderId);
+    const chevron = document.querySelector('.order-chevron-' + orderId);
+    
+    if (detailsRow && detailsRow.classList.contains('hidden')) {
+        detailsRow.classList.remove('hidden');
+        if (chevron) {
+            chevron.classList.add('rotate-90');
+        }
+    } else if (detailsRow) {
+        detailsRow.classList.add('hidden');
+        if (chevron) {
+            chevron.classList.remove('rotate-90');
+        }
+    }
+}
+
+// Prevent row expansion when clicking on links or buttons
+document.addEventListener('click', function(e) {
+    if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('a') || e.target.closest('button')) {
+        e.stopPropagation();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Cycle Count Sessions{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/30 to-yellow-50/20">
+    <!-- Enhanced Page Header -->
+    <div class="bg-gradient-to-r from-amber-500 to-yellow-600 shadow-2xl border-b-4 border-amber-400">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div class="space-y-2">
+                    <div class="flex items-center gap-3">
+                        <a href="{% url 'stock_keeper:cycle_count' %}" class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center hover:bg-white/30 transition-all duration-200">
+                            <i class="fas fa-arrow-left text-white text-lg"></i>
+                        </a>
+                        <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                            <i class="fas fa-list text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-4xl font-bold text-white">Cycle Count Sessions</h1>
+                            <p class="text-amber-100 text-lg">View and manage your counting sessions</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <a href="{% url 'stock_keeper:start_count_session' %}" class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 border border-green-400/20">
+                        <i class="fas fa-plus mr-2"></i>
+                        Start New Session
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Enhanced Sessions List -->
+        <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+            <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                        <i class="fas fa-table text-slate-900 text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white">Your Count Sessions</h3>
+                        <p class="text-slate-300 text-sm">Track progress and review completed sessions</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                {% if sessions %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for session in sessions %}
+                        <div class="bg-white/60 backdrop-blur-sm rounded-2xl p-6 hover:bg-white/80 transition-all duration-200 border border-white/20 shadow-lg hover:shadow-xl">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center">
+                                    <i class="fas fa-clipboard-list text-white text-lg"></i>
+                                </div>
+                                <div class="text-right">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                                        {{ session.session_id }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-medium text-slate-600">Progress</span>
+                                    <span class="text-lg font-bold text-slate-900">{{ session.progress|floatformat:1 }}%</span>
+                                </div>
+                                
+                                <div class="w-full bg-slate-200 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-blue-500 to-cyan-600 h-2 rounded-full transition-all duration-300" style="width: {{ session.progress }}%"></div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4 pt-2">
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-slate-900">{{ session.completed_products }}</div>
+                                        <div class="text-xs text-slate-600">Completed</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-slate-900">{{ session.total_products }}</div>
+                                        <div class="text-xs text-slate-600">Total</div>
+                                    </div>
+                                </div>
+                                
+                                {% if session.total_variance > 0 %}
+                                <div class="pt-2 border-t border-slate-200">
+                                    <div class="text-center">
+                                        <div class="text-lg font-bold text-red-600">{{ session.total_variance }}</div>
+                                        <div class="text-xs text-slate-600">Total Variance</div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if session.created_date %}
+                                <div class="pt-2 border-t border-slate-200">
+                                    <div class="text-center text-xs text-slate-500">
+                                        {{ session.created_date|date:"M d, Y H:i" }}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mt-4 pt-4 border-t border-slate-200">
+                                <a href="{% url 'stock_keeper:cycle_count_session' session.session_id %}" 
+                                   class="w-full inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-600 text-white text-sm font-semibold rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200">
+                                    <i class="fas fa-arrow-right mr-2"></i>
+                                    Continue Session
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="py-12 text-center text-slate-500">
+                        <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-clipboard-list text-slate-400 text-2xl"></i>
+                        </div>
+                        <p class="text-lg font-medium">No count sessions found</p>
+                        <p class="text-sm">Start your first cycle count session to begin tracking inventory</p>
+                        <div class="mt-6">
+                            <a href="{% url 'stock_keeper:start_count_session' %}" 
+                               class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200">
+                                <i class="fas fa-plus mr-2"></i>
+                                Start First Session
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Enhanced Quick Actions -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <a href="{% url 'stock_keeper:cycle_count' %}" class="p-4 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-2xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-center">
+                <i class="fas fa-arrow-left text-2xl mb-2"></i>
+                <div class="text-sm font-semibold">Back to Cycle Count</div>
+                <div class="text-xs opacity-80">Return to main page</div>
+            </a>
+            
+            <a href="{% url 'stock_keeper:start_count_session' %}" class="p-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-center">
+                <i class="fas fa-plus text-2xl mb-2"></i>
+                <div class="text-sm font-semibold">New Session</div>
+                <div class="text-xs opacity-80">Start counting</div>
+            </a>
+            
+            <a href="{% url 'stock_keeper:dashboard' %}" class="p-4 bg-gradient-to-r from-slate-500 to-slate-600 text-white rounded-2xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 text-center">
+                <i class="fas fa-home text-2xl mb-2"></i>
+                <div class="text-sm font-semibold">Dashboard</div>
+                <div class="text-xs opacity-80">Main menu</div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

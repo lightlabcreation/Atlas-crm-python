@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Approve Order for Packaging{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-check text-green-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-green-600">Approve Order for Packaging</h1>
+                        <p class="mt-1 text-sm text-gray-500">Order #{{ order.order_code }}</p>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'orders:detail' order.id %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Order
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Order Review</h3>
+            </div>
+            <div class="p-6">
+                <!-- Order Information -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Order Code</label>
+                        <p class="mt-1 text-lg font-semibold text-gray-900">{{ order.order_code }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Customer</label>
+                        <p class="mt-1 text-lg font-semibold text-gray-900">{{ order.customer }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Phone</label>
+                        <p class="mt-1 text-lg font-semibold text-gray-900">{{ order.customer_phone|default:"N/A" }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Total Amount</label>
+                        <p class="mt-1 text-lg font-semibold text-green-600">AED {{ order.total_price|floatformat:2 }}</p>
+                    </div>
+                </div>
+
+                <!-- Shipping Address -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-500">Shipping Address</label>
+                    <p class="mt-1 text-sm text-gray-900">
+                        {% if order.city %}{{ order.city }}{% endif %}
+                        {% if order.state %}, {{ order.state }}{% endif %}
+                        {% if order.zip_code %}, {{ order.zip_code }}{% endif %}
+                        {% if order.country %}, {{ order.country }}{% endif %}
+                    </p>
+                </div>
+
+                <!-- Product Details -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-500 mb-3">Product Details</label>
+                    {% if order.items.all %}
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Unit Price</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {% for item in order.items.all %}
+                                <tr>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.product.name_en }}</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">{{ item.quantity }}</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">AED {{ item.price|floatformat:2 }}</td>
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900">AED {{ item.total_price|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-gray-500">
+                        <p>No products found.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Notes -->
+                {% if order.notes %}
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-500">Customer Notes</label>
+                    <p class="mt-1 text-sm text-gray-900">{{ order.notes }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Approval Form -->
+                <form method="post" class="mt-8">
+                    {% csrf_token %}
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-yellow-800">
+                                    Important Notice
+                                </h3>
+                                <div class="mt-2 text-sm text-yellow-700">
+                                    <p>By approving this order, you confirm that:</p>
+                                    <ul class="list-disc list-inside mt-2 space-y-1">
+                                        <li>Customer information is complete and accurate</li>
+                                        <li>Shipping address is valid and deliverable</li>
+                                        <li>Product details are correct</li>
+                                        <li>Order is ready for packaging</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end space-x-3">
+                        <a href="{% url 'orders:detail' order.id %}" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200">
+                            Cancel
+                        </a>
+                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200">
+                            <i class="fas fa-check mr-2"></i>
+                            Approve for Packaging
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

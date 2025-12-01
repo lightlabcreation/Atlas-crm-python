@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load role_filters %}
+
+{% block title %}Manage Role Permissions - {{ role.name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100">
+    <!-- Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-semibold text-orange-600">Manage Role Permissions</h1>
+                    <p class="mt-1 text-sm text-gray-500">Assign permissions to role: <strong>{{ role.name }}</strong></p>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'roles:role_detail' role.id %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium">
+                        Back to Role
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <form method="post">
+            {% csrf_token %}
+            
+            <!-- Permissions Table -->
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900">Feature Permissions</h3>
+                            <p class="text-sm text-gray-500">Select permissions for role: <strong>{{ role.name }}</strong></p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button type="button" onclick="selectAll()" class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded text-sm font-medium">
+                                Select All
+                            </button>
+                            <button type="button" onclick="deselectAll()" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded text-sm font-medium">
+                                Deselect All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <!-- Header Row -->
+                        <thead>
+                            <tr>
+                                <th class="text-left text-sm font-medium">features</th>
+                                <th class="text-center text-sm font-medium">Read</th>
+                                <th class="text-center text-sm font-medium">Create</th>
+                                <th class="text-center text-sm font-medium">Delete</th>
+                                <th class="text-center text-sm font-medium">Edit</th>
+                            </tr>
+                        </thead>
+                        
+                        <!-- Body Rows -->
+                        <tbody>
+                            {% for module, permissions in permissions_by_module.items %}
+                            <tr>
+                                <td class="text-sm font-medium">{{ module|title }}</td>
+                                <td class="text-center">
+                                    {% if permissions.read %}
+                                    <input type="checkbox" name="permissions" value="{{ permissions.read }}" 
+                                           class="permission-checkbox" 
+                                           {% if permissions.read in role_permission_codenames %}checked{% endif %}>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if permissions.create %}
+                                    <input type="checkbox" name="permissions" value="{{ permissions.create }}" 
+                                           class="permission-checkbox" 
+                                           {% if permissions.create in role_permission_codenames %}checked{% endif %}>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if permissions.delete %}
+                                    <input type="checkbox" name="permissions" value="{{ permissions.delete }}" 
+                                           class="permission-checkbox" 
+                                           {% if permissions.delete in role_permission_codenames %}checked{% endif %}>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% if permissions.edit %}
+                                    <input type="checkbox" name="permissions" value="{{ permissions.edit }}" 
+                                           class="permission-checkbox" 
+                                           {% if permissions.edit in role_permission_codenames %}checked{% endif %}>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="mt-6 flex justify-end space-x-3">
+                <a href="{% url 'roles:role_detail' role.id %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium">
+                    Cancel
+                </a>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                    Update Permissions
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+/* Custom styling for circular checkboxes */
+.permission-checkbox {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #d1d5db;
+    border-radius: 50%;
+    background-color: #ffffff;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+    display: inline-block;
+}
+
+.permission-checkbox:hover {
+    border-color: #3b82f6;
+    background-color: #f8fafc;
+    transform: scale(1.1);
+}
+
+.permission-checkbox:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.permission-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+/* Table styling */
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Yellow header styling */
+thead tr {
+    background-color: #fbbf24 !important;
+}
+
+thead th {
+    background-color: #fbbf24 !important;
+    color: #1f2937 !important;
+    font-weight: 700;
+    padding: 12px 16px;
+    border: none;
+    font-size: 14px;
+    text-transform: lowercase;
+}
+
+thead th:first-child {
+    text-transform: lowercase;
+}
+
+/* Table rows styling */
+tbody tr {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+tbody tr:last-child {
+    border-bottom: none;
+}
+
+tbody td {
+    padding: 12px 16px;
+    vertical-align: middle;
+}
+
+/* Feature name styling */
+tbody td:first-child {
+    font-weight: 500;
+    color: #374151;
+}
+
+/* Checkbox container styling */
+td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .overflow-x-auto {
+        overflow-x: auto;
+    }
+    
+    table {
+        min-width: 600px;
+    }
+}
+</style>
+
+<script>
+// Select all permissions for a feature
+function selectAllForFeature(featureName) {
+    const checkboxes = document.querySelectorAll(`.permission-checkbox[value^="${featureName}_"]`);
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+    });
+}
+
+// Deselect all permissions for a feature
+function deselectAllForFeature(featureName) {
+    const checkboxes = document.querySelectorAll(`.permission-checkbox[value^="${featureName}_"]`);
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+}
+
+// Select all permissions
+function selectAll() {
+    const checkboxes = document.querySelectorAll('.permission-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+    });
+}
+
+// Deselect all permissions
+function deselectAll() {
+    const checkboxes = document.querySelectorAll('.permission-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+
+{% block title %}Quality Analytics - Packaging{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="{% url 'packaging:dashboard' %}" class="text-gray-500 hover:text-gray-700 mr-3">
+                        <i class="fas fa-arrow-left text-lg"></i>
+                    </a>
+                    <div>
+                        <h1 class="text-xl font-semibold text-gray-900">Quality Analytics</h1>
+                        <p class="text-sm text-gray-500">Quality control performance and statistics</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="{% url 'packaging:dashboard' %}" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
+                        Dashboard
+                    </a>
+                    <a href="{% url 'packaging:export_quality_report' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium">
+                        <i class="fas fa-download mr-2"></i>Export Report
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Checks -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-100 rounded-md flex items-center justify-center">
+                            <i class="fas fa-clipboard-check text-blue-600"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Total Checks</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ total_checks }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pass Rate -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-green-100 rounded-md flex items-center justify-center">
+                            <i class="fas fa-check-circle text-green-600"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Pass Rate</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ pass_rate }}%</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Checks Today -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-yellow-100 rounded-md flex items-center justify-center">
+                            <i class="fas fa-calendar-day text-yellow-600"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">Today</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ checks_today }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- This Week -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-purple-100 rounded-md flex items-center justify-center">
+                            <i class="fas fa-calendar-week text-purple-600"></i>
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-500">This Week</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ checks_this_week }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts and Analytics -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Pass/Fail Distribution -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Check Results Distribution</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-green-500 rounded-full mr-3"></div>
+                            <span class="text-sm font-medium text-gray-700">Passed</span>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-900">{{ passed_checks }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-red-500 rounded-full mr-3"></div>
+                            <span class="text-sm font-medium text-gray-700">Failed</span>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-900">{{ failed_checks }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-4 h-4 bg-yellow-500 rounded-full mr-3"></div>
+                            <span class="text-sm font-medium text-gray-700">Conditional</span>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-900">{{ conditional_checks }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Check Types Breakdown -->
+            <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Check Types</h3>
+                <div class="space-y-3">
+                    {% for check_type, count in check_types.items %}
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-700">{{ check_type }}</span>
+                        <span class="text-sm font-semibold text-gray-900">{{ count }}</span>
+                    </div>
+                    {% empty %}
+                    <p class="text-sm text-gray-500">No check types available</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Trends Chart -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6 mb-8">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Daily Quality Trends (Last 7 Days)</h3>
+            <div class="h-64 flex items-end space-x-2">
+                {% for stat in daily_stats %}
+                <div class="flex-1 flex flex-col items-center">
+                    <div class="w-full bg-gray-200 rounded-t" style="height: {{ stat.pass_rate }}%"></div>
+                    <div class="text-xs text-gray-500 mt-2">{{ stat.date|date:"M d" }}</div>
+                    <div class="text-xs text-gray-700 font-medium">{{ stat.total_checks }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Checker Performance -->
+        <div class="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Checker Performance</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Checker</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Checks</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Passed</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pass Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for checker_stat in checker_stats %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                                        <span class="text-sm font-medium text-gray-800">{{ checker_stat.checker.get_full_name|first|upper|default:checker_stat.checker.email|first|upper }}</span>
+                                    </div>
+                                    <div class="text-sm font-medium text-gray-900">{{ checker_stat.checker.get_full_name|default:checker_stat.checker.email }}</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ checker_stat.total_checks }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ checker_stat.passed_checks }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                    {% if checker_stat.pass_rate >= 90 %}bg-green-100 text-green-800
+                                    {% elif checker_stat.pass_rate >= 70 %}bg-yellow-100 text-yellow-800
+                                    {% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ checker_stat.pass_rate }}%
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="px-6 py-4 text-center text-sm text-gray-500">No checker performance data available</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Simple chart functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects to daily trends
+    const trendBars = document.querySelectorAll('.bg-gray-200');
+    trendBars.forEach(bar => {
+        bar.addEventListener('mouseenter', function() {
+            this.classList.add('bg-blue-500');
+        });
+        bar.addEventListener('mouseleave', function() {
+            this.classList.remove('bg-blue-500');
+        });
+    });
+});
+</script>
+{% endblock %}

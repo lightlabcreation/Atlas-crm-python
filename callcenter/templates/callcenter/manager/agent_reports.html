@@ -1,0 +1,346 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Agent Performance Reports{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/30 to-yellow-50/20">
+    <!-- Enhanced Page Header -->
+    <div class="bg-gradient-to-r from-amber-500 to-yellow-600 shadow-2xl border-b-4 border-amber-400">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div class="space-y-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                            <i class="fas fa-chart-line text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-4xl font-bold text-white">Agent Performance Reports</h1>
+                            <p class="text-amber-100 text-lg">Comprehensive analytics and performance metrics</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <div class="relative">
+                        <select id="period" class="appearance-none bg-white/20 backdrop-blur-sm text-white border border-white/30 rounded-xl px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50 transition-all duration-200">
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month" selected>This Month</option>
+                            <option value="quarter">This Quarter</option>
+                            <option value="year">This Year</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <i class="fas fa-chevron-down text-white/70 text-sm"></i>
+                        </div>
+                    </div>
+                    <button onclick="exportReport()" class="inline-flex items-center justify-center px-6 py-2 bg-white/20 backdrop-blur-sm text-white font-semibold rounded-xl hover:bg-white/30 transition-all duration-200 border border-white/30">
+                        <i class="fas fa-download mr-2"></i>
+                        Export
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Enhanced Team Performance Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mr-4">
+                        <i class="fas fa-users text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-600">Total Agents</p>
+                        <p class="text-2xl font-bold text-slate-900">{{ total_agents|default:"0" }}</p>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-sm">
+                    <span class="text-green-600 font-medium">+3</span>
+                    <span class="text-slate-500 ml-1">this month</span>
+                </div>
+            </div>
+
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-2xl flex items-center justify-center mr-4">
+                        <i class="fas fa-phone text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-600">Total Calls</p>
+                        <p class="text-2xl font-bold text-slate-900">{{ total_calls|default:"0" }}</p>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-sm">
+                    <span class="text-blue-600 font-medium">+18%</span>
+                    <span class="text-slate-500 ml-1">from last period</span>
+                </div>
+            </div>
+
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-2xl flex items-center justify-center mr-4">
+                        <i class="fas fa-star text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-600">Avg Satisfaction</p>
+                        <p class="text-2xl font-bold text-slate-900">{{ avg_satisfaction|default:"0" }}/5</p>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-sm">
+                    <span class="text-amber-600 font-medium">+12%</span>
+                    <span class="text-slate-500 ml-1">from last period</span>
+                </div>
+            </div>
+
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center mr-4">
+                        <i class="fas fa-check-circle text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-600">Resolution Rate</p>
+                        <p class="text-2xl font-bold text-slate-900">{{ resolution_rate|default:"0" }}%</p>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-sm">
+                    <span class="text-purple-600 font-medium">+8%</span>
+                    <span class="text-slate-500 ml-1">from last period</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Agent Performance Table -->
+        <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+            <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                        <i class="fas fa-table text-slate-900 text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white">Agent Performance Details</h3>
+                        <p class="text-slate-300 text-sm">Individual performance metrics and rankings</p>
+                    </div>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50/50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Agent</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Calls Handled</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Avg Duration</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Satisfaction</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Resolution Rate</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-slate-200">
+                        {% for agent in team_performance %}
+                        <tr class="hover:bg-slate-50/50 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full flex items-center justify-center mr-3">
+                                        <span class="text-sm font-bold text-slate-900">{{ agent.name|first|upper }}</span>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-semibold text-slate-900">{{ agent.name }}</div>
+                                        <div class="text-sm text-slate-500">{{ agent.email|default:"" }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-semibold text-slate-900">{{ agent.total_calls|default:"0" }}</div>
+                                <div class="text-sm text-slate-500">{{ agent.orders_handled|default:"0" }} orders</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900 font-medium">
+                                {{ agent.avg_response_time|default:"0" }}m
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if agent.satisfaction and agent.satisfaction > 0 %}
+                                    <div class="flex items-center">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= agent.satisfaction %}
+                                                <i class="fas fa-star text-amber-400 text-sm"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-slate-300 text-sm"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <span class="ml-2 text-sm font-medium text-slate-900">{{ agent.satisfaction|floatformat:1 }}</span>
+                                    </div>
+                                {% else %}
+                                    <span class="text-slate-400 text-sm">No ratings</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-20 bg-slate-200 rounded-full h-2 mr-3">
+                                        <div class="bg-gradient-to-r from-amber-400 to-yellow-500 h-2 rounded-full" style="width: {{ agent.confirmation_rate|default:0 }}%"></div>
+                                    </div>
+                                    <span class="text-sm font-semibold text-slate-900">{{ agent.confirmation_rate|default:"0" }}%</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 border border-green-200 shadow-sm">
+                                    Active
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex items-center space-x-2">
+                                    <button onclick="viewAgentDetails({{ agent.id }})" class="text-amber-600 hover:text-amber-900 transition-colors duration-150">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button onclick="viewAgentHistory({{ agent.id }})" class="text-blue-600 hover:text-blue-900 transition-colors duration-150">
+                                        <i class="fas fa-history"></i>
+                                    </button>
+                                    <button onclick="exportAgentReport({{ agent.id }})" class="text-green-600 hover:text-green-900 transition-colors duration-150">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="px-6 py-12 text-center">
+                                <div class="text-slate-500">
+                                    <i class="fas fa-users text-4xl mb-4 text-slate-300"></i>
+                                    <p class="text-lg font-medium">No agents found</p>
+                                    <p class="text-sm">Add agents to start tracking performance</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Enhanced Performance Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+            <!-- Team Performance Trend -->
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-chart-area text-slate-900 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Team Performance Trend</h3>
+                            <p class="text-slate-300 text-sm">Weekly call volume and success rates</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-slate-700">Week 1</span>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-20 bg-slate-200 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-amber-400 to-yellow-500 h-2 rounded-full" style="width: 85%"></div>
+                                </div>
+                                <span class="text-sm font-semibold text-slate-900">85%</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-slate-700">Week 2</span>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-20 bg-slate-200 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-amber-400 to-yellow-500 h-2 rounded-full" style="width: 92%"></div>
+                                </div>
+                                <span class="text-sm font-semibold text-slate-900">92%</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-slate-700">Week 3</span>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-20 bg-slate-200 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-amber-400 to-yellow-500 h-2 rounded-full" style="width: 78%"></div>
+                                </div>
+                                <span class="text-sm font-semibold text-slate-900">78%</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-slate-700">Week 4</span>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-20 bg-slate-200 rounded-full h-2">
+                                    <div class="bg-gradient-to-r from-amber-400 to-yellow-500 h-2 rounded-full" style="width: 89%"></div>
+                                </div>
+                                <span class="text-sm font-semibold text-slate-900">89%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Performers -->
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-trophy text-slate-900 text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Top Performers</h3>
+                            <p class="text-slate-300 text-sm">This month's leading agents</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        {% for agent in top_performers|slice:":5" %}
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-xs font-bold text-slate-900">{{ forloop.counter }}</span>
+                                </div>
+                                <span class="text-sm font-medium text-slate-700">{{ agent.get_full_name }}</span>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm font-semibold text-slate-900">{{ agent.total_calls|default:"0" }} calls</div>
+                                <div class="text-xs text-slate-500">{{ agent.resolution_rate|default:"0" }}% success</div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center text-slate-500 py-4">
+                            <i class="fas fa-trophy text-2xl mb-2 text-slate-300"></i>
+                            <p class="text-sm">No performance data available</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function exportReport() {
+    const period = document.getElementById('period').value;
+    // Redirect to export endpoint
+    window.location.href = "{% url 'callcenter:export_performance_report' %}";
+}
+
+function viewAgentDetails(agentId) {
+    // Implement agent details view
+    alert(`Viewing details for agent ${agentId}...`);
+}
+
+function viewAgentHistory(agentId) {
+    // Implement agent history view
+    alert(`Viewing history for agent ${agentId}...`);
+}
+
+function exportAgentReport(agentId) {
+    // Export individual agent report
+    window.location.href = `{% url 'callcenter:export_performance_report' %}?agent_id=${agentId}`;
+}
+
+// Update period selection
+document.getElementById('period').addEventListener('change', function() {
+    console.log('Period changed to:', this.value);
+    // Implement period change functionality
+});
+</script>
+{% endblock %} 

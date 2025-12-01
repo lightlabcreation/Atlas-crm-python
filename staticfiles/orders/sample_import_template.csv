@@ -1,0 +1,4 @@
+Order Code,Customer Name,Mobile Number,Shipping Address,Product ID/Code,Quantity,Price,Product Variant,Notes,Product Link,Order Date
+SKU-1755085380-5E878F34,John Doe,+971501234567,Dubai Marina Tower 1,PROD001,2,150.00,Standard,Express delivery,https://example.com/product1,2025-08-16
+SKU-1755085380-5E878F34,Jane Smith,+971507654321,Sheikh Zayed Road,PROD002,1,299.99,Premium,Handle with care,https://example.com/product2,2025-08-16
+SKU-1755085380-5E878F34,Mike Johnson,+971509876543,JBR Beach,PROD003,3,75.50,Standard,Leave at reception,https://example.com/product3,2025-08-16

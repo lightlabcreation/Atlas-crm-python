@@ -1,0 +1,892 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manager Order List{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50/30 to-yellow-50/20">
+    <!-- Enhanced Page Header -->
+    <div class="bg-gradient-to-r from-amber-500 to-yellow-600 shadow-2xl border-b-4 border-amber-400">
+        <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div class="space-y-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                            <i class="fas fa-list-alt text-white text-xl"></i>
+                        </div>
+            <div>
+                            <h1 class="text-4xl font-bold text-white">Order Management</h1>
+                            <p class="text-amber-100 text-lg">Monitor and manage all orders in the system</p>
+                        </div>
+                    </div>
+            </div>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button onclick="autoDistribute()" class="inline-flex items-center justify-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white font-semibold rounded-xl hover:bg-white/30 transition-all duration-200 border border-white/30">
+                        <i class="fas fa-magic mr-2"></i>
+                        Auto Distribute
+                    </button>
+                    <a href="{% url 'callcenter:manager_dashboard' %}" class="inline-flex items-center justify-center px-6 py-3 bg-white/20 backdrop-blur-sm text-white font-semibold rounded-xl hover:bg-white/30 transition-all duration-200 border border-white/30">
+                        <i class="fas fa-tachometer-alt mr-2"></i>
+                        Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Enhanced Summary Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-2xl flex items-center justify-center mr-4">
+                        <i class="fas fa-clock text-white text-xl"></i>
+                    </div>
+                <div>
+                        <p class="text-sm font-medium text-slate-600">Pending Orders</p>
+                        <p class="text-2xl font-bold text-slate-900">{{ pending_orders|default:"0" }}</p>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-sm">
+                    <span class="text-blue-600 font-medium">+8%</span>
+                    <span class="text-slate-500 ml-1">from yesterday</span>
+                </div>
+            </div>
+
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-2xl flex items-center justify-center mr-4">
+                        <i class="fas fa-user-clock text-white text-xl"></i>
+                </div>
+                <div>
+                        <p class="text-sm font-medium text-slate-600">Assigned to Agents</p>
+                        <p class="text-2xl font-bold text-slate-900">{{ assigned_orders|default:"0" }}</p>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-sm">
+                    <span class="text-amber-600 font-medium">+12%</span>
+                    <span class="text-slate-500 ml-1">from yesterday</span>
+                </div>
+            </div>
+
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mr-4">
+                        <i class="fas fa-check-circle text-white text-xl"></i>
+                        </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-600">Completed Today</p>
+                        <p class="text-2xl font-bold text-slate-900">{{ completed_today|default:"0" }}</p>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-sm">
+                    <span class="text-green-600 font-medium">+15%</span>
+                    <span class="text-slate-500 ml-1">from yesterday</span>
+                </div>
+            </div>
+
+            <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-6">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center mr-4">
+                        <i class="fas fa-users text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-600">Active Agents</p>
+                        <p class="text-2xl font-bold text-slate-900">{{ active_agents|default:"0" }}</p>
+        </div>
+    </div>
+                <div class="mt-4 flex items-center text-sm">
+                    <span class="text-purple-600 font-medium">+5%</span>
+                    <span class="text-slate-500 ml-1">from yesterday</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Filters and Search -->
+        <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 mb-8 overflow-hidden">
+            <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                        <i class="fas fa-filter text-slate-900 text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white">Filters & Search</h3>
+                        <p class="text-slate-300 text-sm">Refine order list by various criteria</p>
+            </div>
+        </div>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label for="status_filter" class="block text-sm font-semibold text-slate-700 mb-2">Status</label>
+                        <select id="status_filter" class="block w-full py-3 px-4 border border-slate-300 bg-white rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm transition-all duration-200">
+                            <option value="">All Statuses</option>
+                            <option value="pending">Pending</option>
+                            <option value="assigned">Assigned</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="agent_filter" class="block text-sm font-semibold text-slate-700 mb-2">Agent</label>
+                        <select id="agent_filter" class="block w-full py-3 px-4 border border-slate-300 bg-white rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm transition-all duration-200">
+                            <option value="">All Agents</option>
+                            {% for agent in agents %}
+                            <option value="{{ agent.id }}">{{ agent.get_full_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="priority_filter" class="block text-sm font-semibold text-slate-700 mb-2">Priority</label>
+                        <select id="priority_filter" class="block w-full py-3 px-4 border border-slate-300 bg-white rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm transition-all duration-200">
+                            <option value="">All Priorities</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+        </div>
+                    <div>
+                        <label for="search" class="block text-sm font-semibold text-slate-700 mb-2">Search</label>
+                        <input type="text" id="search" placeholder="Order ID, customer name..." class="block w-full py-3 px-4 border border-slate-300 bg-white rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-sm transition-all duration-200">
+            </div>
+        </div>
+                <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                    <button onclick="applyFilters()" class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 border border-amber-400/20">
+                        <i class="fas fa-search mr-2"></i>
+                        Apply Filters
+                    </button>
+                    <button onclick="clearFilters()" class="inline-flex items-center justify-center px-6 py-3 bg-white text-slate-700 font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 border-2 border-slate-200 hover:border-slate-300">
+                        <i class="fas fa-times mr-2"></i>
+                        Clear Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Orders Table -->
+        <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+            <div class="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-6 border-b border-slate-600/50">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-table text-slate-900 text-lg"></i>
+    </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Orders List</h3>
+                            <p class="text-slate-300 text-sm">Total: {{ page_obj.paginator.count }} orders</p>
+        </div>
+                                </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-slate-300 text-sm">View:</span>
+                        <button onclick="toggleView('table')" id="table_view" class="px-3 py-2 bg-white/20 text-white rounded-lg text-sm font-medium">Table</button>
+                        <button onclick="toggleView('grid')" id="grid_view" class="px-3 py-2 text-slate-300 hover:text-white rounded-lg text-sm font-medium">Grid</button>
+            </div>
+        </div>
+    </div>
+            <div class="overflow-x-auto overflow-y-visible">
+                <table class="min-w-full">
+                    <thead class="bg-slate-50/50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Order Details</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Customer</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Product</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Price</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Address</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Agent</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Priority</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Created</th>
+                            <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white">
+                        {% for order in page_obj %}
+                        <tr class="hover:bg-slate-50/50 transition-colors duration-150 border-0">
+                            <td class="px-6 py-4 whitespace-nowrap border-0">
+                                <div class="text-sm font-semibold text-slate-900">#{{ order.id }}</div>
+                                <div class="text-xs text-slate-400">{{ order.quantity }} items</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap border-0">
+                                <div class="text-sm font-medium text-slate-900">{{ order.customer|default:"No Customer" }}</div>
+                                <div class="text-sm text-slate-500">{{ order.customer_phone|default:"No Phone" }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap border-0">
+                                <div class="text-sm text-slate-900">
+                                    {% if order.items.all %}
+                                        {% for item in order.items.all|slice:":1" %}
+                                            {{ item.product.name_en|default:"No Product" }}
+                                        {% endfor %}
+                                        {% if order.items.count > 1 %}
+                                            <span class="text-slate-500">+{{ order.items.count|add:"-1" }} more</span>
+                                        {% endif %}
+                                    {% else %}
+                                        {{ order.product.name_en|default:"No Product" }}
+                                    {% endif %}
+                                </div>
+                                {% if order.product.product_link %}
+                                <div class="mt-1">
+                                    <div class="text-xs text-slate-500 mb-1">
+                                        <strong>Product Link:</strong>
+                                    </div>
+                                    <div class="text-xs text-blue-600 break-all mb-2">
+                                        {{ order.product.product_link|truncatechars:50 }}
+                                    </div>
+                                    <a href="{{ order.product.product_link }}" target="_blank" rel="noopener noreferrer" 
+                                       class="inline-flex items-center text-xs text-blue-600 hover:text-blue-800 font-medium">
+                                        <i class="fas fa-external-link-alt mr-1"></i>
+                                        View Product
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap border-0">
+                                <div class="text-sm font-semibold text-green-600">
+                                    {% if order.items.all %}
+                                        {% for item in order.items.all|slice:":1" %}
+                                            AED {{ item.price|floatformat:2 }}
+                                        {% endfor %}
+                                    {% else %}
+                                        AED {{ order.price_per_unit|floatformat:2 }}
+                                    {% endif %}
+                                </div>
+                                <div class="text-xs text-slate-500">
+                                    {% if order.items.all %}
+                                        {% for item in order.items.all|slice:":1" %}
+                                            per unit
+                                        {% endfor %}
+                                    {% else %}
+                                        per unit
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap border-0">
+                                <div class="text-sm text-slate-900 max-w-xs truncate">
+                                    {% if order.shipping_address %}
+                                        <i class="fas fa-map-marker-alt text-slate-400 mr-1"></i>
+                                        {{ order.shipping_address|truncatechars:25 }}
+                                    {% elif order.emirate or order.region %}
+                                        <i class="fas fa-map-marker-alt text-slate-400 mr-1"></i>
+                                        {% if order.region %}{{ order.region }}{% endif %}{% if order.region and order.emirate %}, {% endif %}{% if order.emirate %}{{ order.emirate }}{% endif %}
+                                    {% elif order.city or order.state %}
+                                        <i class="fas fa-map-marker-alt text-slate-400 mr-1"></i>
+                                        {% if order.city %}{{ order.city }}{% endif %}{% if order.city and order.state %}, {% endif %}{% if order.state %}{{ order.state }}{% endif %}
+                                    {% else %}
+                                        <span class="text-slate-400 italic">No address</span>
+                                    {% endif %}
+                                </div>
+                                {% if order.city or order.country %}
+                                <div class="text-xs text-slate-500">
+                                    {% if order.city %}{{ order.city }}{% endif %}{% if order.city and order.country %}, {% endif %}{% if order.country %}{{ order.country }}{% endif %}
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap border-0">
+                                {% if order.status == 'confirmed' %}
+                                    <div class="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 bg-white">
+                                        <i class="fas fa-check-square text-green-600 mr-2 text-sm"></i>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">تم التأكيد</div>
+                                            <div class="text-xs text-gray-500">Confirmed</div>
+                                        </div>
+                                    </div>
+                                {% elif order.status == 'pending' %}
+                                    <div class="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 bg-white">
+                                        <i class="fas fa-clock text-yellow-600 mr-2 text-sm"></i>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">في الانتظار</div>
+                                            <div class="text-xs text-gray-500">Pending</div>
+                                        </div>
+                                    </div>
+                                {% elif order.status == 'cancelled' %}
+                                    <div class="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 bg-white">
+                                        <i class="fas fa-times text-red-600 mr-2 text-sm"></i>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">ملغي</div>
+                                            <div class="text-xs text-gray-500">Cancelled</div>
+                                        </div>
+                                    </div>
+                                {% elif order.status == 'processing' %}
+                                    <div class="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 bg-white">
+                                        <i class="fas fa-cog text-blue-600 mr-2 text-sm"></i>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">قيد المعالجة</div>
+                                            <div class="text-xs text-gray-500">Processing</div>
+                                        </div>
+                                    </div>
+                                {% elif order.status == 'shipped' %}
+                                    <div class="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 bg-white">
+                                        <i class="fas fa-shipping-fast text-purple-600 mr-2 text-sm"></i>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">تم الشحن</div>
+                                            <div class="text-xs text-gray-500">Shipped</div>
+                                        </div>
+                                    </div>
+                                {% elif order.status == 'assigned' %}
+                                    <div class="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 bg-white">
+                                        <i class="fas fa-user-check text-blue-600 mr-2 text-sm"></i>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">مُعيّن</div>
+                                            <div class="text-xs text-gray-500">Assigned</div>
+                                        </div>
+                                    </div>
+                                {% elif order.status == 'in_progress' %}
+                                    <div class="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 bg-white">
+                                        <i class="fas fa-play-circle text-purple-600 mr-2 text-sm"></i>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">قيد التنفيذ</div>
+                                            <div class="text-xs text-gray-500">In Progress</div>
+                                        </div>
+                                    </div>
+                                {% elif order.status == 'completed' %}
+                                    <div class="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 bg-white">
+                                        <i class="fas fa-check-circle text-green-600 mr-2 text-sm"></i>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">مكتمل</div>
+                                            <div class="text-xs text-gray-500">Completed</div>
+                                        </div>
+                                    </div>
+                                {% elif order.status == 'no_answer_1st' %}
+                                    <div class="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 bg-white">
+                                        <i class="fas fa-phone text-pink-500 mr-2 text-sm"></i>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">لا يرد - محاولة أولى</div>
+                                            <div class="text-xs text-gray-500">No Answer 1st</div>
+                                        </div>
+                                    </div>
+                                {% elif order.status == 'no_answer_2nd' %}
+                                    <div class="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 bg-white">
+                                        <i class="fas fa-phone text-pink-500 mr-2 text-sm"></i>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">لا يرد - محاولة ثانية</div>
+                                            <div class="text-xs text-gray-500">No Answer 2nd</div>
+                                        </div>
+                                    </div>
+                                {% elif order.status == 'no_answer_final' %}
+                                    <div class="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 bg-white">
+                                        <i class="fas fa-phone text-pink-500 mr-2 text-sm"></i>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">لا يرد - محاولة أخيرة</div>
+                                            <div class="text-xs text-gray-500">No Answer Final</div>
+                                        </div>
+                                    </div>
+                                {% elif order.status == 'postponed' %}
+                                    <div class="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 bg-white">
+                                        <i class="fas fa-clock text-red-500 mr-2 text-sm"></i>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">تأجيل</div>
+                                            <div class="text-xs text-gray-500">Postponed</div>
+                                        </div>
+                                    </div>
+                                {% elif order.status == 'invalid_number' %}
+                                    <div class="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 bg-white">
+                                        <i class="fas fa-phone-slash text-red-500 mr-2 text-sm"></i>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">رقم غير صحيح</div>
+                                            <div class="text-xs text-gray-500">Invalid Number</div>
+                                        </div>
+                                    </div>
+                                {% elif order.status == 'call_back_later' %}
+                                    <div class="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 bg-white">
+                                        <i class="fas fa-redo text-blue-500 mr-2 text-sm"></i>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">إعادة الاتصال لاحقاً</div>
+                                            <div class="text-xs text-gray-500">Call Back Later</div>
+                                        </div>
+                                    </div>
+                                {% elif order.status == 'escalate_manager' %}
+                                    <div class="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 bg-white">
+                                        <i class="fas fa-arrow-up text-blue-500 mr-2 text-sm"></i>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">رفع للمدير</div>
+                                            <div class="text-xs text-gray-500">Escalate to Manager</div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="inline-flex items-center px-3 py-2 rounded-lg border border-gray-200 bg-white">
+                                        <i class="fas fa-question-circle text-gray-600 mr-2 text-sm"></i>
+                                        <div>
+                                            <div class="text-sm font-medium text-gray-900">{{ order.get_status_display|default:order.status|title }}</div>
+                                            <div class="text-xs text-gray-500">{{ order.status|title }}</div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap border-0">
+                                {% if order.agent %}
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full flex items-center justify-center mr-2">
+                                            <span class="text-xs font-bold text-slate-900">{{ order.agent.get_full_name|first|upper|default:order.agent.username|first|upper }}</span>
+                                        </div>
+                                        <span class="text-sm font-medium text-slate-900">{{ order.agent.get_full_name|default:order.agent.username }}</span>
+                                </div>
+                                {% else %}
+                                    <span class="text-slate-400 text-sm">Unassigned</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap border-0">
+                                {% if order.priority == 'high' %}
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 border border-red-200 shadow-sm">
+                                        High
+                                    </span>
+                                {% elif order.priority == 'medium' %}
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800 border border-amber-200 shadow-sm">
+                                        Medium
+                                    </span>
+                                {% elif order.priority == 'low' %}
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 border border-green-200 shadow-sm">
+                                        Low
+                                    </span>
+                                {% else %}
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-100 text-slate-800 border border-slate-200 shadow-sm">
+                                        {{ order.priority|default:"Normal"|title }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500 border-0">
+                                {{ order.date|date:"M d, Y" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium border-0">
+                                <div class="flex items-center space-x-2">
+                                    <a href="{% url 'callcenter:manager_order_detail' order.id %}" class="text-amber-600 hover:text-amber-900 transition-colors duration-150" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if not order.agent %}
+                                    <button onclick="assignOrder(this.dataset.orderId)" data-order-id="{{ order.id }}" class="text-blue-600 hover:text-blue-900 transition-colors duration-150" title="Assign Order">
+                                        <i class="fas fa-user-plus"></i>
+                                    </button>
+                                    {% endif %}
+                                    <button onclick="reassignOrder(this.dataset.orderId)" data-order-id="{{ order.id }}" class="text-purple-600 hover:text-purple-900 transition-colors duration-150" title="Reassign Order">
+                                        <i class="fas fa-exchange-alt"></i>
+                                    </button>
+                                    <div class="relative">
+                                        <button onclick="toggleActionDropdown(this.dataset.orderId)" data-order-id="{{ order.id }}" class="inline-flex items-center px-3 py-1 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
+                                            <i class="fas fa-cog mr-1"></i>
+                                            Select Action
+                                            <i class="fas fa-chevron-down ml-1"></i>
+                                        </button>
+                                        
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="px-6 py-12 text-center">
+                                <div class="text-slate-500">
+                                    <i class="fas fa-inbox text-4xl mb-4 text-slate-300"></i>
+                                    <p class="text-lg font-medium">No orders found</p>
+                                    <p class="text-sm">Try adjusting your filters or search criteria</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+    </div>
+</div>
+
+        <!-- Enhanced Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="mt-8 flex items-center justify-between">
+            <div class="text-sm text-slate-700">
+                Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} results
+            </div>
+            <div class="flex items-center space-x-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="inline-flex items-center justify-center px-4 py-2 bg-white text-slate-700 font-medium rounded-lg shadow-sm hover:bg-slate-50 transition-colors duration-150 border border-slate-300">
+                    <i class="fas fa-chevron-left mr-2"></i>
+                    Previous
+                </a>
+                {% endif %}
+                
+                <div class="flex items-center space-x-1">
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <span class="inline-flex items-center justify-center px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-600 text-white font-medium rounded-lg shadow-sm border border-amber-400/20">
+                            {{ num }}
+                        </span>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a href="?page={{ num }}" class="inline-flex items-center justify-center px-4 py-2 bg-white text-slate-700 font-medium rounded-lg shadow-sm hover:bg-slate-50 transition-colors duration-150 border border-slate-300">
+                            {{ num }}
+                        </a>
+                        {% endif %}
+                                {% endfor %}
+                </div>
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="inline-flex items-center justify-center px-4 py-2 bg-white text-slate-700 font-medium rounded-lg shadow-sm hover:bg-slate-50 transition-colors duration-150 border border-slate-300">
+                    Next
+                    <i class="fas fa-chevron-right ml-2"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Action Selection Modal -->
+<div id="actionModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Select Action</h3>
+                <button onclick="closeActionModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="space-y-2">
+                <button onclick="selectActionFromModal('confirmed')" class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 flex items-center rounded-lg border border-gray-200">
+                    <i class="fas fa-check-square text-green-600 mr-3 text-lg"></i>
+                    <div>
+                        <div class="font-medium">Confirmed</div>
+                    </div>
+                </button>
+                <button onclick="selectActionFromModal('no_answer_1st')" class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 flex items-center rounded-lg border border-gray-200">
+                    <i class="fas fa-phone text-pink-500 mr-3 text-lg"></i>
+                    <div>
+                        <div class="font-medium">No Answer 1st</div>
+                    </div>
+                </button>
+                <button onclick="selectActionFromModal('no_answer_2nd')" class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 flex items-center rounded-lg border border-gray-200">
+                    <i class="fas fa-phone text-pink-500 mr-3 text-lg"></i>
+                    <div>
+                        <div class="font-medium">No Answer 2nd</div>
+                    </div>
+                </button>
+                <button onclick="selectActionFromModal('no_answer_final')" class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 flex items-center rounded-lg border border-gray-200">
+                    <i class="fas fa-phone text-pink-500 mr-3 text-lg"></i>
+                    <div>
+                        <div class="font-medium">No Answer Final</div>
+                    </div>
+                </button>
+                <button onclick="selectActionFromModal('cancelled_customer')" class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 flex items-center rounded-lg border border-gray-200">
+                    <i class="fas fa-times text-red-500 mr-3 text-lg"></i>
+                    <div>
+                        <div class="font-medium">Cancelled by Customer</div>
+                    </div>
+                </button>
+                <button onclick="selectActionFromModal('postponed')" class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 flex items-center rounded-lg border border-gray-200">
+                    <i class="fas fa-clock text-red-500 mr-3 text-lg"></i>
+                    <div>
+                        <div class="font-medium">Postponed</div>
+                    </div>
+                </button>
+                <button onclick="selectActionFromModal('invalid_number')" class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 flex items-center rounded-lg border border-gray-200">
+                    <i class="fas fa-phone-slash text-red-500 mr-3 text-lg"></i>
+                    <div>
+                        <div class="font-medium">Invalid Number</div>
+                    </div>
+                </button>
+                <button onclick="selectActionFromModal('call_back_later')" class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 flex items-center rounded-lg border border-gray-200">
+                    <i class="fas fa-redo text-blue-500 mr-3 text-lg"></i>
+                    <div>
+                        <div class="font-medium">Call Back Later</div>
+                    </div>
+                </button>
+                <button onclick="selectActionFromModal('escalate_manager')" class="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 flex items-center rounded-lg border border-gray-200">
+                    <i class="fas fa-arrow-up text-blue-500 mr-3 text-lg"></i>
+                    <div>
+                        <div class="font-medium">Escalate to Manager</div>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status Change Confirmation Modal -->
+<div id="statusModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900">Confirm Status Change</h3>
+                <button onclick="closeStatusModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <p class="text-sm text-gray-600">Are you sure you want to change order <span id="orderIdText" class="font-semibold"></span> status to <span id="newStatusText" class="font-semibold text-amber-600"></span>?</p>
+            </div>
+            
+            <!-- Reason field for escalation -->
+            <div id="reasonField" class="mb-4 hidden">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Escalation Reason *</label>
+                <textarea id="escalationReason" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" rows="3" placeholder="Enter the reason for escalating this order to the manager..."></textarea>
+                <p class="text-xs text-red-500 mt-1">Please provide a clear and detailed reason for escalation</p>
+            </div>
+            
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeStatusModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md">
+                    Cancel
+                </button>
+                <button id="confirmButton" onclick="confirmStatusChange()" class="px-4 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-md">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function applyFilters() {
+    const status = document.getElementById('status_filter').value;
+    const agent = document.getElementById('agent_filter').value;
+    const priority = document.getElementById('priority_filter').value;
+    const search = document.getElementById('search').value;
+    
+    // Build query string
+    let query = [];
+    if (status) query.push(`status=${status}`);
+    if (agent) query.push(`agent=${agent}`);
+    if (priority) query.push(`priority=${priority}`);
+    if (search) query.push(`search=${encodeURIComponent(search)}`);
+    
+    // Redirect with filters
+    if (query.length > 0) {
+        window.location.href = `?${query.join('&')}`;
+    }
+}
+
+function clearFilters() {
+    document.getElementById('status_filter').value = '';
+    document.getElementById('agent_filter').value = '';
+    document.getElementById('priority_filter').value = '';
+    document.getElementById('search').value = '';
+    window.location.href = window.location.pathname;
+}
+
+function autoDistribute() {
+    if (confirm('This will automatically distribute unassigned orders to available agents. Continue?')) {
+        // Implement auto-distribution logic
+        alert('Auto-distribution completed!');
+                    location.reload();
+    }
+}
+
+function assignOrder(orderId) {
+    // Redirect to assign order page
+    window.location.href = `/callcenter/manager/orders/${orderId}/assign/`;
+}
+
+function reassignOrder(orderId) {
+    // Redirect to reassign order page
+    window.location.href = `/callcenter/manager/orders/${orderId}/reassign/`;
+}
+
+function toggleView(view) {
+    const tableView = document.getElementById('table_view');
+    const gridView = document.getElementById('grid_view');
+    
+    if (view === 'table') {
+        tableView.className = 'px-3 py-2 bg-white/20 text-white rounded-lg text-sm font-medium';
+        gridView.className = 'px-3 py-2 text-slate-300 hover:text-white rounded-lg text-sm font-medium';
+        // Show table view
+            } else {
+        gridView.className = 'px-3 py-2 bg-white/20 text-white rounded-lg text-sm font-medium';
+        tableView.className = 'px-3 py-2 text-slate-300 hover:text-white rounded-lg text-sm font-medium';
+        // Show grid view
+    }
+}
+
+// Status change functions
+let currentOrderId = null;
+let currentNewStatus = null;
+
+function toggleActionDropdown(orderId) {
+    currentOrderId = orderId;
+    document.getElementById('actionModal').classList.remove('hidden');
+}
+
+function selectActionFromModal(action) {
+    currentNewStatus = action;
+    
+    // Get action display name
+    const actionNames = {
+        'confirmed': 'Confirmed',
+        'no_answer_1st': 'No Answer 1st',
+        'no_answer_2nd': 'No Answer 2nd',
+        'no_answer_final': 'No Answer Final',
+        'cancelled_customer': 'Cancelled by Customer',
+        'postponed': 'Postponed',
+        'invalid_number': 'Invalid Number',
+        'call_back_later': 'Call Back Later',
+        'escalate_manager': 'Escalate to Manager'
+    };
+    
+    document.getElementById('orderIdText').textContent = '#' + currentOrderId;
+    document.getElementById('newStatusText').textContent = actionNames[action] || action;
+    
+    // Show/hide fields based on action
+    const reasonField = document.getElementById('reasonField');
+    const escalationReason = document.getElementById('escalationReason');
+    const confirmButton = document.getElementById('confirmButton');
+    
+    if (!reasonField || !escalationReason || !confirmButton) {
+        console.error('Required elements not found:', { reasonField, escalationReason, confirmButton });
+        return;
+    }
+    
+    // Reset all fields
+    reasonField.classList.add('hidden');
+    escalationReason.required = false;
+    confirmButton.disabled = false;
+    confirmButton.classList.remove('opacity-50', 'cursor-not-allowed');
+    
+    if (action === 'escalate_manager') {
+        reasonField.classList.remove('hidden');
+        escalationReason.required = true;
+        confirmButton.disabled = true;
+        confirmButton.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+    
+    // Clear fields
+    escalationReason.value = '';
+    
+    // Add event listeners
+    escalationReason.addEventListener('input', function() {
+        const confirmButton = document.getElementById('confirmButton');
+        if (this.value.trim().length > 0) {
+            confirmButton.disabled = false;
+            confirmButton.classList.remove('opacity-50', 'cursor-not-allowed');
+        } else {
+            confirmButton.disabled = true;
+            confirmButton.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    });
+    
+    // Close action modal
+    document.getElementById('actionModal').classList.add('hidden');
+    
+    // Show confirmation modal
+    document.getElementById('statusModal').classList.remove('hidden');
+}
+
+function closeActionModal() {
+    document.getElementById('actionModal').classList.add('hidden');
+    currentOrderId = null;
+    currentNewStatus = null;
+}
+
+function confirmStatusChange() {
+    if (!currentOrderId || !currentNewStatus) return;
+    
+    // If escalating to manager, require reason
+    if (currentNewStatus === 'escalate_manager') {
+        const reason = document.getElementById('escalationReason').value.trim();
+        if (!reason) {
+            alert('Please provide an escalation reason');
+            document.getElementById('escalationReason').focus();
+            return;
+        }
+        
+        // Send AJAX request to update status with escalation reason
+        fetch(`/callcenter/manager/orders/${currentOrderId}/update-status/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                status: currentNewStatus,
+                escalation_reason: reason.trim()
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Order status changed successfully', 'success');
+                location.reload();
+            } else {
+                showNotification('Error changing status: ' + (data.error || 'Unknown error'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error connecting to server', 'error');
+        });
+    } else {
+        // Send AJAX request to update status
+        fetch(`/callcenter/manager/orders/${currentOrderId}/update-status/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                status: currentNewStatus
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Order status changed successfully', 'success');
+                location.reload();
+            } else {
+                showNotification('Error changing status: ' + (data.error || 'Unknown error'), 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error connecting to server', 'error');
+        });
+    }
+    
+    closeStatusModal();
+}
+
+function closeStatusModal() {
+    document.getElementById('statusModal').classList.add('hidden');
+    currentOrderId = null;
+    currentNewStatus = null;
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showNotification(message, type) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 ${
+        type === 'success' ? 'bg-green-500' : 'bg-red-500'
+    }`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const statusModal = document.getElementById('statusModal');
+    const actionModal = document.getElementById('actionModal');
+    
+    if (event.target === statusModal) {
+        closeStatusModal();
+    }
+    
+    if (event.target === actionModal) {
+        closeActionModal();
+    }
+}
+</script>
+{% endblock %} 

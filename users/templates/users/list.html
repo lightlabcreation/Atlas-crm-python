@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+
+{% block title %}User Management{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100">
+    <!-- Simple Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-users text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">User Management</h1>
+                        <p class="mt-1 text-sm text-gray-500">Manage system users and their roles</p>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'users:create' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        Add User
+                    </a>
+                    <a href="{% url 'dashboard:index' %}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-home mr-2"></i>
+                        Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Search & Filters -->
+        <div class="bg-gray-50 rounded-lg border border-gray-300 mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Search & Filters</h3>
+                <p class="text-sm text-gray-500">Find users by name, email, or role</p>
+            </div>
+            <div class="p-6">
+                <form method="get" action="{% url 'users:list' %}" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Search Users</label>
+                            <input type="text" name="search" value="{{ search_query }}" placeholder="Search by name, email, phone, etc." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                            <select name="role" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">All Roles</option>
+                                {% for role in roles %}
+                                    <option value="{{ role.id }}" {% if selected_role == role.id %}selected{% endif %}>
+                                        {{ role.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                            Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Users List -->
+        <div class="bg-gray-50 rounded-lg border border-gray-300">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900">Users List</h3>
+                        <p class="text-sm text-gray-500">All users in the system with their details</p>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        Total Users: {{ users|length }}
+                    </div>
+                </div>
+            </div>
+            <div class="overflow-x-auto shadow-sm rounded-lg border border-gray-200">
+                <table class="min-w-full divide-y divide-gray-200 bg-white">
+                    <thead class="bg-gradient-to-r from-orange-50 to-amber-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-user text-orange-600"></i>
+                                    <span>User</span>
+                                </div>
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-envelope text-orange-600"></i>
+                                    <span>Email</span>
+                                </div>
+                            </th>
+                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200">
+                                <div class="flex items-center justify-center space-x-2">
+                                    <i class="fas fa-user-tag text-orange-600"></i>
+                                    <span>Primary Role</span>
+                                </div>
+                            </th>
+                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200" style="min-width: 120px;">
+                                <div class="flex items-center justify-center space-x-2">
+                                    <i class="fas fa-info-circle text-orange-600"></i>
+                                    <span>Status</span>
+                                </div>
+                            </th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider border-r border-orange-200">
+                                <div class="flex items-center space-x-2">
+                                    <i class="fas fa-clock text-orange-600"></i>
+                                    <span>Last Login</span>
+                                </div>
+                            </th>
+                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-700 uppercase tracking-wider sticky right-0 bg-gradient-to-r from-orange-50 to-amber-50">
+                                <div class="flex items-center justify-center space-x-2">
+                                    <i class="fas fa-cog text-orange-600"></i>
+                                    <span>Actions</span>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for user in users %}
+                        <tr class="hover:bg-gradient-to-r hover:from-orange-50 hover:to-transparent transition-all duration-200 border-b border-gray-100">
+                            <td class="px-6 py-4 whitespace-nowrap border-r border-gray-100">
+                                <div class="flex items-center space-x-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="h-10 w-10 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-md">
+                                            <span class="text-sm font-bold text-white">{{ user.get_full_name|first }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="max-w-xs">
+                                        <div class="text-sm font-bold text-gray-900 truncate">{{ user.get_full_name }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap border-r border-gray-100">
+                                <div class="text-sm font-semibold text-gray-900 truncate max-w-xs">{{ user.email }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center border-r border-gray-100">
+                                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold bg-blue-100 text-blue-800 whitespace-nowrap shadow-sm">
+                                    <i class="fas fa-star mr-2"></i>
+                                    {{ user.primary_role.name|default:"No Role" }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center border-r border-gray-100" style="min-width: 120px; white-space: nowrap !important;">
+                                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap shadow-sm {% if user.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                    <i class="fas {% if user.is_active %}fa-check{% else %}fa-times{% endif %} mr-2"></i>
+                                    {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap border-r border-gray-100">
+                                <div class="text-sm font-medium text-gray-900">
+                                    {% if user.last_login %}
+                                        <i class="fas fa-clock mr-2 text-gray-400"></i>
+                                        {{ user.last_login|date:"M d, Y" }}
+                                    {% else %}
+                                        <span class="text-gray-500">Never</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center sticky right-0 bg-white">
+                                <a href="{% url 'users:detail' user.id %}" 
+                                   class="inline-flex items-center px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-semibold shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105" 
+                                   title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center">
+                                <div class="flex flex-col items-center">
+                                    <div class="h-20 w-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                                        <i class="fas fa-users text-gray-400 text-3xl"></i>
+                                    </div>
+                                    <p class="text-lg font-bold text-gray-900 mb-2">No users found</p>
+                                    <p class="text-sm text-gray-500">Add your first user to get started</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+/* Beautiful Table Styles */
+.overflow-x-auto {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #f97316 #fef3c7;
+}
+
+.overflow-x-auto::-webkit-scrollbar {
+    height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+    background: #fef3c7;
+    border-radius: 10px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+    background: linear-gradient(to right, #f97316, #fb923c);
+    border-radius: 10px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to right, #ea580c, #f97316);
+}
+
+.overflow-x-auto table thead th {
+    white-space: nowrap !important;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: linear-gradient(to right, #fff7ed, #fef3c7) !important;
+}
+
+.overflow-x-auto table tbody td {
+    white-space: nowrap !important;
+}
+
+.overflow-x-auto table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.overflow-x-auto table tbody tr:hover {
+    background: linear-gradient(to right, #fff7ed, transparent) !important;
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.1);
+}
+
+.overflow-x-auto table tbody td:last-child {
+    position: sticky;
+    right: 0;
+    background: white;
+    z-index: 5;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.overflow-x-auto table tbody tr:hover td:last-child {
+    background: linear-gradient(to right, #fff7ed, white);
+}
+</style>
+{% endblock %}

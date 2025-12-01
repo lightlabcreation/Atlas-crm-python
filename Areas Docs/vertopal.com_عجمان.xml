@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<office:document-content xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:ooo="http://openoffice.org/2004/office" xmlns:ooow="http://openoffice.org/2004/writer" xmlns:oooc="http://openoffice.org/2004/calc" xmlns:dom="http://www.w3.org/2001/xml-events" xmlns:xforms="http://www.w3.org/2002/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" office:version="1.2">
+  <office:font-face-decls>
+    <style:font-face style:name="Courier New" style:font-family-generic="modern" style:font-pitch="fixed" svg:font-family="'Courier New'" />
+  </office:font-face-decls>
+  <office:automatic-styles>
+    <style:style style:name="fr2" style:family="graphic" style:parent-style-name="Formula"><style:graphic-properties style:vertical-pos="middle" style:vertical-rel="text" style:horizontal-pos="center" style:horizontal-rel="paragraph-content" style:wrap="none" /></style:style>
+    <style:style style:name="fr1" style:family="graphic" style:parent-style-name="Formula"><style:graphic-properties style:vertical-pos="middle" style:vertical-rel="text" /></style:style>
+  </office:automatic-styles>
+<office:body>
+<office:text>
+<text:p text:style-name="Text_20_body">Ajman Beach</text:p>
+<text:p text:style-name="Text_20_body">Ajman Free Zone (AFZA)</text:p>
+<text:p text:style-name="Text_20_body">Ajman Industrial 1</text:p>
+<text:p text:style-name="Text_20_body">Ajman Industrial 2</text:p>
+<text:p text:style-name="Text_20_body">Ajman Port</text:p>
+<text:p text:style-name="Text_20_body">Ajman Uptown</text:p>
+<text:p text:style-name="Text_20_body">Al Alya</text:p>
+<text:p text:style-name="Text_20_body">Al Amera</text:p>
+<text:p text:style-name="Text_20_body">Al Bahya</text:p>
+<text:p text:style-name="Text_20_body">Al Bustan</text:p>
+<text:p text:style-name="Text_20_body">Al Hamidiyah 1</text:p>
+<text:p text:style-name="Text_20_body">Al Hamidiyah 2</text:p>
+<text:p text:style-name="Text_20_body">Al Hamrya</text:p>
+<text:p text:style-name="Text_20_body">Al Helio 1</text:p>
+<text:p text:style-name="Text_20_body">Al Helio 2</text:p>
+<text:p text:style-name="Text_20_body">Al Jurf</text:p>
+<text:p text:style-name="Text_20_body">Al Manama</text:p>
+<text:p text:style-name="Text_20_body">Al Muntazi 1</text:p>
+<text:p text:style-name="Text_20_body">Al Muntazi 2</text:p>
+<text:p text:style-name="Text_20_body">Al Muwaihat 1</text:p>
+<text:p text:style-name="Text_20_body">Al Muwaihat 2</text:p>
+<text:p text:style-name="Text_20_body">Al Muwaihat 3</text:p>
+<text:p text:style-name="Text_20_body">Al Raqaib 1</text:p>
+<text:p text:style-name="Text_20_body">Al Raqaib 2</text:p>
+<text:p text:style-name="Text_20_body">Al Rashidiya 1</text:p>
+<text:p text:style-name="Text_20_body">Al Rashidiya 2</text:p>
+<text:p text:style-name="Text_20_body">Al Rashidiya 3</text:p>
+<text:p text:style-name="Text_20_body">Al Rawdha 1</text:p>
+<text:p text:style-name="Text_20_body">Al Rawdha 2</text:p>
+<text:p text:style-name="Text_20_body">Al Rawdha 3</text:p>
+<text:p text:style-name="Text_20_body">Al Rumailah 1</text:p>
+<text:p text:style-name="Text_20_body">Al Rumailah 2</text:p>
+<text:p text:style-name="Text_20_body">Al Rumailah 3</text:p>
+<text:p text:style-name="Text_20_body">Al Safia</text:p>
+<text:p text:style-name="Text_20_body">Al Safya Island</text:p>
+<text:p text:style-name="Text_20_body">Al Tallah 1</text:p>
+<text:p text:style-name="Text_20_body">Al Tallah 2</text:p>
+<text:p text:style-name="Text_20_body">Al Yasmeen</text:p>
+<text:p text:style-name="Text_20_body">Al Zahya</text:p>
+<text:p text:style-name="Text_20_body">Al Zora</text:p>
+<text:p text:style-name="Text_20_body">Ammar Street</text:p>
+<text:p text:style-name="Text_20_body">Asyad Tower</text:p>
+<text:p text:style-name="Text_20_body">China Mall</text:p>
+<text:p text:style-name="Text_20_body">Corniche Ajman</text:p>
+<text:p text:style-name="Text_20_body">Emirates City</text:p>
+<text:p text:style-name="Text_20_body">King Faisal Street</text:p>
+<text:p text:style-name="Text_20_body">Liwara</text:p>
+<text:p text:style-name="Text_20_body">Mushairef</text:p>
+<text:p text:style-name="Text_20_body">Nakheel 1</text:p>
+<text:p text:style-name="Text_20_body">Nakheel 2</text:p>
+<text:p text:style-name="Text_20_body">Nuaimeya 1</text:p>
+<text:p text:style-name="Text_20_body">Nuaimeya 2</text:p>
+<text:p text:style-name="Text_20_body">Nuaimeya 3</text:p>
+<text:p text:style-name="Text_20_body">One Tower </text:p>
+</office:text>
+</office:body>
+</office:document-content>

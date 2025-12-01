@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Assign Order for Delivery{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-truck text-indigo-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-indigo-600">Assign Order for Delivery</h1>
+                        <p class="mt-1 text-sm text-gray-500">Order #{{ order.order_code }}</p>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'orders:detail' order.id %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Order
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <!-- Order Information -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Order Information</h3>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Order Code</label>
+                        <p class="mt-1 text-lg font-semibold text-gray-900">{{ order.order_code }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Customer</label>
+                        <p class="mt-1 text-lg font-semibold text-gray-900">{{ order.customer|default:"N/A" }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Total Amount</label>
+                        <p class="mt-1 text-lg font-semibold text-green-600">AED {{ order.total_price|floatformat:2 }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-500">Status</label>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            {{ order.get_workflow_status_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assignment Form -->
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Select Delivery Agent</h3>
+            </div>
+            <div class="p-6">
+                {% if delivery_agents %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="space-y-4">
+                            <div>
+                                <label for="agent_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Available Delivery Agents <span class="text-red-500">*</span>
+                                </label>
+                                <select name="agent_id" id="agent_id" required class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="">Select a delivery agent</option>
+                                    {% for agent in delivery_agents %}
+                                    <option value="{{ agent.id }}">{{ agent.get_full_name|default:agent.username }} ({{ agent.email }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-info-circle text-blue-400"></i>
+                                    </div>
+                                    <div class="ml-3">
+                                        <h3 class="text-sm font-medium text-blue-800">
+                                            Assignment Information
+                                        </h3>
+                                        <div class="mt-2 text-sm text-blue-700">
+                                            <p>This order will be assigned to the selected delivery agent and moved to 'Ready for Delivery' status.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-end space-x-3">
+                                <a href="{% url 'orders:detail' order.id %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                    Cancel
+                                </a>
+                                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                                    <i class="fas fa-truck mr-2"></i>
+                                    Assign Order
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                {% else %}
+                    <div class="text-center py-8">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-user-slash text-2xl text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Delivery Agents Available</h3>
+                        <p class="text-gray-500 mb-4">There are no delivery agents available for assignment.</p>
+                        <a href="{% url 'users:list' %}" class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-md">
+                            <i class="fas fa-user-plus mr-2"></i>
+                            Add Delivery Agent
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

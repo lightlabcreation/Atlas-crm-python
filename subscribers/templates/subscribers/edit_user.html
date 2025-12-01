@@ -1,0 +1,419 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit User: {{ user_obj.full_name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Page Header -->
+    <div class="bg-gray-50 border-b border-gray-300">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                        <i class="fas fa-edit text-orange-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-semibold text-orange-600">Edit User</h1>
+                        <p class="mt-1 text-sm text-gray-500">Update information for {{ user_obj.full_name }}</p>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="{% url 'subscribers:view_details' user_obj.id %}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 font-medium">
+                        <i class="fas fa-eye mr-2"></i>
+                        View Details
+                    </a>
+                    <a href="{% url 'subscribers:list' %}" class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200 font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Form Errors Display -->
+        {% if form.non_field_errors %}
+        <div class="bg-red-50 border-l-4 border-red-500 p-6 mb-8 rounded-lg shadow-sm">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-500 text-2xl"></i>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-semibold text-red-800 mb-2">
+                        There were errors with your submission
+                    </h3>
+                    <div class="text-sm text-red-700">
+                        <ul role="list" class="list-disc pl-5 space-y-1">
+                            {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Form Card -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-4">
+                        <h3 class="text-xl font-bold text-white flex items-center">
+                            <i class="fas fa-user-edit mr-3"></i>
+                            User Information
+                        </h3>
+                    </div>
+                    
+                    <form method="post" enctype="multipart/form-data" class="p-6 space-y-8">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Information Section -->
+                        <div class="space-y-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-info-circle text-orange-600"></i>
+                                </div>
+                                <h4 class="text-lg font-semibold text-gray-900">Basic Information</h4>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Full Name -->
+                                <div class="space-y-2">
+                                    <label for="id_full_name" class="flex items-center text-sm font-semibold text-gray-700">
+                                        <i class="fas fa-user text-orange-500 mr-2"></i>
+                                        Full Name <span class="text-red-500 ml-1">*</span>
+                                    </label>
+                                    {{ form.full_name }}
+                                    {% if form.full_name.errors %}
+                                        <p class="text-sm text-red-600">{{ form.full_name.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Username -->
+                                <div class="space-y-2">
+                                    <label for="id_username" class="flex items-center text-sm font-semibold text-gray-700">
+                                        <i class="fas fa-at text-orange-500 mr-2"></i>
+                                        Username <span class="text-red-500 ml-1">*</span>
+                                    </label>
+                                    {{ form.username }}
+                                    {% if form.username.errors %}
+                                        <p class="text-sm text-red-600">{{ form.username.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Email -->
+                                <div class="space-y-2">
+                                    <label for="id_email" class="flex items-center text-sm font-semibold text-gray-700">
+                                        <i class="fas fa-envelope text-orange-500 mr-2"></i>
+                                        Email Address <span class="text-red-500 ml-1">*</span>
+                                    </label>
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                        <p class="text-sm text-red-600">{{ form.email.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Phone -->
+                                <div class="space-y-2">
+                                    <label for="id_phone" class="flex items-center text-sm font-semibold text-gray-700">
+                                        <i class="fas fa-phone text-orange-500 mr-2"></i>
+                                        Phone Number
+                                    </label>
+                                    {{ form.phone }}
+                                    {% if form.phone.errors %}
+                                        <p class="text-sm text-red-600">{{ form.phone.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Company Name -->
+                                <div class="space-y-2">
+                                    <label for="id_company_name" class="flex items-center text-sm font-semibold text-gray-700">
+                                        <i class="fas fa-building text-orange-500 mr-2"></i>
+                                        Company Name
+                                    </label>
+                                    {{ form.company_name }}
+                                    {% if form.company_name.errors %}
+                                        <p class="text-sm text-red-600">{{ form.company_name.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Country -->
+                                <div class="space-y-2">
+                                    <label for="id_country" class="flex items-center text-sm font-semibold text-gray-700">
+                                        <i class="fas fa-globe text-orange-500 mr-2"></i>
+                                        Country
+                                    </label>
+                                    {{ form.country }}
+                                    {% if form.country.errors %}
+                                        <p class="text-sm text-red-600">{{ form.country.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Account Settings Section -->
+                        <div class="space-y-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-cog text-green-600"></i>
+                                </div>
+                                <h4 class="text-lg font-semibold text-gray-900">Account Settings</h4>
+                            </div>
+                            
+                            <div class="bg-gray-50 rounded-lg p-6">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex-1">
+                                        <label for="id_is_active" class="flex items-center text-sm font-semibold text-gray-700 mb-2">
+                                            <i class="fas fa-toggle-on text-green-500 mr-2"></i>
+                                            Account Status
+                                        </label>
+                                        <p class="text-sm text-gray-500">Enable or disable user access to the system</p>
+                                    </div>
+                                    <div class="flex items-center">
+                                        {{ form.is_active }}
+                                        {% if form.is_active.errors %}
+                                            <p class="ml-2 text-sm text-red-600">{{ form.is_active.errors.0 }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User Roles Section -->
+                        <div class="space-y-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-user-tag text-purple-600"></i>
+                                </div>
+                                <h4 class="text-lg font-semibold text-gray-900">User Roles</h4>
+                            </div>
+                            
+                            <div class="bg-gray-50 rounded-lg p-6">
+                                {% if user_obj.user_roles.all %}
+                                    <div class="space-y-4">
+                                        {% for user_role in user_obj.user_roles.all %}
+                                        <div class="bg-white rounded-lg p-4 border border-gray-200">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center space-x-4">
+                                                    <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                                        <i class="fas fa-shield-alt text-yellow-600"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h5 class="font-semibold text-gray-900">{{ user_role.role.name }}</h5>
+                                                        <p class="text-sm text-gray-500">{{ user_role.role.description|default:"No description" }}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center space-x-2">
+                                                    {% if user_role.is_primary %}
+                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
+                                                        <i class="fas fa-star mr-1"></i>
+                                                        Primary
+                                                    </span>
+                                                    {% endif %}
+                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold
+                                                        {% if user_role.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                                        <span class="w-2 h-2 rounded-full mr-2
+                                                            {% if user_role.is_active %}bg-green-400{% else %}bg-red-400{% endif %}"></span>
+                                                        {% if user_role.is_active %}Active{% else %}Inactive{% endif %}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                                        <div class="flex items-start">
+                                            <i class="fas fa-info-circle text-blue-500 mr-2 mt-1"></i>
+                                            <p class="text-sm text-blue-700">
+                                                Role management is handled through the Roles section. Contact an administrator to modify user roles.
+                                            </p>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="text-center py-8">
+                                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <i class="fas fa-user-slash text-2xl text-gray-400"></i>
+                                        </div>
+                                        <h3 class="text-lg font-medium text-gray-900 mb-2">No roles assigned</h3>
+                                        <p class="text-gray-500 mb-4">This user doesn't have any roles assigned yet.</p>
+                                        <a href="{% url 'roles:assign_user_role' user_obj.id %}" class="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors duration-200 font-medium">
+                                            <i class="fas fa-plus mr-2"></i>
+                                            Assign Role
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Account Information Section -->
+                        <div class="space-y-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-info text-blue-600"></i>
+                                </div>
+                                <h4 class="text-lg font-semibold text-gray-900">Account Information</h4>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Date Joined</label>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-calendar text-gray-400 mr-3"></i>
+                                        <span class="text-gray-900">{{ user_obj.date_joined|date:"F d, Y" }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Last Login</label>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-sign-in-alt text-gray-400 mr-3"></i>
+                                        <span class="text-gray-900">{{ user_obj.last_login|date:"F d, Y H:i"|default:"Never" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                            <a href="{% url 'subscribers:view_details' user_obj.id %}" class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors duration-200 font-medium">
+                                <i class="fas fa-times mr-2"></i>
+                                Cancel
+                            </a>
+                            <button type="submit" class="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors duration-200 font-medium">
+                                <i class="fas fa-save mr-2"></i>
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Quick Actions Card -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-tools text-orange-600"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900">Quick Actions</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <button onclick="toggleUserStatus()" class="w-full flex items-center px-4 py-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                            <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-power-off text-blue-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium">{% if user_obj.is_active %}Deactivate User{% else %}Activate User{% endif %}</div>
+                                <div class="text-sm text-gray-500">Toggle user status</div>
+                            </div>
+                        </button>
+                        
+                        
+                        <a href="{% url 'subscribers:view_details' user_obj.id %}" class="w-full flex items-center px-4 py-3 text-left text-gray-700 hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                            <div class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-eye text-green-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium">View Full Profile</div>
+                                <div class="text-sm text-gray-500">View detailed user information</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- User Summary Card -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-user text-purple-600"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-900">User Summary</h3>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Status:</span>
+                            <span class="font-medium {% if user_obj.is_active %}text-green-600{% else %}text-red-600{% endif %}">
+                                {% if user_obj.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Roles:</span>
+                            <span class="font-medium text-gray-900">{{ user_obj.user_roles.count }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Joined:</span>
+                            <span class="font-medium text-gray-900">{{ user_obj.date_joined|date:"M Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Card -->
+                <div class="bg-yellow-50 rounded-lg border border-yellow-200 p-6">
+                    <div class="flex items-center mb-3">
+                        <i class="fas fa-lightbulb text-yellow-600 mr-2"></i>
+                        <h3 class="text-sm font-semibold text-yellow-800">Tips</h3>
+                    </div>
+                    <ul class="text-xs text-yellow-700 space-y-1">
+                        <li>• Keep user information up to date</li>
+                        <li>• Verify email addresses are correct</li>
+                        <li>• Contact admin for role changes</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleUserStatus() {
+    const userId = {{ user_obj.id }};
+    
+    fetch(`/subscribers/user/${userId}/toggle-status/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showNotification(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Error updating user status', 'error');
+    });
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${
+        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+    }`;
+    notification.innerHTML = `
+        <div class="flex items-center">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} mr-2"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+</script>
+{% endblock %}

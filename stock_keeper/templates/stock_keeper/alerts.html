@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Stock Alerts{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-white">
+    <div class="container mx-auto px-4 py-6">
+        <div class="mb-6 flex items-center justify-between">
+            <h1 class="text-xl font-semibold text-gray-800">Stock Alerts</h1>
+            <a href="{% url 'stock_keeper:dashboard' %}" class="inline-flex items-center px-3 py-2 bg-white text-gray-700 text-sm rounded-md border">
+                <i class="fas fa-tachometer-alt mr-2"></i>
+                Dashboard
+            </a>
+        </div>
+
+        <!-- Enhanced Warehouse Stock Overview -->
+        {% if warehouse_stock_data %}
+        <div class="bg-white rounded-lg border shadow-sm overflow-hidden mb-6">
+            <div class="px-4 py-4 border-b">
+                <h2 class="text-sm font-semibold text-gray-800">Warehouse Stock Overview</h2>
+                <p class="text-xs text-gray-500">Current stock levels across all warehouses</p>
+            </div>
+            <div class="p-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for warehouse_data in warehouse_stock_data %}
+                    <div class="bg-white rounded-lg border shadow-sm">
+                        <div class="p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <h3 class="text-sm font-semibold text-gray-800">{{ warehouse_data.warehouse.name }}</h3>
+                                <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">{{ warehouse_data.warehouse.location }}</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-600">Total Items:</span>
+                                    <span class="font-semibold text-gray-800">{{ warehouse_data.total_items }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-600">Low Stock:</span>
+                                    <span class="font-semibold {% if warehouse_data.low_stock_items > 0 %}text-orange-600{% else %}text-green-600{% endif %}">
+                                        {{ warehouse_data.low_stock_items }}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-600">Out of Stock:</span>
+                                    <span class="font-semibold {% if warehouse_data.out_of_stock_items > 0 %}text-red-600{% else %}text-green-600{% endif %}">
+                                        {{ warehouse_data.out_of_stock_items }}
+                                    </span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs text-gray-600">Active Alerts:</span>
+                                    <span class="font-semibold {% if warehouse_data.alerts_count > 0 %}text-red-600{% else %}text-green-600{% endif %}">
+                                        {{ warehouse_data.alerts_count }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="mt-3 pt-3 border-t">
+                                <div class="flex space-x-3 text-sm">
+                                    <a href="{% url 'stock_keeper:warehouses' %}" class="text-blue-600 hover:text-blue-800">
+                                        <i class="fas fa-warehouse mr-1"></i>View Warehouses
+                                    </a>
+                                    <a href="{% url 'inventory:products' %}" class="text-green-600 hover:text-green-800">
+                                        <i class="fas fa-boxes mr-1"></i>View Products
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Enhanced Filters -->
+        <div class="bg-white rounded-lg border shadow-sm p-4 mb-6">
+            <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div>
+                    <label for="warehouse" class="block text-xs font-semibold text-gray-700 mb-1">Warehouse</label>
+                    <select name="warehouse" id="warehouse" class="w-full px-3 py-2 bg-white border rounded-md">
+                        <option value="">All Warehouses</option>
+                        {% for warehouse_data in warehouse_stock_data %}
+                        <option value="{{ warehouse_data.warehouse.id }}" {% if request.GET.warehouse == warehouse_data.warehouse.id|stringformat:"s" %}selected{% endif %}>
+                            {{ warehouse_data.warehouse.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            
+                <div>
+                    <label for="type" class="block text-xs font-semibold text-gray-700 mb-1">Alert Type</label>
+                    <select name="type" id="type" class="w-full px-3 py-2 bg-white border rounded-md">
+                        <option value="">All Types</option>
+                        <option value="low_stock" {% if alert_type_filter == 'low_stock' %}selected{% endif %}>Low Stock</option>
+                        <option value="out_of_stock" {% if alert_type_filter == 'out_of_stock' %}selected{% endif %}>Out of Stock</option>
+                        <option value="overstocked" {% if alert_type_filter == 'overstocked' %}selected{% endif %}>Overstocked</option>
+                        <option value="expiry" {% if alert_type_filter == 'expiry' %}selected{% endif %}>Expiry Warning</option>
+                        <option value="damage" {% if alert_type_filter == 'damage' %}selected{% endif %}>Damage Report</option>
+                        <option value="transfer_request" {% if alert_type_filter == 'transfer_request' %}selected{% endif %}>Transfer Request</option>
+                    </select>
+                </div>
+            
+                <div>
+                    <label for="priority" class="block text-xs font-semibold text-gray-700 mb-1">Priority</label>
+                    <select name="priority" id="priority" class="w-full px-3 py-2 bg-white border rounded-md">
+                        <option value="">All Priorities</option>
+                        <option value="low" {% if priority_filter == 'low' %}selected{% endif %}>Low</option>
+                        <option value="medium" {% if priority_filter == 'medium' %}selected{% endif %}>Medium</option>
+                        <option value="high" {% if priority_filter == 'high' %}selected{% endif %}>High</option>
+                        <option value="urgent" {% if priority_filter == 'urgent' %}selected{% endif %}>Urgent</option>
+                    </select>
+                </div>
+            
+                <div>
+                    <label for="resolved" class="block text-xs font-semibold text-gray-700 mb-1">Status</label>
+                    <select name="resolved" id="resolved" class="w-full px-3 py-2 bg-white border rounded-md">
+                        <option value="">All Status</option>
+                        <option value="false" {% if resolved_filter == 'false' %}selected{% endif %}>Active</option>
+                        <option value="true" {% if resolved_filter == 'true' %}selected{% endif %}>Resolved</option>
+                    </select>
+                </div>
+            
+                <div class="flex items-end">
+                    <button type="submit" class="w-full px-4 py-2 bg-yellow-500 text-white text-sm rounded-md">
+                        <i class="fas fa-filter mr-2"></i>Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Enhanced Alerts List -->
+        <div class="bg-white rounded-lg border shadow-sm">
+            <div class="px-4 py-4 border-b">
+                <h2 class="text-sm font-semibold text-gray-800">Stock Alerts</h2>
+            </div>
+            
+            <div class="divide-y">
+                {% for alert in alerts %}
+                <div class="p-4 hover:bg-gray-50 transition-colors">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center mb-2">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                                    {% if alert.priority == 'urgent' %}bg-red-100 text-red-800
+                                    {% elif alert.priority == 'high' %}bg-orange-100 text-orange-800
+                                    {% elif alert.priority == 'medium' %}bg-yellow-100 text-yellow-800
+                                    {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                    {{ alert.get_priority_display }}
+                                </span>
+                                
+                                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                                    {% if alert.is_resolved %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                    {% if alert.is_resolved %}Resolved{% else %}Active{% endif %}
+                                </span>
+                                
+                                <span class="ml-2 text-xs text-gray-500">{{ alert.get_alert_type_display }}</span>
+                            </div>
+                            
+                            <h3 class="text-sm font-semibold text-gray-800 mb-2">
+                                {{ alert.product.name_en }} - {{ alert.warehouse.name }}
+                            </h3>
+                            
+                            <p class="text-gray-600 mb-3 text-sm">{{ alert.message }}</p>
+                            
+                            <div class="flex items-center text-xs text-gray-500 mb-3">
+                                <i class="fas fa-calendar mr-1"></i>
+                                <span>{{ alert.created_at|date:"M d, Y H:i" }}</span>
+                                
+                                {% if alert.resolved_by %}
+                                <span class="mx-2">•</span>
+                                <i class="fas fa-user mr-1"></i>
+                                <span>Resolved by {{ alert.resolved_by.full_name }}</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="flex space-x-4 text-xs">
+                                <a href="{% url 'inventory:products' %}?search={{ alert.product.name_en }}" 
+                                   class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-box mr-1"></i>View Product
+                                </a>
+                                <a href="{% url 'stock_keeper:warehouses' %}" 
+                                   class="text-green-600 hover:text-green-800">
+                                    <i class="fas fa-warehouse mr-1"></i>View Warehouses
+                                </a>
+                            </div>
+                        </div>
+                        
+                        {% if not alert.is_resolved %}
+                        <div class="ml-4">
+                            <a href="{% url 'stock_keeper:resolve_alert' alert.id %}" 
+                               class="inline-flex items-center px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-md">
+                                <i class="fas fa-check mr-2"></i>Resolve
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="p-10 text-center">
+                    <i class="fas fa-check-circle text-4xl text-green-300 mb-3"></i>
+                    <p class="text-gray-500 text-sm">No alerts found</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Enhanced Pagination -->
+        {% if alerts.has_other_pages %}
+        <div class="mt-6 flex justify-center">
+            <nav class="flex items-center space-x-2">
+                {% if alerts.has_previous %}
+                <a href="?page={{ alerts.previous_page_number }}{% if request.GET.warehouse %}&warehouse={{ request.GET.warehouse }}{% endif %}{% if alert_type_filter %}&type={{ alert_type_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if resolved_filter %}&resolved={{ resolved_filter }}{% endif %}" 
+                   class="px-3 py-2 text-sm font-medium text-gray-600 bg-white border rounded-md">
+                    <i class="fas fa-chevron-left mr-1"></i>Previous
+                </a>
+                {% endif %}
+                
+                <span class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border rounded-md">
+                    Page {{ alerts.number }} of {{ alerts.paginator.num_pages }}
+                </span>
+                
+                {% if alerts.has_next %}
+                <a href="?page={{ alerts.next_page_number }}{% if request.GET.warehouse %}&warehouse={{ request.GET.warehouse }}{% endif %}{% if alert_type_filter %}&type={{ alert_type_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if resolved_filter %}&resolved={{ resolved_filter }}{% endif %}" 
+                   class="px-3 py-2 text-sm font-medium text-gray-600 bg-white border rounded-md">
+                    Next<i class="fas fa-chevron-right ml-1"></i>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

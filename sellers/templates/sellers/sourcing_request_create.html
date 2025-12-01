@@ -1,0 +1,474 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Sourcing Request{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Clean Header -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-xl font-semibold text-orange-600">Create Sourcing Request</h1>
+                    <p class="text-sm text-gray-500">Fill out all required fields to create your sourcing request.</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="{% url 'sellers:sourcing_requests' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Requests
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <form method="post" id="comprehensiveSourcingForm" class="bg-white rounded border border-gray-200" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Required Fields Section -->
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-check-circle text-blue-600 text-sm"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900">Required Information</h3>
+                </div>
+            </div>
+            
+            <div class="px-6 py-4">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <!-- Product Name -->
+                        <div class="space-y-2">
+                            <label for="product_name" class="block text-sm font-medium text-gray-700">
+                                Product Name <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="product_name" name="product_name" required
+                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                                   placeholder="Enter product name">
+                            <div class="text-xs text-gray-600 bg-gray-100 p-2 rounded border-l-2 border-orange-500">
+                                Enter the name of the product you want to source.
+                            </div>
+                        </div>
+                        
+                        <!-- Product URL -->
+                        <div class="space-y-2">
+                            <label for="product_url" class="block text-sm font-medium text-gray-700">
+                                Product URL (Optional)
+                            </label>
+                            <input type="url" id="product_url" name="product_url"
+                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                                   placeholder="https://example.com/product">
+                            <div class="text-xs text-gray-600 bg-gray-100 p-2 rounded border-l-2 border-orange-500">
+                                Link to the product page (optional).
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Product Image -->
+                    <div class="mb-4">
+                        <label for="product_image" class="block text-sm font-medium text-gray-700 mb-2">
+                            Product Image (Optional)
+                        </label>
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-1">
+                                <input type="file" id="product_image" name="product_image" accept="image/*"
+                                       class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100">
+                            </div>
+                            <div id="imagePreview" class="hidden">
+                                <img id="previewImg" src="" alt="Preview" class="h-20 w-20 object-cover rounded border border-gray-300">
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-600 bg-gray-100 p-2 rounded border-l-2 border-orange-500 mt-2">
+                            Upload a product image (optional). Accepted formats: JPG, PNG, GIF.
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <!-- Unit Quantity (Pieces) -->
+                        <div class="space-y-2">
+                            <label for="unit_quantity" class="block text-sm font-semibold text-slate-700">
+                                Quantity (Pieces) <span class="text-red-500">*</span>
+                            </label>
+                            <input type="number" id="unit_quantity" name="unit_quantity" required min="1"
+                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                                   placeholder="Enter quantity in pieces">
+                            <div class="text-sm text-slate-600 bg-white/60 p-3 rounded-lg border-l-4 border-amber-500">
+                                Specify the total quantity in pieces/units.
+                            </div>
+                        </div>
+                        
+                        <!-- Carton Quantity -->
+                        <div class="space-y-2">
+                            <label for="carton_quantity" class="block text-sm font-semibold text-slate-700">
+                                Number of Cartons <span class="text-red-500">*</span>
+                            </label>
+                            <input type="number" id="carton_quantity" name="carton_quantity" required min="1"
+                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                                   placeholder="Enter number of cartons">
+                            <div class="text-sm text-slate-600 bg-white/60 p-3 rounded-lg border-l-4 border-amber-500">
+                                Specify the number of cartons/boxes. Standard carton sizes vary by product.
+                            </div>
+                        </div>
+                        
+                        <!-- Source Country -->
+                        <div class="space-y-2">
+                            <label for="source_country" class="block text-sm font-semibold text-slate-700">
+                                Source Country <span class="text-red-500">*</span>
+                            </label>
+                            <select id="source_country" name="source_country" required
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
+                                <option value="">Select source country</option>
+                                <option value="UAE">UAE</option>
+                                <option value="China">China</option>
+                                <option value="USA">USA</option>
+                                <option value="Turkey">Turkey</option>
+                                <option value="Korea">Korea</option>
+                                <option value="Japan">Japan</option>
+                            </select>
+                            <div class="text-sm text-slate-600 bg-white/60 p-3 rounded-lg border-l-4 border-amber-500">
+                                Select the country where you want the product to be sourced from.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <!-- Destination Country -->
+                        <div class="space-y-2">
+                            <label for="destination_country" class="block text-sm font-semibold text-slate-700">
+                                Destination Country <span class="text-red-500">*</span>
+                            </label>
+                            <select id="destination_country" name="destination_country" required
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
+                                <option value="">Select destination country</option>
+                                <!-- Africa -->
+                                <option value="Algeria">Algeria (Algiers)</option>
+                                <option value="Angola">Angola (Luanda)</option>
+                                <option value="Benin">Benin (Porto-Novo)</option>
+                                <option value="Botswana">Botswana (Gaborone)</option>
+                                <option value="Burkina Faso">Burkina Faso (Ouagadougou)</option>
+                                <option value="Burundi">Burundi (Gitega)</option>
+                                <option value="Cabo Verde">Cabo Verde (Cape Verde) (Praia)</option>
+                                <option value="Cameroon">Cameroon (Yaoundé)</option>
+                                <option value="Central African Republic">Central African Republic (Bangui)</option>
+                                <option value="Chad">Chad (N'Djamena)</option>
+                                <option value="Comoros">Comoros (Moroni)</option>
+                                <option value="Democratic Republic of the Congo">Democratic Republic of the Congo (DRC) (Kinshasa)</option>
+                                <option value="Republic of the Congo">Republic of the Congo (Brazzaville)</option>
+                                <option value="Djibouti">Djibouti (Djibouti)</option>
+                                <option value="Egypt">Egypt (Cairo)</option>
+                                <option value="Equatorial Guinea">Equatorial Guinea (Malabo)</option>
+                                <option value="Eritrea">Eritrea (Asmara)</option>
+                                <option value="Eswatini">Eswatini (Swaziland) (Mbabane)</option>
+                                <option value="Ethiopia">Ethiopia (Addis Ababa)</option>
+                                <option value="Gabon">Gabon (Libreville)</option>
+                                <option value="Gambia">Gambia (Banjul)</option>
+                                <option value="Ghana">Ghana (Accra)</option>
+                                <option value="Guinea">Guinea (Conakry)</option>
+                                <option value="Guinea-Bissau">Guinea-Bissau (Bissau)</option>
+                                <option value="Ivory Coast">Ivory Coast (Côte d'Ivoire) (Yamoussoukro)</option>
+                                <option value="Kenya">Kenya (Nairobi)</option>
+                                <option value="Lesotho">Lesotho (Maseru)</option>
+                                <option value="Liberia">Liberia (Monrovia)</option>
+                                <option value="Libya">Libya (Tripoli)</option>
+                                <option value="Madagascar">Madagascar (Antananarivo)</option>
+                                <option value="Malawi">Malawi (Lilongwe)</option>
+                                <option value="Mali">Mali (Bamako)</option>
+                                <option value="Mauritania">Mauritania (Nouakchott)</option>
+                                <option value="Mauritius">Mauritius (Port Louis)</option>
+                                <option value="Morocco">Morocco (Rabat)</option>
+                                <option value="Mozambique">Mozambique (Maputo)</option>
+                                <option value="Namibia">Namibia (Windhoek)</option>
+                                <option value="Niger">Niger (Niamey)</option>
+                                <option value="Nigeria">Nigeria (Abuja)</option>
+                                <option value="Rwanda">Rwanda (Kigali)</option>
+                                <option value="São Tomé and Príncipe">São Tomé and Príncipe (São Tomé)</option>
+                                <option value="Senegal">Senegal (Dakar)</option>
+                                <option value="Seychelles">Seychelles (Victoria)</option>
+                                <option value="Sierra Leone">Sierra Leone (Freetown)</option>
+                                <option value="Somalia">Somalia (Mogadishu)</option>
+                                <option value="South Africa">South Africa (Pretoria)</option>
+                                <option value="South Sudan">South Sudan (Juba)</option>
+                                <option value="Sudan">Sudan (Khartoum)</option>
+                                <option value="Tanzania">Tanzania (Dodoma)</option>
+                                <option value="Togo">Togo (Lomé)</option>
+                                <option value="Tunisia">Tunisia (Tunis)</option>
+                                <option value="Uganda">Uganda (Kampala)</option>
+                                <option value="Zambia">Zambia (Lusaka)</option>
+                                <option value="Zimbabwe">Zimbabwe (Harare)</option>
+                                <!-- Europe -->
+                                <option value="Albania">Albania (Tirana)</option>
+                                <option value="Andorra">Andorra (Andorra la Vella)</option>
+                                <option value="Armenia">Armenia (Yerevan)</option>
+                                <option value="Austria">Austria (Vienna)</option>
+                                <option value="Azerbaijan">Azerbaijan (Baku)</option>
+                                <option value="Belarus">Belarus (Minsk)</option>
+                                <option value="Belgium">Belgium (Brussels)</option>
+                                <option value="Bosnia and Herzegovina">Bosnia and Herzegovina (Sarajevo)</option>
+                                <option value="Bulgaria">Bulgaria (Sofia)</option>
+                                <option value="Croatia">Croatia (Zagreb)</option>
+                                <option value="Cyprus">Cyprus (Nicosia)</option>
+                                <option value="Czech Republic">Czech Republic (Czechia) (Prague)</option>
+                                <option value="Denmark">Denmark (Copenhagen)</option>
+                                <option value="Estonia">Estonia (Tallinn)</option>
+                                <option value="Finland">Finland (Helsinki)</option>
+                                <option value="France">France (Paris)</option>
+                                <option value="Georgia">Georgia (Tbilisi)</option>
+                                <option value="Germany">Germany (Berlin)</option>
+                                <option value="Greece">Greece (Athens)</option>
+                                <option value="Hungary">Hungary (Budapest)</option>
+                                <option value="Iceland">Iceland (Reykjavík)</option>
+                                <option value="Ireland">Ireland (Dublin)</option>
+                                <option value="Italy">Italy (Rome)</option>
+                                <option value="Kazakhstan">Kazakhstan (Astana/Nur-Sultan)</option>
+                                <option value="Kosovo">Kosovo (Pristina)</option>
+                                <option value="Latvia">Latvia (Riga)</option>
+                                <option value="Liechtenstein">Liechtenstein (Vaduz)</option>
+                                <option value="Lithuania">Lithuania (Vilnius)</option>
+                                <option value="Luxembourg">Luxembourg (Luxembourg City)</option>
+                                <option value="Malta">Malta (Valletta)</option>
+                                <option value="Moldova">Moldova (Chișinău)</option>
+                                <option value="Monaco">Monaco (Monaco)</option>
+                                <option value="Montenegro">Montenegro (Podgorica)</option>
+                                <option value="Netherlands">Netherlands (Amsterdam)</option>
+                                <option value="North Macedonia">North Macedonia (Skopje)</option>
+                                <option value="Norway">Norway (Oslo)</option>
+                                <option value="Poland">Poland (Warsaw)</option>
+                                <option value="Portugal">Portugal (Lisbon)</option>
+                                <option value="Romania">Romania (Bucharest)</option>
+                                <option value="Russia">Russia (Moscow)</option>
+                                <option value="San Marino">San Marino (San Marino)</option>
+                                <option value="Serbia">Serbia (Belgrade)</option>
+                                <option value="Slovakia">Slovakia (Bratislava)</option>
+                                <option value="Slovenia">Slovenia (Ljubljana)</option>
+                                <option value="Spain">Spain (Madrid)</option>
+                                <option value="Sweden">Sweden (Stockholm)</option>
+                                <option value="Switzerland">Switzerland (Bern)</option>
+                                <option value="Turkey">Turkey (Ankara)</option>
+                                <option value="Ukraine">Ukraine (Kyiv)</option>
+                                <option value="United Kingdom">United Kingdom (London)</option>
+                                <option value="Vatican City">Vatican City (Holy See) (Vatican City)</option>
+                                <!-- Latin America -->
+                                <option value="Argentina">Argentina (Buenos Aires)</option>
+                                <option value="Belize">Belize (Belmopan)</option>
+                                <option value="Bolivia">Bolivia (Sucre)</option>
+                                <option value="Brazil">Brazil (Brasília)</option>
+                                <option value="Chile">Chile (Santiago)</option>
+                                <option value="Colombia">Colombia (Bogotá)</option>
+                                <option value="Costa Rica">Costa Rica (San José)</option>
+                                <option value="Cuba">Cuba (Havana)</option>
+                                <option value="Dominican Republic">Dominican Republic (Santo Domingo)</option>
+                                <option value="Ecuador">Ecuador (Quito)</option>
+                                <option value="El Salvador">El Salvador (San Salvador)</option>
+                                <option value="Guatemala">Guatemala (Guatemala City)</option>
+                                <option value="Honduras">Honduras (Tegucigalpa)</option>
+                                <option value="Mexico">Mexico (Mexico City)</option>
+                                <option value="Nicaragua">Nicaragua (Managua)</option>
+                                <option value="Panama">Panama (Panama City)</option>
+                                <option value="Paraguay">Paraguay (Asunción)</option>
+                                <option value="Peru">Peru (Lima)</option>
+                                <option value="Puerto Rico">Puerto Rico (San Juan)</option>
+                                <option value="Uruguay">Uruguay (Montevideo)</option>
+                                <option value="Venezuela">Venezuela (Caracas)</option>
+                                <!-- GCC -->
+                                <option value="Saudi Arabia">Saudi Arabia (Riyadh)</option>
+                                <option value="UAE">United Arab Emirates (UAE) (Abu Dhabi)</option>
+                                <option value="Qatar">Qatar (Doha)</option>
+                                <option value="Kuwait">Kuwait (Kuwait City)</option>
+                                <option value="Bahrain">Bahrain (Manama)</option>
+                                <option value="Oman">Oman (Muscat)</option>
+                                <!-- Asia -->
+                                <option value="Pakistan">Pakistan (Islamabad)</option>
+                                <option value="India">India (New Delhi)</option>
+                            </select>
+                            <div class="text-sm text-slate-600 bg-white/60 p-3 rounded-lg border-l-4 border-amber-500">
+                                Select the country where the product should be delivered.
+                            </div>
+                        </div>
+                        
+                        <!-- Funding Source -->
+                        <div class="space-y-2">
+                            <label class="block text-sm font-semibold text-slate-700">
+                                Funding Source <span class="text-red-500">*</span>
+                            </label>
+                            <div class="space-y-3">
+                                <div class="flex items-center">
+                                    <input type="radio" id="self_financed" name="finance_source" value="self_financed" checked
+                                           class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300">
+                                    <label for="self_financed" class="ml-3 block text-sm font-medium text-gray-700">
+                                        Seller's Funds - I will finance this sourcing request
+                                    </label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" id="crm_financed" name="finance_source" value="crm_financed"
+                                           class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300">
+                                    <label for="crm_financed" class="ml-3 block text-sm font-medium text-gray-700">
+                                        CRM Funding Request - Request CRM to finance this sourcing
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="text-sm text-slate-600 bg-white/60 p-3 rounded-lg border-l-4 border-amber-500">
+                                Choose how this sourcing request will be financed.
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            
+            <!-- Optional Information Section -->
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-plus text-gray-600 text-sm"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900">Optional Information</h3>
+                </div>
+            </div>
+            
+            <div class="px-6 py-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- Priority -->
+                    <div class="space-y-2">
+                        <label for="priority" class="block text-sm font-medium text-gray-700">
+                            Priority
+                        </label>
+                        <select id="priority" name="priority"
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Budget -->
+                    <div class="space-y-2">
+                        <label for="budget" class="block text-sm font-medium text-gray-700">
+                            Budget (AED)
+                        </label>
+                        <input type="number" id="budget" name="budget" step="0.01" min="0"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                               placeholder="0.00">
+                    </div>
+                </div>
+                
+                <!-- Notes -->
+                <div class="space-y-2">
+                    <label for="notes" class="block text-sm font-medium text-gray-700">
+                        Additional Notes
+                    </label>
+                    <textarea id="notes" name="notes" rows="4"
+                              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
+                              placeholder="Any additional information or special requirements"></textarea>
+                </div>
+            </div>
+            
+            <!-- Submit Button -->
+            <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                <div class="flex justify-end space-x-3">
+                    <a href="{% url 'sellers:sourcing_requests' %}" 
+                       class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                        Cancel
+                    </a>
+                    <button type="submit" id="submitBtn"
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        Submit Request
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('comprehensiveSourcingForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.innerHTML;
+    
+    // Disable button and show loading
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Submitting...';
+    
+    // Create FormData
+    const formData = new FormData(this);
+    
+    // Ensure enctype is set for file upload
+    this.setAttribute('enctype', 'multipart/form-data');
+    
+    // Submit via AJAX
+    fetch('{% url "sellers:sourcing_request_create" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
+        if (data.success) {
+            // Redirect to requests list with success message
+            window.location.href = '{% url "sellers:sourcing_requests" %}?success=1';
+        } else {
+            // Show error message in the form
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4';
+            errorDiv.innerHTML = '<strong>Error:</strong> ' + (data.error || data.message || 'Failed to submit request');
+            
+            // Insert error message at the top of the form
+            const form = document.getElementById('comprehensiveSourcingForm');
+            form.insertBefore(errorDiv, form.firstChild);
+            
+            // Re-enable button
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        
+        // Show error message in the form
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4';
+        errorDiv.innerHTML = '<strong>Error:</strong> An error occurred while submitting the request. Please try again.';
+        
+        // Insert error message at the top of the form
+        const form = document.getElementById('comprehensiveSourcingForm');
+        form.insertBefore(errorDiv, form.firstChild);
+        
+        // Re-enable button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    });
+    
+    // Image preview functionality
+    const productImageInput = document.getElementById('product_image');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    
+    if (productImageInput && imagePreview && previewImg) {
+        productImageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.classList.add('hidden');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
