@@ -1005,3 +1005,47 @@ def toggle_user_status(request, user_id):
         'success': False,
         'message': 'Invalid request method.'
     })
+
+
+@login_required
+def force_password_change(request):
+    """
+    Force password change for users with password_change_required=True.
+
+    This view is specifically for internal users (staff, admin, etc.) who have been
+    given temporary passwords and must change them before accessing the system.
+    """
+    # If user doesn't need to change password, redirect to dashboard
+    if not request.user.password_change_required:
+        messages.info(request, "You do not need to change your password.")
+        return redirect('dashboard:index')
+
+    if request.method == 'POST':
+        form = PasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            user = form.save()
+
+            # Mark password change as no longer required
+            user.password_change_required = False
+            user.save(update_fields=['password_change_required'])
+
+            # Log the forced password change
+            AuditLog.objects.create(
+                user=request.user,
+                action='forced_password_change',
+                entity_type='user',
+                entity_id=str(user.id),
+                description=f"Forced password change completed for {user.email}",
+                ip_address=request.META.get('REMOTE_ADDR'),
+                user_agent=request.META.get('HTTP_USER_AGENT', '')
+            )
+
+            # Update the session to prevent logging out
+            update_session_auth_hash(request, user)
+
+            messages.success(request, "Your password has been changed successfully. You can now access the system.")
+            return redirect('dashboard:index')
+    else:
+        form = PasswordChangeForm(user=request.user)
+
+    return render(request, 'users/force_password_change.html', {'form': form})

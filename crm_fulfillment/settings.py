@@ -25,12 +25,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-p6(d1x^*0xb*d)a_hn3iubcl_wen!i4+80*o32=_9pdadls9j!'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 # Debug messages
 TEMPLATE_DEBUG = DEBUG
 
-ALLOWED_HOSTS = ["*"]
+# Properly configure allowed hosts for production
+ALLOWED_HOSTS = [
+    'atlas.alexandratechlab.com',
+    'atlas-crm.alexandratechlab.com',
+    'localhost',
+    '127.0.0.1',
+]
+
+# Silence test key warnings for django-recaptcha
+SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
 
 # Email Configuration
 # Email Configuration for Hostinger (can be overridden by environment variables)
@@ -113,6 +122,7 @@ MIDDLEWARE = [
     'django_otp.middleware.OTPMiddleware',  # OTP middleware for 2FA
     'axes.middleware.AxesMiddleware',  # Login attempt tracking
     'users.middleware_2fa.TwoFactorAuthMiddleware',
+    'users.middleware.PasswordChangeRequiredMiddleware',  # Force password change for internal users
     'order_packaging.middleware.PackagingAgentAccessMiddleware',  # Restrict Packaging Agent to packaging URLs only
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',

@@ -209,6 +209,9 @@ class User(AbstractUser, PermissionsMixin):
     verification_code = models.CharField(_('verification code'), max_length=6, blank=True, null=True)
     verification_code_sent_at = models.DateTimeField(_('verification code sent at'), null=True, blank=True)
     verification_code_expires_at = models.DateTimeField(_('verification code expires at'), null=True, blank=True)
+
+    # Password change requirement for internal users
+    password_change_required = models.BooleanField(_('password change required'), default=False)
     
     objects = UserManager()
     

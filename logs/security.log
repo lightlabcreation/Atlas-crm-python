@@ -1428,3 +1428,16 @@ INFO 2025-12-04 09:37:41,271 database 1971036 134010015789184 AXES: Reset 3 acce
 INFO 2025-12-04 09:37:41,271 database 1971036 134010015789184 AXES: Deleted 3 failed login attempts by {username: "********************", ip_address: "********************", user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36", path_info: "/users/login/"} from database.
 INFO 2025-12-04 09:37:44,300 database 1971035 134010015789184 AXES: Cleaned up 0 expired access attempts from database that were older than 2025-12-04 14:37:44.297441+00:00
 INFO 2025-12-04 09:37:44,300 database 1971035 134010015789184 AXES: Successful logout by {username: "********************", ip_address: "********************", user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.7499.4 Safari/537.36", path_info: "/users/logout/"}.
+INFO 2025-12-04 09:50:37,793 apps 2209535 135925734211712 AXES: BEGIN version 8.0.0, blocking by ip_address
+INFO 2025-12-04 09:50:56,232 apps 2211589 126946072473728 AXES: BEGIN version 8.0.0, blocking by ip_address
+INFO 2025-12-04 09:51:01,429 apps 2212023 124848108695680 AXES: BEGIN version 8.0.0, blocking by ip_address
+INFO 2025-12-04 09:53:47,829 apps 2228483 132654861774976 AXES: BEGIN version 8.0.0, blocking by ip_address
+INFO 2025-12-04 09:53:47,836 apps 2228485 132654861774976 AXES: BEGIN version 8.0.0, blocking by ip_address
+INFO 2025-12-04 09:53:47,856 apps 2228484 132654861774976 AXES: BEGIN version 8.0.0, blocking by ip_address
+INFO 2025-12-04 09:55:02,733 apps 2236361 129942645764224 AXES: BEGIN version 8.0.0, blocking by ip_address
+INFO 2025-12-04 09:55:16,089 apps 2237465 133343240110208 AXES: BEGIN version 8.0.0, blocking by ip_address
+INFO 2025-12-04 09:55:41,913 apps 2240045 138770603413632 AXES: BEGIN version 8.0.0, blocking by ip_address
+INFO 2025-12-04 09:55:49,322 apps 2240792 129096826761344 AXES: BEGIN version 8.0.0, blocking by ip_address
+INFO 2025-12-04 09:58:33,837 apps 2257169 137447053181056 AXES: BEGIN version 8.0.0, blocking by ip_address
+INFO 2025-12-04 09:58:33,889 apps 2257171 137447053181056 AXES: BEGIN version 8.0.0, blocking by ip_address
+INFO 2025-12-04 09:58:33,921 apps 2257170 137447053181056 AXES: BEGIN version 8.0.0, blocking by ip_address

@@ -19,6 +19,7 @@ urlpatterns = [
     path('registration-success/', views.registration_success_view, name='registration_success'),
     path('profile/', views.profile_view, name='profile'),
     path('change-password/', views.change_password_view, name='change_password'),
+    path('force-password-change/', views.force_password_change, name='force_password_change'),
     path('edit-profile/', views.edit_profile_view, name='edit_profile'),
     
     # User Management Actions
