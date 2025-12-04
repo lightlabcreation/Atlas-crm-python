@@ -10,8 +10,11 @@ urlpatterns = [
     # REST API endpoints
     path('api/executive-summary/', views.ExecutiveSummaryView.as_view(), name='api_executive_summary'),
     path('api/orders/', views.OrderAnalyticsView.as_view(), name='api_orders'),
+    path('api/order-analytics/', views.OrderAnalyticsView.as_view(), name='api_order_analytics'),
     path('api/inventory/', views.InventoryAnalyticsView.as_view(), name='api_inventory'),
+    path('api/inventory-analytics/', views.InventoryAnalyticsView.as_view(), name='api_inventory_analytics'),
     path('api/finance/', views.FinanceAnalyticsView.as_view(), name='api_finance'),
+    path('api/finance-analytics/', views.FinanceAnalyticsView.as_view(), name='api_finance_analytics'),
     path('api/delivery/', views.DeliveryAnalyticsView.as_view(), name='api_delivery'),
     path('api/callcenter/', views.CallCenterAnalyticsView.as_view(), name='api_callcenter'),
     path('api/users/', views.UserAnalyticsView.as_view(), name='api_users'),

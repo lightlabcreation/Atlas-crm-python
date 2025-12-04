@@ -39,6 +39,7 @@ urlpatterns = [
     path('api/users/', include('users.api_urls')),
     path('api/callcenter/', include('callcenter.api_urls')),
     path('packaging/', include('order_packaging.urls')),
+    path('order-packaging/', include('order_packaging.urls')),  # Add alt URL
     path('delivery/', include('delivery.urls', namespace='delivery')),
     path('delivery/security/', include('delivery.security_urls', namespace='security')),
     path('finance/', include('finance.urls')),

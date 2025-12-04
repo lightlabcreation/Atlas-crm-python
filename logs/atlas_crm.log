@@ -6494,3 +6494,6 @@ INFO 2025-12-04 07:14:55,324 tasks 3050570 133784084111488 Stock levels synchron
 INFO 2025-12-04 07:14:55,345 tasks 3033867 125160194707584 Overdue invoice check completed. Found: 0
 INFO 2025-12-04 07:14:55,371 tasks 3050570 133784084111488 Cleared 0 old access attempts and 0 old logs
 ERROR 2025-12-04 07:14:58,244 tasks 3033867 125160194707584 Stock alert check failed: Cannot resolve keyword 'current_stock' into field. Choices are: id, last_reorder_date, max_quantity, min_quantity, product, product_id, reorder_quantity
+WARNING 2025-12-04 07:34:45,884 log 1378640 126774076989568 Forbidden: /analytics/api/order-analytics/
+WARNING 2025-12-04 07:34:45,931 log 1378640 126774076989568 Forbidden: /analytics/api/inventory-analytics/
+WARNING 2025-12-04 07:34:45,999 log 1378640 126774076989568 Forbidden: /analytics/api/finance-analytics/

@@ -67,6 +67,8 @@ INSTALLED_APPS = [
     'django_otp',
     'django_otp.plugins.otp_totp',
     'django_otp.plugins.otp_static',
+    # 'django_recaptcha',  # CAPTCHA for forms - install separately
+    'auditlog',  # Audit trail system
     # Celery
     'django_celery_beat',
     'django_celery_results',
@@ -171,6 +173,14 @@ else:
     }
 
 
+# Password hashing - Use Argon2 (spec requirement)
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+]
+
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -180,6 +190,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -448,3 +461,22 @@ LOGGING = {
         },
     },
 }
+# ==============================================================================
+# SECURITY ENHANCEMENTS - Spec Requirements
+# ==============================================================================
+
+# Rate Limiting Configuration
+RATELIMIT_ENABLE = True
+RATELIMIT_USE_CACHE = 'default'
+
+# reCAPTCHA Configuration (for production, add real keys)
+RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY', '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI')  # Test key
+RECAPTCHA_PRIVATE_KEY = os.environ.get('RECAPTCHA_PRIVATE_KEY', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe')  # Test key
+RECAPTCHA_REQUIRED_SCORE = 0.85
+
+# Audit Log Configuration
+AUDITLOG_INCLUDE_ALL_MODELS = False  # Manually register models
+
+# ==============================================================================
+# END OF SETTINGS
+# ==============================================================================
