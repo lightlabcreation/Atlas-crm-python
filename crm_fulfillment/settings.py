@@ -67,7 +67,7 @@ INSTALLED_APPS = [
     'django_otp',
     'django_otp.plugins.otp_totp',
     'django_otp.plugins.otp_static',
-    'snowpenguin.django.recaptcha3',  # reCAPTCHA v3 for forms
+    'django_recaptcha',  # reCAPTCHA v3/v2 for forms
     'auditlog',  # Audit trail system
     # Celery
     'django_celery_beat',

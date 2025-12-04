@@ -48,7 +48,7 @@ class RegisterForm(forms.ModelForm):
     )
 
     # Add reCAPTCHA field
-    from snowpenguin.django.recaptcha3.fields import ReCaptchaField
+    from django_recaptcha.fields import ReCaptchaField
     captcha = ReCaptchaField()
     
     # Marketing platforms choices
