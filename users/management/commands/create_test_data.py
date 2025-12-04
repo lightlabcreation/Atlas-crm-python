@@ -33,20 +33,14 @@ class Command(BaseCommand):
         parser.add_argument(
             '--users',
             type=int,
-            default=20,
-            help='Number of users to create per role (default: 20)'
-        )
-        parser.add_argument(
-            '--products',
-            type=int,
-            default=50,
-            help='Number of products to create (default: 50)'
+            default=5,
+            help='Number of users to create per role (default: 5)'
         )
         parser.add_argument(
             '--orders',
             type=int,
-            default=100,
-            help='Number of orders to create (default: 100)'
+            default=20,
+            help='Number of orders to create (default: 20)'
         )
 
     def generate_password(self):
@@ -151,17 +145,18 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f'✓ Created {len(products)} products'))
         return products
 
-    def create_orders(self, count, users, products):
-        """Create test orders."""
+    def create_orders(self, count, users):
+        """Create test orders using the actual Order model structure."""
         self.stdout.write('\n' + '='*70)
         self.stdout.write(self.style.SUCCESS('Creating Test Orders'))
         self.stdout.write('='*70 + '\n')
 
         # Import orders model
         try:
-            from orders.models import Order, OrderItem
-        except ImportError:
-            self.stdout.write(self.style.WARNING('Orders app not available'))
+            from orders.models import Order
+            from sellers.models import Product
+        except ImportError as e:
+            self.stdout.write(self.style.WARNING(f'Orders or Products app not available: {e}'))
             return []
 
         # Get seller users
@@ -170,45 +165,39 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING('No sellers found, skipping order creation'))
             return []
 
+        # Get products
+        products = list(Product.objects.all()[:50])
+        if not products:
+            self.stdout.write(self.style.WARNING('No products found, skipping order creation'))
+            return []
+
         orders = []
-        order_statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled']
+        order_statuses = ['pending', 'confirmed', 'processing', 'packaged', 'shipped', 'delivered']
+        workflow_statuses = ['seller_submitted', 'callcenter_review', 'pick_and_pack', 'ready_for_delivery', 'delivery_in_progress']
+        emirates = ['Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Ras Al Khaimah', 'Fujairah', 'Umm Al Quwain']
 
         for i in range(count):
             seller = random.choice(sellers)
-            
+            product = random.choice(products)
+            quantity = random.randint(1, 5)
+
             order = Order.objects.create(
                 seller=seller,
-                order_number=f"ORD-TEST-{random.randint(100000, 999999)}",
+                customer=f"Test Customer {i+1}",
+                customer_phone=f"+971{random.randint(500000000, 599999999)}",
                 status=random.choice(order_statuses),
-                customer_name=f"Customer {i+1}",
-                customer_email=f"customer{i+1}@test.com",
-                customer_phone=f"+100{random.randint(1000000, 9999999)}",
-                shipping_address=f"{i+1} Test Street, Test City, TC 12345",
-                payment_method=random.choice(['cash_on_delivery', 'bank_transfer', 'credit_card']),
-                notes=f"Test order {i+1}",
-                created_at=timezone.now() - timedelta(days=random.randint(0, 90))
+                workflow_status=random.choice(workflow_statuses),
+                product=product,
+                quantity=quantity,
+                price_per_unit=Decimal(random.randint(50, 500)),
+                store_link=f"https://teststore.com/product/{i+1}",
+                shipping_address=f"Building {i+1}, Street {random.randint(1, 50)}",
+                city="Dubai",
+                emirate=random.choice(emirates),
+                country="United Arab Emirates",
+                notes=f"Test order #{i+1} - Generated for testing",
+                date=timezone.now() - timedelta(days=random.randint(0, 90))
             )
-
-            # Add order items
-            num_items = random.randint(1, 5)
-            total_amount = Decimal(0)
-            
-            for _ in range(num_items):
-                product = random.choice(products)
-                quantity = random.randint(1, 10)
-                unit_price = product.price
-                
-                OrderItem.objects.create(
-                    order=order,
-                    product=product,
-                    quantity=quantity,
-                    unit_price=unit_price,
-                    subtotal=quantity * unit_price
-                )
-                total_amount += quantity * unit_price
-
-            order.total_amount = total_amount
-            order.save()
             orders.append(order)
 
         self.stdout.write(self.style.SUCCESS(f'✓ Created {len(orders)} orders'))
@@ -216,7 +205,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         users_per_role = options['users']
-        products_count = options['products']
         orders_count = options['orders']
 
         self.stdout.write(self.style.SUCCESS('\n' + '='*70))
@@ -224,21 +212,18 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('='*70))
         self.stdout.write(f'\nConfiguration:')
         self.stdout.write(f'  - Users per role: {users_per_role}')
-        self.stdout.write(f'  - Products: {products_count}')
         self.stdout.write(f'  - Orders: {orders_count}')
         self.stdout.write(f'\n  Default Password: {self.generate_password()}')
 
         # Create test data
         users = self.create_users(users_per_role)
-        products = self.create_products(products_count)
-        orders = self.create_orders(orders_count, users, products)
+        orders = self.create_orders(orders_count, users)
 
         # Summary
         self.stdout.write('\n' + '='*70)
         self.stdout.write(self.style.SUCCESS('TEST DATA GENERATION COMPLETE'))
         self.stdout.write('='*70)
         self.stdout.write(f'\n✓ Users created: {len(users)}')
-        self.stdout.write(f'✓ Products created: {len(products)}')
         self.stdout.write(f'✓ Orders created: {len(orders)}')
         self.stdout.write(self.style.WARNING(f'\n⚠️  Default password for all test users: {self.generate_password()}'))
         self.stdout.write('\n' + '='*70 + '\n')
