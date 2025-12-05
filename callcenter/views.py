@@ -1198,10 +1198,24 @@ def bulk_assign_orders(request):
 
 @login_required
 def export_performance_report(request):
-    """Export agent performance report as CSV."""
-    if not has_callcenter_role(request.user):
-        messages.error(request, "ليس لديك صلاحية للدخول لهذه الصفحة.")
-        return redirect('dashboard:index')
+    """Export agent performance report as CSV - RESTRICTED TO SUPER ADMIN ONLY."""
+    from users.models import AuditLog
+
+    # SECURITY: Restrict data export to Super Admin only (P0 CRITICAL requirement)
+    if not request.user.is_superuser:
+        from utils.views import permission_denied_authenticated
+        AuditLog.objects.create(
+            user=request.user,
+            action='unauthorized_export_attempt',
+            entity_type='performance_report',
+            description=f"Unauthorized attempt to export performance report by {request.user.email}",
+            ip_address=request.META.get('REMOTE_ADDR'),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')
+        )
+        return permission_denied_authenticated(
+            request,
+            message="Data export is restricted to Super Admin only for security compliance."
+        )
     
     import csv
     from django.http import HttpResponse
@@ -1276,7 +1290,17 @@ def export_performance_report(request):
             round(performance['avg_satisfaction'] or 0, 1),
             performance['total_calls'] or 0,
         ])
-    
+
+    # Audit log for successful export (P0 CRITICAL security requirement)
+    AuditLog.objects.create(
+        user=request.user,
+        action='data_export',
+        entity_type='performance_report',
+        description=f"Exported performance report for {len(agents)} agent(s) to CSV",
+        ip_address=request.META.get('REMOTE_ADDR'),
+        user_agent=request.META.get('HTTP_USER_AGENT', '')
+    )
+
     return response
 
 # API Views
@@ -3538,11 +3562,27 @@ def bulk_create_followups(request):
 
 
 @login_required
-@user_passes_test(has_callcenter_role)
 def export_orders_csv(request):
-    """Export orders to CSV."""
+    """Export orders to CSV - RESTRICTED TO SUPER ADMIN ONLY."""
     import csv
     from django.http import HttpResponse
+    from users.models import AuditLog
+
+    # SECURITY: Restrict data export to Super Admin only (P0 CRITICAL requirement)
+    if not request.user.is_superuser:
+        from utils.views import permission_denied_authenticated
+        AuditLog.objects.create(
+            user=request.user,
+            action='unauthorized_export_attempt',
+            entity_type='order',
+            description=f"Unauthorized attempt to export orders by {request.user.email}",
+            ip_address=request.META.get('REMOTE_ADDR'),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')
+        )
+        return permission_denied_authenticated(
+            request,
+            message="Data export is restricted to Super Admin only for security compliance."
+        )
     
     order_ids = request.GET.getlist('order_ids[]')
     status_filter = request.GET.get('status')
@@ -3578,5 +3618,15 @@ def export_orders_csv(request):
             order.total_amount,
             order.payment_status
         ])
-    
+
+    # Audit log for successful export (P0 CRITICAL security requirement)
+    AuditLog.objects.create(
+        user=request.user,
+        action='data_export',
+        entity_type='order',
+        description=f"Exported {query.count()} orders to CSV",
+        ip_address=request.META.get('REMOTE_ADDR'),
+        user_agent=request.META.get('HTTP_USER_AGENT', '')
+    )
+
     return response

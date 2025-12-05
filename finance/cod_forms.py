@@ -67,7 +67,8 @@ class CODCollectionForm(forms.ModelForm):
                 'class': 'w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-green-500',
                 'step': '0.01',
                 'min': '0',
-                'placeholder': '0.00'
+                'placeholder': '0.00',
+                'required': True
             }),
             'receipt_number': forms.TextInput(attrs={
                 'class': 'w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-green-500',
@@ -75,11 +76,13 @@ class CODCollectionForm(forms.ModelForm):
             }),
             'collection_proof_image': forms.FileInput(attrs={
                 'class': 'w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-green-500',
-                'accept': 'image/*'
+                'accept': 'image/*',
+                'required': True
             }),
             'customer_signature': forms.FileInput(attrs={
                 'class': 'w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-green-500',
-                'accept': 'image/*'
+                'accept': 'image/*',
+                'required': True
             }),
             'notes': forms.Textarea(attrs={
                 'rows': 2,
@@ -88,12 +91,49 @@ class CODCollectionForm(forms.ModelForm):
             }),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make proof of payment MANDATORY as per specification requirement
+        self.fields['collection_proof_image'].required = True
+        self.fields['customer_signature'].required = True
+        self.fields['collected_amount'].required = True
+
+        # Add help text for required fields
+        self.fields['collection_proof_image'].help_text = _('MANDATORY: Photo proof of payment collection')
+        self.fields['customer_signature'].help_text = _('MANDATORY: Customer signature confirmation')
+
     def clean_collected_amount(self):
         """Validate collected amount"""
         collected = self.cleaned_data.get('collected_amount')
-        if collected and collected < 0:
+        if collected is None:
+            raise forms.ValidationError(_('Collected amount is required'))
+        if collected < 0:
             raise forms.ValidationError(_('Collected amount cannot be negative'))
         return collected
+
+    def clean_collection_proof_image(self):
+        """Validate collection proof image - MANDATORY"""
+        image = self.cleaned_data.get('collection_proof_image')
+        if not image:
+            raise forms.ValidationError(_('Collection proof image is MANDATORY. Please upload photo evidence of payment collection.'))
+
+        # Validate file size (max 5MB)
+        if image.size > 5 * 1024 * 1024:
+            raise forms.ValidationError(_('Image file size cannot exceed 5MB'))
+
+        return image
+
+    def clean_customer_signature(self):
+        """Validate customer signature - MANDATORY"""
+        signature = self.cleaned_data.get('customer_signature')
+        if not signature:
+            raise forms.ValidationError(_('Customer signature is MANDATORY. Please upload customer signature confirmation.'))
+
+        # Validate file size (max 5MB)
+        if signature.size > 5 * 1024 * 1024:
+            raise forms.ValidationError(_('Signature file size cannot exceed 5MB'))
+
+        return signature
 
 
 class CODDepositForm(forms.Form):

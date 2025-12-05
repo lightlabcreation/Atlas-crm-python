@@ -1088,10 +1088,24 @@ def import_orders(request):
 
 @login_required
 def export_orders(request):
-    """Export orders to CSV for sellers."""
-    if not has_seller_role(request.user):
-        messages.error(request, "ليس لديك صلاحية للدخول لهذه الصفحة.")
-        return redirect('dashboard:index')
+    """Export orders to CSV - RESTRICTED TO SUPER ADMIN ONLY."""
+    from users.models import AuditLog
+
+    # SECURITY: Restrict data export to Super Admin only (P0 CRITICAL requirement)
+    if not request.user.is_superuser:
+        from utils.views import permission_denied_authenticated
+        AuditLog.objects.create(
+            user=request.user,
+            action='unauthorized_export_attempt',
+            entity_type='order',
+            description=f"Unauthorized attempt to export orders by {request.user.email}",
+            ip_address=request.META.get('REMOTE_ADDR'),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')
+        )
+        return permission_denied_authenticated(
+            request,
+            message="Data export is restricted to Super Admin only for security compliance."
+        )
     
     # Get orders based on user role
     if request.user.has_role('Seller'):
@@ -1140,6 +1154,16 @@ def export_orders(request):
             order.notes or ''
         ])
     
+    # Audit log for successful export (P0 CRITICAL security requirement)
+    AuditLog.objects.create(
+        user=request.user,
+        action='data_export',
+        entity_type='order',
+        description=f"Exported {orders.count()} orders to CSV",
+        ip_address=request.META.get('REMOTE_ADDR'),
+        user_agent=request.META.get('HTTP_USER_AGENT', '')
+    )
+
     # Create notification for successful export
     create_seller_notification(
         seller=request.user,
@@ -1150,7 +1174,7 @@ def export_orders(request):
         related_object_type='order',
         related_url="/sellers/orders/"
     )
-    
+
     return response
 
 @login_required

@@ -251,8 +251,23 @@ def inventory_products(request):
     # Debug: Print final inventory data
     print(f"DEBUG: Final inventory_data length: {len(inventory_data)}")
     
-    # Handle export request
+    # Handle export request - RESTRICTED TO SUPER ADMIN ONLY (P0 CRITICAL)
     if request.GET.get('export') == 'csv':
+        if not request.user.is_superuser:
+            from utils.views import permission_denied_authenticated
+            from users.models import AuditLog
+            AuditLog.objects.create(
+                user=request.user,
+                action='unauthorized_export_attempt',
+                entity_type='inventory',
+                description=f"Unauthorized attempt to export inventory by {request.user.email}",
+                ip_address=request.META.get('REMOTE_ADDR'),
+                user_agent=request.META.get('HTTP_USER_AGENT', '')
+            )
+            return permission_denied_authenticated(
+                request,
+                message="Data export is restricted to Super Admin only for security compliance."
+            )
         return export_products_csv(inventory_data, request)
     
     # Check if there's a movements parameter to show movements
@@ -484,7 +499,8 @@ def inventory_movements(request):
     return render(request, 'inventory/movements.html', context)
 
 def export_products_csv(inventory_data, request):
-    """Export products data as CSV."""
+    """Export products data as CSV - Called only after Super Admin check."""
+    from users.models import AuditLog
     try:
         # Create a file-like buffer to receive CSV data
         buffer = StringIO()
@@ -509,7 +525,17 @@ def export_products_csv(inventory_data, request):
         # Create the HTTP response with CSV data
         response = HttpResponse(buffer.getvalue(), content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="inventory_products.csv"'
-        
+
+        # Audit log for successful export (P0 CRITICAL security requirement)
+        AuditLog.objects.create(
+            user=request.user,
+            action='data_export',
+            entity_type='inventory',
+            description=f"Exported {len(inventory_data)} inventory products to CSV",
+            ip_address=request.META.get('REMOTE_ADDR'),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')
+        )
+
         return response
     except Exception as e:
         print(f"Error exporting products: {e}")
@@ -518,9 +544,11 @@ def export_products_csv(inventory_data, request):
 
 @login_required
 def export_warehouses_csv(warehouse_data, request):
-    """Export warehouses data as CSV."""
-    # Check if user has permission to export warehouses
-    if not (request.user.has_role('Admin') or request.user.is_superuser):
+    """Export warehouses data as CSV - RESTRICTED TO SUPER ADMIN ONLY."""
+    from users.models import AuditLog
+
+    # SECURITY: Restrict data export to Super Admin only (P0 CRITICAL requirement)
+    if not request.user.is_superuser:
         messages.error(request, 'You do not have permission to export warehouses.')
         return redirect('inventory:warehouses')
     
@@ -548,7 +576,17 @@ def export_warehouses_csv(warehouse_data, request):
         # Create the HTTP response with CSV data
         response = HttpResponse(buffer.getvalue(), content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="warehouses.csv"'
-        
+
+        # Audit log for successful export (P0 CRITICAL security requirement)
+        AuditLog.objects.create(
+            user=request.user,
+            action='data_export',
+            entity_type='warehouse',
+            description=f"Exported {len(warehouse_data)} warehouses to CSV",
+            ip_address=request.META.get('REMOTE_ADDR'),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')
+        )
+
         return response
     except Exception as e:
         print(f"Error exporting warehouses: {e}")
@@ -557,7 +595,25 @@ def export_warehouses_csv(warehouse_data, request):
 
 @login_required
 def export_movements(request):
-    """Export inventory movements as CSV."""
+    """Export inventory movements as CSV - RESTRICTED TO SUPER ADMIN ONLY."""
+    from users.models import AuditLog
+
+    # SECURITY: Restrict data export to Super Admin only (P0 CRITICAL requirement)
+    if not request.user.is_superuser:
+        from utils.views import permission_denied_authenticated
+        AuditLog.objects.create(
+            user=request.user,
+            action='unauthorized_export_attempt',
+            entity_type='inventory_movement',
+            description=f"Unauthorized attempt to export inventory movements by {request.user.email}",
+            ip_address=request.META.get('REMOTE_ADDR'),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')
+        )
+        return permission_denied_authenticated(
+            request,
+            message="Data export is restricted to Super Admin only for security compliance."
+        )
+
     # Get movements, possibly filtered
     movements = InventoryMovement.objects.all().order_by('-created_at')
     
@@ -615,7 +671,17 @@ def export_movements(request):
     # Create the HTTP response with CSV data
     response = HttpResponse(buffer.getvalue(), content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="inventory_movements.csv"'
-    
+
+    # Audit log for successful export (P0 CRITICAL security requirement)
+    AuditLog.objects.create(
+        user=request.user,
+        action='data_export',
+        entity_type='inventory_movement',
+        description=f"Exported {movements.count()} inventory movements to CSV",
+        ip_address=request.META.get('REMOTE_ADDR'),
+        user_agent=request.META.get('HTTP_USER_AGENT', '')
+    )
+
     return response
 
 class ProductForm(forms.ModelForm):

@@ -1480,8 +1480,9 @@ def public_order_view(request, order_code):
     return render(request, 'orders/public_order_view.html', context)
 
 
+@login_required
 def get_states_for_city_api(request):
- 
+    """API endpoint to get states for a city - requires authentication."""
     city_name = request.GET.get('city', '')
     if not city_name:
         return JsonResponse({'success': False, 'error': 'City name is required'})
@@ -1495,8 +1496,9 @@ def get_states_for_city_api(request):
         'states': states_list
     })
 
+@login_required
 def available_agents_count(request):
-    """API endpoint to get count of available Call Center Agents."""
+    """API endpoint to get count of available Call Center Agents - requires authentication."""
     try:
         # Get all active Call Center Agents
         agents_count = User.objects.filter(

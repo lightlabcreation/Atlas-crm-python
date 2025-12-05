@@ -1178,11 +1178,28 @@ def truvo_payment_create(request):
 
 @login_required
 def export_payments(request):
-    """Export payments to CSV."""
+    """Export payments to CSV - RESTRICTED TO SUPER ADMIN ONLY."""
     import csv
     from io import StringIO
-    
-    # Check user role for access control
+    from users.models import AuditLog
+
+    # SECURITY: Restrict data export to Super Admin only (P0 CRITICAL requirement)
+    if not request.user.is_superuser:
+        from utils.views import permission_denied_authenticated
+        AuditLog.objects.create(
+            user=request.user,
+            action='unauthorized_export_attempt',
+            entity_type='payment',
+            description=f"Unauthorized attempt to export payments by {request.user.email}",
+            ip_address=request.META.get('REMOTE_ADDR'),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')
+        )
+        return permission_denied_authenticated(
+            request,
+            message="Data export is restricted to Super Admin only for security compliance."
+        )
+
+    # Check user role for access control (legacy - now only superuser can reach here)
     is_seller = request.user.has_role('Seller')
     is_admin = request.user.has_role('Admin') or request.user.has_role('Super Admin') or request.user.is_superuser
     
@@ -1272,7 +1289,17 @@ def export_payments(request):
             getattr(payment, 'transaction_id', getattr(payment, 'truvo_transaction_id', '')),
             payment.notes
         ])
-    
+
+    # Audit log for successful export (P0 CRITICAL security requirement)
+    AuditLog.objects.create(
+        user=request.user,
+        action='data_export',
+        entity_type='payment',
+        description=f"Exported {len(all_payments)} payment records to CSV",
+        ip_address=request.META.get('REMOTE_ADDR'),
+        user_agent=request.META.get('HTTP_USER_AGENT', '')
+    )
+
     return response
 
 @login_required

@@ -1541,12 +1541,28 @@ def movement_history(request):
     return render(request, 'stock_keeper/movement_history.html', context)
 
 @login_required
-@user_passes_test(is_stock_keeper)
 def export_movement_history_excel(request):
-    """Export movement history to Excel."""
+    """Export movement history to Excel - RESTRICTED TO SUPER ADMIN ONLY."""
     from django.http import HttpResponse
     import csv
     from io import StringIO
+    from users.models import AuditLog
+
+    # SECURITY: Restrict data export to Super Admin only (P0 CRITICAL requirement)
+    if not request.user.is_superuser:
+        from utils.views import permission_denied_authenticated
+        AuditLog.objects.create(
+            user=request.user,
+            action='unauthorized_export_attempt',
+            entity_type='inventory_movement',
+            description=f"Unauthorized attempt to export movement history by {request.user.email}",
+            ip_address=request.META.get('REMOTE_ADDR'),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')
+        )
+        return permission_denied_authenticated(
+            request,
+            message="Data export is restricted to Super Admin only for security compliance."
+        )
     
     movements = InventoryMovement.objects.select_related(
         'product', 'from_warehouse', 'to_warehouse', 'processed_by'
@@ -1604,7 +1620,17 @@ def export_movement_history_excel(request):
             m.processed_by.get_full_name() or m.processed_by.username,
             m.reference_number or 'N/A'
         ])
-    
+
+    # Audit log for successful export (P0 CRITICAL security requirement)
+    AuditLog.objects.create(
+        user=request.user,
+        action='data_export',
+        entity_type='inventory_movement',
+        description=f"Exported {movements.count()} inventory movements to CSV",
+        ip_address=request.META.get('REMOTE_ADDR'),
+        user_agent=request.META.get('HTTP_USER_AGENT', '')
+    )
+
     return response
 
 @login_required
@@ -2197,12 +2223,28 @@ def product_acceptance(request):
     return render(request, 'stock_keeper/product_acceptance.html', context)
 
 @login_required
-@user_passes_test(is_stock_keeper)
 def export_stock_report(request):
-    """Export stock report (low stock, out of stock, near expiry)."""
+    """Export stock report (low stock, out of stock, near expiry) - RESTRICTED TO SUPER ADMIN ONLY."""
     from django.http import HttpResponse
     import csv
     from datetime import timedelta
+    from users.models import AuditLog
+
+    # SECURITY: Restrict data export to Super Admin only (P0 CRITICAL requirement)
+    if not request.user.is_superuser:
+        from utils.views import permission_denied_authenticated
+        AuditLog.objects.create(
+            user=request.user,
+            action='unauthorized_export_attempt',
+            entity_type='stock_report',
+            description=f"Unauthorized attempt to export stock report by {request.user.email}",
+            ip_address=request.META.get('REMOTE_ADDR'),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')
+        )
+        return permission_denied_authenticated(
+            request,
+            message="Data export is restricted to Super Admin only for security compliance."
+        )
     
     warehouse_filter = request.GET.get('warehouse', '')
     inventory_records = InventoryRecord.objects.select_related('product', 'warehouse', 'location')
@@ -2266,7 +2308,18 @@ def export_stock_report(request):
                 record.expiry_date.strftime('%Y-%m-%d') if record.expiry_date else 'N/A',
                 record.quantity
             ])
-    
+
+    # Audit log for successful export (P0 CRITICAL security requirement)
+    total_records = low_stock.count() + out_of_stock.count() + near_expiry.count()
+    AuditLog.objects.create(
+        user=request.user,
+        action='data_export',
+        entity_type='stock_report',
+        description=f"Exported stock report with {total_records} alert records to CSV",
+        ip_address=request.META.get('REMOTE_ADDR'),
+        user_agent=request.META.get('HTTP_USER_AGENT', '')
+    )
+
     return response
 
 @login_required

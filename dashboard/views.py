@@ -470,17 +470,23 @@ def audit_log(request):
 
 @login_required
 def export_audit_log(request):
-    """Export audit log to CSV."""
-    # Check if user has admin or super admin role
-    primary_role = request.user.get_primary_role()
-    role_name = primary_role.name if primary_role else ''
-    
-    if role_name not in ['Super Admin', 'Admin'] and not request.user.is_superuser:
-        # Use the new permission denied system
+    """Export audit log to CSV - RESTRICTED TO SUPER ADMIN ONLY."""
+    from users.models import AuditLog as AuditLogModel
+
+    # SECURITY: Restrict data export to Super Admin only (P0 CRITICAL requirement)
+    if not request.user.is_superuser:
         from utils.views import permission_denied_authenticated
+        AuditLogModel.objects.create(
+            user=request.user,
+            action='unauthorized_export_attempt',
+            entity_type='audit_log',
+            description=f"Unauthorized attempt to export audit logs by {request.user.email}",
+            ip_address=request.META.get('REMOTE_ADDR'),
+            user_agent=request.META.get('HTTP_USER_AGENT', '')
+        )
         return permission_denied_authenticated(
-            request, 
-            message="You need Admin or Super Admin role to export audit logs."
+            request,
+            message="Data export is restricted to Super Admin only for security compliance."
         )
     
     # Get filter parameters
@@ -524,7 +530,17 @@ def export_audit_log(request):
             log.description or 'No description',
             log.ip_address or 'N/A'
         ])
-    
+
+    # Audit log for successful export (P0 CRITICAL security requirement)
+    AuditLogModel.objects.create(
+        user=request.user,
+        action='data_export',
+        entity_type='audit_log',
+        description=f"Exported {audit_logs.count()} audit log records to CSV",
+        ip_address=request.META.get('REMOTE_ADDR'),
+        user_agent=request.META.get('HTTP_USER_AGENT', '')
+    )
+
     return response
 
 
