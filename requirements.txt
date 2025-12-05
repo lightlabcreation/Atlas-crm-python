@@ -18,6 +18,7 @@ xlsxwriter>=3.2.5
 
 # Environment variable management
 python-dotenv>=1.0.1
+dj-database-url>=2.1.0
 
 # Django forms/widgets
 django-crispy-forms>=2.1

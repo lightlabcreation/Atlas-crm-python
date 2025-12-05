@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-p6(d1x^*0xb*d)a_hn3iubcl_wen!i4+80*o32=_9pdadls9j!'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-for-dev-only')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -37,6 +37,15 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
 ]
+
+# Add Railway domain if RAILWAY_STATIC_URL is set
+if os.environ.get('RAILWAY_STATIC_URL'):
+    railway_domain = os.environ.get('RAILWAY_STATIC_URL').replace('https://', '').replace('http://', '')
+    ALLOWED_HOSTS.append(railway_domain)
+
+# Add Railway public domain if set
+if os.environ.get('RAILWAY_PUBLIC_DOMAIN'):
+    ALLOWED_HOSTS.append(os.environ.get('RAILWAY_PUBLIC_DOMAIN'))
 
 # Silence test key warnings for django-recaptcha
 SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
@@ -148,6 +157,9 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.i18n',
+                # Custom context processors
+                'utils.context_processors.breadcrumbs',
+                'utils.context_processors.user_permissions',
             ],
         },
     },
@@ -159,28 +171,41 @@ WSGI_APPLICATION = 'crm_fulfillment.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Support for environment-based database configuration (Docker)
-DATABASE_TYPE = os.environ.get('DATABASE', 'postgres').lower()
+# Support for environment-based database configuration (Docker and Railway)
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
-if DATABASE_TYPE == 'postgres':
+if DATABASE_URL:
+    # Parse Railway DATABASE_URL format: postgresql://user:password@host:port/database
+    import dj_database_url
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('DB_NAME', 'atlas_crm'),
-            'USER': os.environ.get('DB_USER', 'atlas_user'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', 'atlas_secure_pass_2024'),
-            'HOST': os.environ.get('DB_HOST', 'localhost'),
-            'PORT': os.environ.get('DB_PORT', '5433'),
-        }
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
 else:
-    # Default to SQLite for local development
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+    DATABASE_TYPE = os.environ.get('DATABASE', 'postgres').lower()
+
+    if DATABASE_TYPE == 'postgres':
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': os.environ.get('DB_NAME', 'atlas_crm'),
+                'USER': os.environ.get('DB_USER', 'atlas_user'),
+                'PASSWORD': os.environ.get('DB_PASSWORD', 'atlas_secure_pass_2024'),
+                'HOST': os.environ.get('DB_HOST', 'localhost'),
+                'PORT': os.environ.get('DB_PORT', '5433'),
+            }
         }
-    }
+    else:
+        # Default to SQLite for local development
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
 
 
 # Password hashing - Use Argon2 (spec requirement)
@@ -308,8 +333,8 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 # Session Configuration
-SESSION_COOKIE_HTTPONLY = False  # Allow JavaScript access for debugging
-SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookies (XSS protection)
+SESSION_COOKIE_SECURE = True  # Force HTTPS for session cookies (prevent session hijacking)
 SESSION_COOKIE_SAMESITE = 'Lax'  # Allow cross-site requests
 SESSION_SAVE_EVERY_REQUEST = True  # Save session on every request
 
