@@ -38,6 +38,12 @@ test('Finance Payouts page', async ({ page }) => {
   expect([200, 302]).toContain(response?.status());
 });
 
+test('Users 2FA page', async ({ page }) => {
+  const response = await page.goto(`${BASE_URL}/users/2fa/`);
+  console.log('2FA Status:', response?.status());
+  expect([200, 302]).toContain(response?.status());
+});
+
 test('Finance Refunds page', async ({ page }) => {
   const response = await page.goto(`${BASE_URL}/finance/refunds/`);
   console.log('Refunds Status:', response?.status());

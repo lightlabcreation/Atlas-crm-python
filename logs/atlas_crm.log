@@ -13378,3 +13378,170 @@ Traceback (most recent call last):
   File "/root/new-python-code/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1806, in names_to_path
     raise FieldError(
 django.core.exceptions.FieldError: Cannot resolve keyword 'delivery_agent' into field. Choices are: agent, agent_id, assigned_at, assignments, call_back_time, call_logs, cancelled_reason, city, cod_payment, country, created_at, customer, customer_interactions, customer_phone, date, delivery, delivery_area, delivery_assignments, emirate, escalated_at, escalated_by, escalated_by_id, escalated_to_manager, escalation_reason, id, internal_notes, invoices, items, manager_notes, no_answer_time, notes, order_code, order_fees, packaging, packaging_tasks, payments, postponed_until, price_per_unit, product, product_id, quantity, refunds, region, returns, seller, seller_email, seller_id, shipping_address, state, status, status_history, status_logs, stock_reservations, store_link, street_address, tracking_number, truvo_payments, updated_at, workflow_logs, workflow_status, zip_code
+ERROR 2025-12-07 08:14:56,617 tasks 3806611 130342932914304 Auto-cancel task failed: Cannot resolve keyword 'payment_status' into field. Choices are: agent, agent_id, assigned_at, assignments, call_back_time, call_logs, cancelled_reason, city, cod_payment, country, created_at, customer, customer_interactions, customer_phone, date, delivery, delivery_area, delivery_assignments, emirate, escalated_at, escalated_by, escalated_by_id, escalated_to_manager, escalation_reason, id, internal_notes, invoices, items, manager_notes, no_answer_time, notes, order_code, order_fees, packaging, packaging_tasks, payments, postponed_until, price_per_unit, product, product_id, quantity, region, returns, seller, seller_email, seller_id, shipping_address, state, status, status_history, status_logs, stock_reservations, store_link, street_address, tracking_number, truvo_payments, updated_at, workflow_logs, workflow_status, zip_code
+INFO 2025-12-07 08:14:56,701 tasks 3806611 130342932914304 Stock levels synchronized: 0 discrepancies found
+INFO 2025-12-07 08:14:56,733 tasks 3806613 130342932914304 Cleared 0 old access attempts and 0 old logs
+INFO 2025-12-07 08:15:02,260 tasks 3806611 130342932914304 Stock alert check completed. Created: 0, Resolved: 0
+WARNING 2025-12-07 08:22:31,067 log 2964458 126942588375168 Not Found: /finance/seller-payouts/
+ERROR 2025-12-07 08:22:52,821 log 2964458 126942588375168 Internal Server Error: /users/roles/
+Traceback (most recent call last):
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/users/views.py", line 1080, in roles_list
+    users_per_role[role.name] = User.objects.filter(primary_role=role).count()
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/db/models/manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1495, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1513, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1523, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1646, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1678, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1526, in build_filter
+    lookups, parts, reffed_expression = self.solve_lookup_type(arg, summarize)
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1333, in solve_lookup_type
+    _, field, _, lookup_parts = self.names_to_path(lookup_splitted, self.get_meta())
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 1806, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'primary_role' into field. Choices are: account_holder_name, account_number, acknowledged_alerts, agent_sessions, approval_status, approved_at, approved_by, approved_by_id, approved_products, approved_refunds, approved_returns, approved_sourcing_requests, approved_users, assigned_orders, assigned_orders_admin, assigned_packaging_tasks, assigned_roles, assigned_tasks, assignments_made, audit_logs, auditlog, auth_token, bank_name, barcodescanhistory, bugreport, call_logs, callcenter_assignments, cod_collections, cod_reconciliations, company_name, confirmed_deliveries, country, courier_profile, created_products, created_roles, created_suppliers, created_tasks, custom_permissions, customer_interactions, date_joined, deletion_requests, delivery_assignments, delivery_preferences, deliverystatushistory, email, email_verified, escalated_orders, expected_daily_orders, finance_processed_refunds, first_name, full_name, granted_permissions, groups, iban_confirmation, id, id_back_image, id_front_image, inspected_returns, interactions_received, inventorymovement, investigated_frauds, is_active, is_staff, is_superuser, last_login, last_name, login_attempts, lowest_performances, marketing_platforms, movements_created, movements_processed, notes_created, notes_received, orders, orderworkflowlog, packaged_orders, password, password_change_required, payment_platforms, payouts, performance_records, performed_quality_checks, phone_number, physicalcountrecord, previous_assignments, processed_payouts, processed_refunds, product, profile_image, quality_checked_packages, received_returns, reconciled_cods, rejection_reason, requested_refunds, resolved_alerts, resolved_security_events, restocked_returns, returns, returnstatuslog, reviewed_deletion_requests, role_audit_logs, saleschannel, seller_payments, seller_profile, sellerfee, sourcing_requests, sourcingcomment, staticdevice, status_changes, status_changes_made, statuslog, stock_reservations, stockalert, stockkeepersession, store_link, store_name, store_specialization, store_type, subscriber_profile, target_role_audit_logs, top_performances, totpdevice, triggered_security_events, truvo_payments, twofa_profile, updated_fees, uploaded_sourcing_documents, user_id, user_notifications, user_permissions, user_roles, verification_code, verification_code_expires_at, verification_code_sent_at, verified_cod_payments, verified_counts, verified_payments, verified_proofs
+WARNING 2025-12-07 08:22:59,702 log 2964458 126942588375168 Forbidden (Permission denied): /users/login/
+Traceback (most recent call last):
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django_ratelimit/decorators.py", line 26, in _wrapped
+    raise (import_string(cls) if isinstance(cls, str) else cls)()
+django_ratelimit.exceptions.Ratelimited
+WARNING 2025-12-07 08:23:16,431 log 2964464 126942588375168 Forbidden (Permission denied): /users/login/
+Traceback (most recent call last):
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django_ratelimit/decorators.py", line 26, in _wrapped
+    raise (import_string(cls) if isinstance(cls, str) else cls)()
+django_ratelimit.exceptions.Ratelimited
+WARNING 2025-12-07 08:23:33,969 log 2964457 126942588375168 Not Found: /users/settings/two-factor/
+ERROR 2025-12-07 08:23:41,953 log 2964457 126942588375168 Internal Server Error: /callcenter/callbacks/
+Traceback (most recent call last):
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/callcenter/views.py", line 3697, in callbacks_list
+    return render(request, 'callcenter/callbacks_list.html', {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/template/loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/template/backends/django.py", line 107, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/template/base.py", line 171, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/template/loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/template/base.py", line 163, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/template/loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/template/base.py", line 1016, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/template/base.py", line 977, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/template/defaulttags.py", line 199, in render
+    len_values = len(values)
+                 ^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/core/paginator.py", line 191, in __len__
+    return len(self.object_list)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/db/models/query.py", line 368, in __len__
+    self._fetch_all()
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/db/models/query.py", line 1954, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/db/models/query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1610, in execute_sql
+    sql, params = self.as_sql()
+                  ^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 766, in as_sql
+    extra_select, order_by, group_by = self.pre_sql_setup(
+                                       ^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 85, in pre_sql_setup
+    self.setup_query(with_col_aliases=with_col_aliases)
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 74, in setup_query
+    self.select, self.klass_info, self.annotation_col_map = self.get_select(
+                                                            ^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 299, in get_select
+    related_klass_infos = self.get_related_selections(select, select_mask)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1230, in get_related_selections
+    raise FieldError(
+django.core.exceptions.FieldError: Non-relational field given in select_related: 'customer'. Choices are: product, seller, agent, escalated_by, packaging, delivery, order_fees, cod_payment
+WARNING 2025-12-07 08:23:53,948 log 2964458 126942588375168 Not Found: /finance/dashboard/
+WARNING 2025-12-07 08:23:54,606 log 2964457 126942588375168 Forbidden (Permission denied): /users/login/
+Traceback (most recent call last):
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/new-python-code/venv/lib/python3.12/site-packages/django_ratelimit/decorators.py", line 26, in _wrapped
+    raise (import_string(cls) if isinstance(cls, str) else cls)()
+django_ratelimit.exceptions.Ratelimited
+INFO 2025-12-07 08:25:02,266 tasks 3806611 130342932914304 Stock alert check completed. Created: 0, Resolved: 0

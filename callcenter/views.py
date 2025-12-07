@@ -3644,7 +3644,7 @@ def callbacks_list(request):
     # Get callbacks (orders with call_back_time set)
     callbacks = Order.objects.filter(
         call_back_time__isnull=False
-    ).select_related('customer', 'agent').order_by('call_back_time')
+    ).select_related('agent').order_by('call_back_time')
 
     # Filter by status
     status = request.GET.get('status', '')

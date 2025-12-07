@@ -32,7 +32,7 @@ test.describe('Finance Module - New UI Pages', () => {
   });
 
   test('Seller Payouts page loads correctly', async ({ page }) => {
-    await page.goto(`${BASE_URL}/finance/seller-payouts/`);
+    await page.goto(`${BASE_URL}/finance/payouts/`);
     await expect(page.locator('h1')).toContainText('Seller Payouts');
   });
 
@@ -89,7 +89,7 @@ test.describe('Users Module - New UI Pages', () => {
   });
 
   test('Two-Factor Authentication page loads correctly', async ({ page }) => {
-    await page.goto(`${BASE_URL}/users/settings/two-factor/`);
+    await page.goto(`${BASE_URL}/users/2fa/`);
     await expect(page.locator('h1')).toContainText('Two-Factor Authentication');
   });
 });
