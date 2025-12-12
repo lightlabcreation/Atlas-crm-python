@@ -11,6 +11,18 @@
 4. **No new features** - Do not add functionality unless specifically requested
 5. **Ask first** - If something seems broken, ASK the user before making changes
 
+### 🚫 NEVER TOUCH (Can Break Live Site):
+- **Nginx** - No nginx config changes, no `/etc/nginx/` modifications
+- **Ports** - Do not change any port configurations
+- **Gunicorn** - Do not modify gunicorn settings or restart commands
+- **Systemd** - No service file changes
+- **SSL/Certificates** - Do not touch SSL or HTTPS configuration
+- **DNS** - No domain or DNS changes
+- **Database** - No direct database modifications (migrations OK if explicitly requested)
+- **Environment variables** - Do not change .env files or settings
+- **Server commands** - No `kill`, `systemctl`, `service`, or server restart commands
+- **Firewall** - No iptables, ufw, or firewall changes
+
 ### To make changes, the user must say things like:
 - "Edit the file..."
 - "Change the code to..."
