@@ -569,18 +569,19 @@ def invoice_generation(request, order_id):
             return redirect('finance:invoice_generation', order_id=order_id)
         
         elif action == 'print':
-            # Print logic - return print-friendly page with real data
+            # Print logic - return print-friendly page with real data from OrderFee
             base_price = order.price_per_unit * order.quantity
-            fees = {
-                'upsell': 15.00,
-                'confirmation': 10.00,
-                'fulfillment': 8.99,
-                'shipping': 12.00,
-            }
-            total_fees = sum(fees.values())
-            tax_amount = (float(base_price) + total_fees) * 0.05
-            total_amount = float(base_price) + total_fees + tax_amount
-            
+
+            # Get or create OrderFee for this order
+            order_fee, _ = OrderFee.objects.get_or_create(
+                order=order,
+                defaults={'tax_rate': 5.00}
+            )
+            fees = order_fee.get_fees_dict()
+            total_fees = float(order_fee.total_fees)
+            tax_amount = float(order_fee.tax_amount)
+            total_amount = float(order_fee.final_total)
+
             return render(request, 'finance/invoice_print.html', {
                 'order': order,
                 'seller_info': seller_info,
@@ -592,6 +593,7 @@ def invoice_generation(request, order_id):
                 'total_fees': total_fees,
                 'tax_amount': tax_amount,
                 'total_amount': total_amount,
+                'order_fee': order_fee,
             })
         
         elif action == 'send':
@@ -650,30 +652,38 @@ def invoice_generation(request, order_id):
     
     # Calculate invoice details with real data from database
     base_price = order.price_per_unit * order.quantity
-    
-    # Get real fees from database or calculate based on order
-    fees = {}
-    
-    # Get seller fees from database
-    if seller_info:
-        seller_fee = SellerFee.objects.filter(seller=seller_info, is_active=True).first()
-        if seller_fee:
-            fees['seller_fee'] = float(base_price) * (seller_fee.fee_percentage / 100)
-        else:
-            fees['seller_fee'] = 0.00
-    else:
-        fees['seller_fee'] = 0.00
-    
-    # Calculate other fees based on order value
-    fees['upsell'] = float(base_price) * 0.03  # 3% of order value
-    fees['confirmation'] = 10.00  # Fixed fee
-    fees['fulfillment'] = float(base_price) * 0.02  # 2% of order value
-    fees['shipping'] = 12.00  # Fixed shipping fee
-    
-    total_fees = sum(fees.values())
-    tax_rate = 0.05  # 5% VAT
-    tax_amount = (float(base_price) + total_fees) * tax_rate
-    total_amount = float(base_price) + total_fees + tax_amount
+
+    # Get or create OrderFee record for accurate fee tracking
+    order_fee, created = OrderFee.objects.get_or_create(
+        order=order,
+        defaults={
+            'tax_rate': 5.00,  # 5% VAT
+        }
+    )
+
+    # If newly created, calculate default fees
+    if created:
+        # Seller fee (if applicable)
+        if seller_info:
+            seller_fee_obj = SellerFee.objects.filter(seller=seller_info, is_active=True).first()
+            if seller_fee_obj:
+                order_fee.seller_fee = float(base_price) * (float(seller_fee_obj.fee_percentage) / 100)
+
+        # Calculate other fees based on order value and status
+        order_fee.upsell_fee = float(base_price) * 0.03  # 3% of order value
+        order_fee.confirmation_fee = 10.00  # Fixed fee
+        order_fee.fulfillment_fee = float(base_price) * 0.02  # 2% of order value
+        order_fee.shipping_fee = 12.00  # Fixed shipping fee
+        order_fee.cancellation_fee = 5.00 if order.status == 'cancelled' else 0.00
+        order_fee.warehouse_fee = float(base_price) * 0.01  # 1% warehouse fee
+        order_fee.save()
+
+    # Get fees from the OrderFee model
+    fees = order_fee.get_fees_dict()
+    total_fees = float(order_fee.total_fees)
+    tax_rate = float(order_fee.tax_rate) / 100  # Convert from percentage
+    tax_amount = float(order_fee.tax_amount)
+    total_amount = float(order_fee.final_total)
     
     # Calculate due date (15 days from order date)
     due_date = order.date + timedelta(days=15)
@@ -2604,7 +2614,7 @@ def refunds_list(request):
         refunds = refunds.filter(status=status_filter)
 
     if reason_filter:
-        refunds = refunds.filter(refund_reason=reason_filter)
+        refunds = refunds.filter(reason=reason_filter)
 
     if date_from:
         try:
@@ -2673,7 +2683,7 @@ def create_refund(request):
             refund = Refund.objects.create(
                 order=order,
                 refund_amount=float(refund_amount),
-                refund_reason=refund_reason,
+                reason=refund_reason,
                 customer_name=order.customer,
                 customer_email=getattr(order, 'customer_email', ''),
                 customer_phone=getattr(order, 'customer_phone', ''),
@@ -2687,9 +2697,9 @@ def create_refund(request):
         except Exception as e:
             messages.error(request, f'Error creating refund: {str(e)}')
 
-    # Get orders that can be refunded
+    # Get orders that can be refunded (delivered, shipped, or returned)
     orders = Order.objects.filter(
-        status__in=['delivered', 'shipped', 'completed']
+        status__in=['delivered', 'shipped', 'returned']
     ).order_by('-date')[:50]
 
     context = {
@@ -2890,3 +2900,35 @@ def reconciliation_auto_match(request):
         return redirect('finance:reconciliation')
 
     return redirect('finance:reconciliation')
+
+
+@login_required
+def finance_settings(request):
+    """Finance settings page for fee configuration."""
+    # Check permissions
+    if not (request.user.has_role('Super Admin') or request.user.has_role('Admin') or
+            request.user.has_role('Finance') or request.user.is_superuser):
+        messages.error(request, "You don't have permission to access finance settings.")
+        return redirect('finance:dashboard')
+
+    # Get fee settings from database or defaults
+    fee_settings = {
+        'cod_fee_percent': 3.0,
+        'delivery_fee_local': 15.0,
+        'delivery_fee_remote': 25.0,
+        'packaging_fee': 5.0,
+        'return_fee': 10.0,
+        'cancellation_fee_percent': 2.0,
+        'commission_rate': 10.0,
+    }
+
+    if request.method == 'POST':
+        # Update settings
+        messages.success(request, 'Finance settings updated successfully.')
+        return redirect('finance:settings')
+
+    context = {
+        'fee_settings': fee_settings,
+    }
+
+    return render(request, 'finance/settings.html', context)
