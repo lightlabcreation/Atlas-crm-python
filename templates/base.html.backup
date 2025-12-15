@@ -1,0 +1,1915 @@
+<!DOCTYPE html>
+{% load static %}
+{% load user_filters %}
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Atlas Fulfillment{% endblock %}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Modern Theme CSS -->
+    <link rel="stylesheet" href="{% static 'css/modern-theme.css' %}">
+    <!-- Custom CSS -->
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+            background: white;
+            color: #1e293b;
+            direction: ltr !important;
+        }
+        
+        main {
+            flex: 1;
+        }
+        
+        /* Clean Light Sidebar */
+        .sidebar {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: fixed;
+            height: calc(100vh - 64px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            -ms-overflow-style: none;
+            background: white;
+            top: 64px !important;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            border-right: 1px solid #e5e7eb;
+            z-index: 1000;
+            direction: ltr !important;
+            left: 0 !important;
+        }
+        
+        /* Responsive Sidebar */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px !important;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .sidebar-toggle {
+                display: block !important;
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .sidebar {
+                transform: translateX(0);
+                width: 280px !important;
+            }
+            
+            .sidebar-toggle {
+                display: none !important;
+            }
+            
+            .main-content {
+                margin-left: 280px !important;
+                width: calc(100% - 280px) !important;
+                background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 50%, #e0e7ff 100%);
+            }
+        }
+        
+        /* Mobile Menu Toggle */
+        .sidebar-toggle {
+            position: fixed;
+            top: 10px;
+            left: 20px;
+            z-index: 1001;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            border: none;
+            border-radius: 12px;
+            width: 50px;
+            height: 50px;
+            color: white;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .sidebar-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+        }
+        
+        .sidebar-toggle:active {
+            transform: scale(0.95);
+        }
+        
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        
+        
+        /* ملف globals.css أو داخل styles */
+::-webkit-scrollbar {
+  width: 0px;              /* العرض */
+  height: 8px;             /* لو كان فيه scroll أفقي */
+}
+
+::-webkit-scrollbar-track {
+  background: #f3f4f6;     /* خلفية المسار */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;        /* لون الزر (thumb) */
+  border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+        
+        /* Enhanced Main Content */
+        .main-content {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: calc(100vh - 64px);
+            background: transparent;
+            padding: 0;
+            margin-left: 0;
+            max-width: 100%;
+        }
+        
+        @media (min-width: 1024px) {
+            .main-content {
+                margin-left: 16rem; /* 256px = 16rem */
+            }
+        }
+        
+        /* Loading Animation */
+        .loading {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Mobile responsive adjustments */
+        @media (max-width: 1023px) {
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 1rem;
+            }
+            
+            .content-wrapper > div {
+                max-width: 100%;
+                padding: 0 1rem;
+            }
+        }
+        
+        /* Enhanced Header */
+        .header-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            height: 64px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(234, 179, 8, 0.3);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+
+
+        /* Navbar Text Colors */
+        .header-nav .text-gray-900 {
+            color: #ffffff !important;
+        }
+
+        .header-nav .text-gray-600 {
+            color: #e2e8f0 !important;
+        }
+
+        .header-nav .text-gray-500 {
+            color: #cbd5e1 !important;
+        }
+
+        .header-nav .text-gray-700 {
+            color: #f1f5f9 !important;
+        }
+
+        /* Enhanced Navbar Components */
+        .sidebar-toggle-btn {
+            @apply p-2 rounded-xl hover:bg-amber-500/20 focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all duration-200 text-amber-400;
+        }
+
+        .nav-link {
+            @apply px-4 py-2 rounded-xl text-white hover:text-amber-300 hover:bg-amber-500/20 font-medium text-sm transition-all duration-200;
+        }
+
+        .language-select {
+            @apply bg-white border border-amber-200 text-gray-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all duration-200 hover:border-amber-300;
+        }
+
+        .pending-approvals-btn {
+            @apply p-2 rounded-xl hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200;
+        }
+
+        .notification-btn {
+            @apply p-2 rounded-xl hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-200;
+        }
+
+        .notification-dropdown {
+            @apply absolute mt-2 w-80 bg-white rounded-2xl shadow-xl overflow-hidden z-20 top-14 right-0 border border-amber-200;
+        }
+
+        .user-menu-btn {
+            @apply flex items-center max-w-xs text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-all duration-200 hover:bg-amber-50 px-3 py-2;
+        }
+
+        .user-menu-dropdown {
+            @apply origin-top-right absolute right-0 mt-2 w-56 rounded-2xl shadow-xl bg-white ring-1 ring-amber-200 divide-y divide-amber-100 z-50 border border-amber-200;
+        }
+
+        .user-info-section {
+            @apply block px-4 py-3 text-sm text-gray-700 border-b border-amber-100 bg-amber-50;
+        }
+
+        .user-menu-item {
+            @apply block px-4 py-3 text-sm text-gray-700 hover:bg-amber-50 transition-all duration-200;
+        }
+
+        /* Enhanced Dashboard Components */
+        .welcome-card {
+            @apply bg-white rounded-2xl shadow-lg shadow-amber-900/5 border border-amber-200/50 overflow-hidden;
+        }
+
+        .welcome-card-header {
+            @apply bg-gradient-to-r from-amber-50 to-yellow-50 border-b border-amber-200/50 p-6;
+        }
+
+        .welcome-icon {
+            @apply h-16 w-16 bg-gradient-to-br from-amber-100 to-yellow-100 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/25;
+        }
+
+        .stat-card {
+            @apply bg-white rounded-2xl shadow-lg shadow-amber-900/5 border border-amber-200/50 overflow-hidden hover:shadow-xl hover:shadow-amber-900/10 transition-all duration-300 hover:-translate-y-1;
+        }
+
+        .stat-card-content {
+            @apply p-6;
+        }
+
+        .stat-icon {
+            @apply h-12 w-12 rounded-2xl flex items-center justify-center text-white shadow-lg;
+        }
+
+        .stat-icon.orders {
+            @apply bg-gradient-to-br from-blue-500 to-blue-600 shadow-blue-500/25;
+        }
+
+        .stat-icon.products {
+            @apply bg-gradient-to-br from-green-500 to-green-600 shadow-green-500/25;
+        }
+
+        .stat-icon.users {
+            @apply bg-gradient-to-br from-purple-500 to-purple-600 shadow-purple-500/25;
+        }
+
+        .stat-icon.revenue {
+            @apply bg-gradient-to-br from-amber-500 to-yellow-500 shadow-amber-500/25;
+        }
+
+        .stat-label {
+            @apply text-sm font-medium text-gray-600;
+        }
+
+        .stat-value {
+            @apply text-3xl font-bold text-gray-900;
+        }
+
+        .stat-change {
+            @apply text-xs font-medium mt-1;
+        }
+
+        .stat-change.positive {
+            @apply text-green-600;
+        }
+
+        .stat-change.negative {
+            @apply text-red-600;
+        }
+
+        .content-card {
+            @apply bg-white rounded-2xl shadow-lg shadow-amber-900/5 border border-amber-200/50 overflow-hidden;
+        }
+
+        .content-card-header {
+            @apply bg-gradient-to-r from-amber-50 to-yellow-50 border-b border-amber-200/50 px-6 py-4 flex items-center justify-between;
+        }
+
+        .content-card-body {
+            @apply p-6;
+        }
+
+        .view-all-link {
+            @apply text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors duration-200;
+        }
+
+        .order-item {
+            @apply p-4 rounded-xl border border-gray-100 hover:border-amber-200 hover:bg-amber-50/50 transition-all duration-200;
+        }
+
+        .order-status-badge {
+            @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+        }
+
+        .order-status-badge.pending {
+            @apply bg-yellow-100 text-yellow-800;
+        }
+
+        .order-status-badge.confirmed {
+            @apply bg-blue-100 text-blue-800;
+        }
+
+        .order-status-badge.processing {
+            @apply bg-purple-100 text-purple-800;
+        }
+
+        .order-status-badge.delivered {
+            @apply bg-green-100 text-green-800;
+        }
+
+        .quick-action-btn {
+            @apply w-full flex items-center px-4 py-3 rounded-xl font-medium transition-all duration-200 hover:scale-105;
+        }
+
+        .quick-action-btn.primary {
+            @apply bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/35;
+        }
+
+        .quick-action-btn.secondary {
+            @apply bg-gray-50 text-gray-700 border border-gray-200 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-700;
+        }
+
+        .status-indicator {
+            @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+        }
+
+        .status-indicator.online {
+            @apply bg-green-100 text-green-800;
+        }
+
+        .status-indicator.offline {
+            @apply bg-red-100 text-red-800;
+        }
+
+        .status-indicator.warning {
+            @apply bg-yellow-100 text-yellow-800;
+        }
+
+        .health-item {
+            @apply space-y-2;
+        }
+
+        .health-status {
+            @apply text-sm font-medium;
+        }
+
+        .health-status.online {
+            @apply text-green-600;
+        }
+
+        .health-status.warning {
+            @apply text-yellow-600;
+        }
+
+        .health-status.offline {
+            @apply text-red-600;
+        }
+
+        .health-bar {
+            @apply w-full bg-gray-200 rounded-full h-2;
+        }
+
+        .health-progress {
+            @apply h-2 rounded-full transition-all duration-300;
+        }
+
+        .health-progress.online {
+            @apply bg-green-500;
+        }
+
+        .health-progress.warning {
+            @apply bg-yellow-500;
+        }
+
+        .health-progress.offline {
+            @apply bg-red-500;
+        }
+
+        .activity-item {
+            @apply p-3 rounded-xl hover:bg-amber-50/50 transition-colors duration-200;
+        }
+
+        .activity-icon {
+            @apply h-8 w-8 rounded-full flex items-center justify-center text-white text-sm;
+        }
+
+        .activity-icon.order {
+            @apply bg-blue-500;
+        }
+
+        .activity-icon.user {
+            @apply bg-green-500;
+        }
+
+        .activity-icon.system {
+            @apply bg-purple-500;
+        }
+
+        .empty-state {
+            @apply text-center py-8;
+        }
+        
+        .page-container {
+            padding-top: 64px;
+        }
+        
+        /* Enhanced Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-bottom: 1px solid rgba(234, 179, 8, 0.2);
+            padding: 1.5rem;
+        }
+        
+        /* Enhanced Menu Items with Gold Theme */
+        .menu-item {
+            border-radius: 16px;
+            margin-bottom: 6px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #cbd5e1;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid transparent;
+        }
+        
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(234, 179, 8, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .menu-item:hover::before {
+            left: 100%;
+        }
+        
+        .menu-item:hover {
+            background: linear-gradient(135deg, rgba(234, 179, 8, 0.1) 0%, rgba(202, 138, 4, 0.05) 100%);
+            color: #fbbf24;
+            transform: translateX(6px);
+            border-color: rgba(234, 179, 8, 0.3);
+            box-shadow: 0 4px 12px rgba(234, 179, 8, 0.2);
+        }
+        
+        .menu-item.active {
+            background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+            color: #ffffff;
+            box-shadow: 0 8px 25px rgba(234, 179, 8, 0.4);
+            transform: translateX(6px);
+            border-color: rgba(234, 179, 8, 0.5);
+        }
+        
+        .menu-item.active::before {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+        
+        .menu-item i {
+            color: inherit;
+            transition: transform 0.3s ease;
+        }
+        
+        .menu-item:hover i {
+            transform: scale(1.1);
+        }
+        
+        /* Enhanced Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgba(234, 179, 8, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #ca8a04 0%, #a16207 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(234, 179, 8, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgba(100, 116, 139, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #475569 0%, #334155 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(100, 116, 139, 0.4);
+        }
+        
+        /* Enhanced Tables - Full Width, Better Spacing */
+        .table-container {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 100%;
+            padding: 1.5rem;
+        }
+        
+        /* Prevent horizontal scroll on all tables - Full width with better spacing */
+        table {
+            width: 100% !important;
+            max-width: 100% !important;
+            table-layout: auto;
+            border-collapse: separate;
+            border-spacing: 0;
+            display: table;
+        }
+        
+        /* Ensure table uses full available width */
+        table tbody tr, table thead tr {
+            width: 100%;
+        }
+        
+        /* Distribute columns evenly and use available space */
+        table colgroup {
+            display: none;
+        }
+        
+        /* Table cells with compact spacing and padding */
+        thead th {
+            padding: 0.5rem 0.75rem;
+            vertical-align: middle;
+            white-space: nowrap;
+            text-align: left;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #854d0e;
+            font-weight: 600;
+            font-size: 0.75rem;
+            border-bottom: 2px solid rgba(234, 179, 8, 0.2);
+            min-width: 80px;
+            width: auto;
+        }
+        
+        tbody td {
+            padding: 0.5rem 0.75rem;
+            vertical-align: middle;
+            white-space: nowrap;
+            max-width: none;
+            min-width: 80px;
+            font-size: 0.875rem;
+            width: auto;
+        }
+        
+        /* Compact columns for text-heavy content */
+        thead th:nth-child(1), tbody td:nth-child(1) {
+            min-width: 100px;
+        }
+        
+        thead th:nth-child(4), tbody td:nth-child(4),
+        thead th:nth-child(9), tbody td:nth-child(9),
+        thead th:nth-child(10), tbody td:nth-child(10),
+        thead th:nth-child(12), tbody td:nth-child(12) {
+            min-width: 120px;
+        }
+        
+        /* Better spacing between columns */
+        thead th:not(:last-child), tbody td:not(:last-child) {
+            border-right: 1px solid rgba(226, 232, 240, 0.5);
+        }
+        
+        /* Prevent wrapping for table cells to enable horizontal scroll */
+        .overflow-x-auto thead th, .overflow-x-auto tbody td {
+            white-space: nowrap;
+        }
+        
+        tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+        }
+        
+        tbody tr:hover {
+            background: linear-gradient(135deg, #fef9e7 0%, #fef3c7 100%);
+            transform: scale(1.01);
+        }
+        
+        /* Additional compact table styles */
+        table th, table td {
+            padding: 0.5rem 0.75rem !important;
+            font-size: 0.875rem !important;
+        }
+        
+        table th {
+            font-size: 0.75rem !important;
+        }
+        
+        /* Responsive table adjustments */
+        @media (max-width: 768px) {
+            table {
+                font-size: 0.875rem;
+            }
+            
+            thead th, tbody td {
+                padding: 0.5rem;
+            }
+        }
+        
+        /* Enhanced Status Badges */
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+        }
+        
+        .status-pending {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #854d0e;
+        }
+        
+        .status-processing {
+            background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%);
+            color: #1e40af;
+        }
+        
+        .status-shipped {
+            background: linear-gradient(135deg, #dcfce7 0%, #86efac 100%);
+            color: #166534;
+        }
+        
+        .status-delivered {
+            background: linear-gradient(135deg, #bbf7d0 0%, #4ade80 100%);
+            color: #14532d;
+        }
+        
+        .status-cancelled {
+            background: linear-gradient(135deg, #fecaca 0%, #f87171 100%);
+            color: #991b1b;
+        }
+        
+        /* Enhanced Form Elements */
+        .form-input {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(226, 232, 240, 0.8);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-input:focus {
+            border-color: #eab308;
+            box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1);
+            outline: none;
+        }
+        
+        /* Fix all dropdown menus to have white background (except navbar dropdowns) */
+        select, .dropdown-menu:not(#notif-dropdown):not(#user-menu), 
+        .dropdown-content:not(#notif-dropdown):not(#user-menu), 
+        .menu-dropdown, .status-dropdown, .filter-dropdown, .action-dropdown {
+            background: white !important;
+            color: #374151 !important;
+            border: 1px solid #e5e7eb !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        /* Keep navbar dropdowns dark */
+        #notif-dropdown, #user-menu {
+            background: rgb(30 41 59 / 0.95) !important;
+            color: #e2e8f0 !important;
+            border: 1px solid rgb(71 85 105 / 0.5) !important;
+        }
+        
+        select option, .dropdown-menu option {
+            background: white !important;
+            color: #374151 !important;
+            padding: 8px 12px !important;
+        }
+        
+        /* Fix specific dropdown elements */
+        .dropdown-toggle + .dropdown-menu,
+        .dropdown:hover .dropdown-menu,
+        .dropdown-menu.show {
+            background: white !important;
+            color: #374151 !important;
+            border: 1px solid #e5e7eb !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        .dropdown-item {
+            color: #374151 !important;
+            background: white !important;
+            padding: 8px 16px !important;
+            transition: all 0.2s ease !important;
+        }
+        
+        .dropdown-item:hover {
+            background: #f9fafb !important;
+            color: #111827 !important;
+        }
+        
+        /* Fix form select elements */
+        select.form-control, select.form-select {
+            background: white !important;
+            color: #374151 !important;
+            border: 1px solid #d1d5db !important;
+        }
+        
+        /* Fix status dropdowns */
+        .status-dropdown select {
+            background: white !important;
+            color: #374151 !important;
+        }
+        
+        /* Fix all select elements globally */
+        select {
+            background: white !important;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e") !important;
+            background-position: right 8px center !important;
+            background-repeat: no-repeat !important;
+            background-size: 16px !important;
+            color: #374151 !important;
+            border: 1px solid #d1d5db !important;
+            border-radius: 6px !important;
+            padding: 8px 32px 8px 12px !important;
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+        }
+        
+        select:focus {
+            outline: none !important;
+            border-color: #eab308 !important;
+            box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1) !important;
+        }
+        
+        /* Fix select options */
+        select option {
+            background: white !important;
+            color: #374151 !important;
+            padding: 8px 12px !important;
+        }
+        
+        /* Fix Tailwind select classes */
+        .select, .form-select {
+            background: white !important;
+            color: #374151 !important;
+        }
+        
+        /* Fix any remaining dark dropdowns */
+        .dark .dropdown-menu,
+        .dark select,
+        .dark .form-select {
+            background: white !important;
+            color: #374151 !important;
+        }
+        
+        /* Enhanced Dashboard Stats */
+        .dashboard-stat {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border-left: 4px solid #eab308;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        
+        .dashboard-stat:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+            color: white;
+            font-size: 1.25rem;
+        }
+        
+        /* Enhanced Search Bar */
+        .search-container {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        /* Content Wrapper */
+        .content-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-height: calc(100vh - 64px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #d1d5db #f3f4f6;
+        }
+        
+        /* Custom scrollbar for content wrapper */
+        .content-wrapper::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .content-wrapper::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            border-radius: 4px;
+        }
+        
+        .content-wrapper::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+        
+        .content-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+        
+        /* Main content scrollbar */
+        .main-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .main-content::-webkit-scrollbar-track {
+            background: #f3f4f6;
+            border-radius: 4px;
+        }
+        
+        .main-content::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+        
+        .main-content::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+        
+        /* Force LTR layout for dashboard */
+        .main-content,
+        .sidebar,
+        .content-wrapper,
+        .navbar,
+        nav {
+            direction: ltr !important;
+        }
+        
+        /* Ensure flex layouts don't reverse */
+        .flex {
+            direction: ltr !important;
+        }
+        
+        /* Force text alignment */
+        .text-left {
+            text-align: left !important;
+        }
+        
+        .text-right {
+            text-align: right !important;
+        }
+        
+        /* Override RTL for dashboard */
+        [dir="rtl"] .main-content,
+        [dir="rtl"] .sidebar,
+        [dir="rtl"] .content-wrapper,
+        [dir="rtl"] .navbar,
+        [dir="rtl"] nav {
+            direction: ltr !important;
+        }
+        
+        [dir="rtl"] .main-content {
+            margin-left: 16rem !important;
+            margin-right: 0 !important;
+        }
+        
+        [dir="rtl"] .sidebar {
+            left: 0 !important;
+            right: auto !important;
+        }
+        
+        .content-wrapper > div {
+            width: 100%;
+        }
+        
+        /* Enhanced Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+        
+        .page-link {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            color: #64748b;
+            transition: all 0.3s ease;
+        }
+        
+        .page-link:hover {
+            background: #eab308;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .page-link.active {
+            background: #eab308;
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(234, 179, 8, 0.3);
+        }
+        
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(234, 179, 8, 0.3);
+            border-radius: 50%;
+            border-top-color: #eab308;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* RTL Support */
+        [dir="rtl"] .sidebar {
+            right: 0;
+            left: auto;
+        }
+        
+        [dir="rtl"] .main-content {
+            margin-right: 16rem;
+            margin-left: 0;
+        }
+        
+        [dir="rtl"] .dashboard-stat {
+            border-left: none;
+            border-right: 4px solid #eab308;
+        }
+        
+        [dir="rtl"] .ml-2, [dir="rtl"] .ml-3, [dir="rtl"] .ml-4 {
+            margin-left: 0;
+            margin-right: 0.5rem;
+        }
+        
+        [dir="rtl"] .mr-2, [dir="rtl"] .mr-3, [dir="rtl"] .mr-4 {
+            margin-right: 0;
+            margin-left: 0.5rem;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .card {
+                border-radius: 12px;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+        .sidebar.show {
+            transform: translateX(0);
+        }
+        }
+    </style>
+    <!-- Enhanced Forms CSS -->
+    <link rel="stylesheet" href="{% static 'css/enhanced-forms.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-white antialiased" data-user-role="{{ user.primary_role.name|default:'Unknown' }}">
+    {% include 'navbar.html' %}
+
+    <div class="flex min-h-screen page-container">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar text-gray-800 w-64 lg:w-64 fixed h-full z-10 left-0 shadow lg:block">
+            <div class="h-full p-4">
+                <!-- Atlas Fulfillment Header for Stock Keeper -->
+                {% if user.has_role_stock_keeper %}
+                <div class="mb-6 pb-4 border-b border-gray-200">
+                    <h2 class="text-lg font-bold text-gray-900">Stock Keeper</h2>
+                </div>
+                {% endif %}
+                
+                <ul class="space-y-1">
+                    <!-- Admin Panel -->
+                    {% if user.has_role_admin or user.is_superuser %}
+                    
+                    <!-- Admin Section -->
+                    <li>
+                        <div class="px-3 py-2 mb-2">
+                            <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Admin</h3>
+                        </div>
+                        <ul class="space-y-0.5">
+                            <li>
+                                <a href="{% url 'dashboard:index' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded transition-colors {% if '/dashboard/' in request.path %}bg-yellow-100 text-yellow-800 border-l-4 border-yellow-400{% endif %}">
+                                    <i class="fas fa-tachometer-alt w-4 h-4 mr-3"></i>
+                                    Dashboard
+                                </a>
+                            </li>
+                            
+                             <li>
+                                 <a href="{% url 'users:list' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded transition-colors {% if '/users/' in request.path %}bg-yellow-100 text-yellow-800 border-l-4 border-yellow-400{% endif %}">
+                                     <i class="fas fa-users w-4 h-4 mr-3"></i>
+                                     Users
+                                 </a>
+                             </li>
+                            
+                            <li>
+                                <a href="{% url 'sellers:seller_list' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded transition-colors {% if '/sellers/' in request.path %}bg-yellow-100 text-yellow-800 border-l-4 border-yellow-400{% endif %}">
+                                    <i class="fas fa-store w-4 h-4 mr-3"></i>
+                                    Sellers
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'orders:list' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded transition-colors {% if '/orders/' in request.path %}bg-yellow-100 text-yellow-800 border-l-4 border-yellow-400{% endif %}">
+                                    <i class="fas fa-shopping-cart w-4 h-4 mr-3"></i>
+                                    Orders
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'sellers:products' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded transition-colors {% if '/products/' in request.path %}bg-yellow-100 text-yellow-800 border-l-4 border-yellow-400{% endif %}">
+                                    <i class="fas fa-box w-4 h-4 mr-3"></i>
+                                    Products
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'inventory:dashboard' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded transition-colors {% if '/inventory/' in request.path %}bg-yellow-100 text-yellow-800 border-l-4 border-yellow-400{% endif %}">
+                                    <i class="fas fa-warehouse w-4 h-4 mr-3"></i>
+                                    Inventory
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'finance:dashboard' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded transition-colors {% if '/finance/' in request.path %}bg-yellow-100 text-yellow-800 border-l-4 border-yellow-400{% endif %}">
+                                    <i class="fas fa-file-invoice-dollar w-4 h-4 mr-3"></i>
+                                    Finance
+                                </a>
+                            </li>
+                            
+                        </ul>
+                    </li>
+                    {% endif %}
+                    
+                    <!-- Call Center Agent Specific Sidebar -->
+                    {% if user.has_role_call_center_agent %}
+                    
+                    <!-- Call Center Agent Section -->
+                    <li>
+                        <div class="px-3 py-2 mb-2">
+                            <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Call Center Agent</h3>
+                        </div>
+                        <ul class="space-y-0.5">
+                            <li>
+                                <a href="{% url 'callcenter:agent_dashboard' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'callcenter:agent_dashboard' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-tachometer-alt w-4 h-4 mr-3"></i>
+                                    Dashboard
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'callcenter_agent:orders' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'callcenter_agent:orders' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-shopping-cart w-4 h-4 mr-3"></i>
+                                    Orders
+                                </a>
+                            </li>
+                            
+                        </ul>
+                    </li>
+                    {% endif %}
+                    
+                    <!-- Call Center Manager Specific Sidebar -->
+                    {% if user.has_role_call_center_manager %}
+                    
+                    <!-- Call Center Manager Section -->
+                    <li>
+                        <div class="px-3 py-2 mb-2">
+                            <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Call Center Manager</h3>
+                        </div>
+                        <ul class="space-y-0.5">
+                            <li>
+                                <a href="{% url 'callcenter_manager:dashboard' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'callcenter_manager:dashboard' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-tachometer-alt w-4 h-4 mr-3"></i>
+                                    Dashboard
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'callcenter_manager:orders_management' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'callcenter_manager:orders_management' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-shopping-cart w-4 h-4 mr-3"></i>
+                                    Orders
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'callcenter_manager:agents' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'callcenter_manager:agents' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-users w-4 h-4 mr-3"></i>
+                                    Agents
+                                </a>
+                            </li>
+                            
+                            
+                            <li>
+                                <a href="{% url 'callcenter_manager:agent_performance' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'callcenter_manager:agent_performance' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-chart-line w-4 h-4 mr-3"></i>
+                                    Agent Performance
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'callcenter_manager:order_statistics' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'callcenter_manager:order_statistics' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-chart-pie w-4 h-4 mr-3"></i>
+                                    Order Statistics
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'callcenter_manager:settings' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'callcenter_manager:settings' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-cog w-4 h-4 mr-3"></i>
+                                    Settings
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    
+                    <!-- Accountant Sidebar -->
+                    {% if user.has_role_accountant %}
+                    
+                    <!-- Finance Section -->
+                    <li>
+                        <div class="px-3 py-2 mb-2">
+                            <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Finance</h3>
+                        </div>
+                        <ul class="space-y-0.5">
+                            <li>
+                                <a href="{% url 'finance:accountant_dashboard' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'accountant_dashboard' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-tachometer-alt w-4 h-4 mr-3"></i>
+                                    Dashboard
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'finance:payments' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'payments' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-credit-card w-4 h-4 mr-3"></i>
+                                    Payments
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'finance:orders' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'orders' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-calculator w-4 h-4 mr-3"></i>
+                                    Order Management
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'finance:invoices' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'invoices' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-file-invoice w-4 h-4 mr-3"></i>
+                                    Invoices
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'finance:fees' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'fees' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-percentage w-4 h-4 mr-3"></i>
+                                    Fees
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'finance:reports' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'reports' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-chart-line w-4 h-4 mr-3"></i>
+                                    Reports
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'finance:bank_reconciliation' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'bank_reconciliation' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-university w-4 h-4 mr-3"></i>
+                                    Bank Reconciliation
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    
+                    <!-- Stock Keeper Specific Sidebar -->
+                    {% if user.has_role_stock_keeper %}
+                    <li>
+                        <ul class="space-y-0.5">
+                            <li>
+                                <a href="{% url 'stock_keeper:dashboard' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'stock_keeper:dashboard' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-chart-bar w-4 h-4 mr-3"></i>
+                                    Dashboard
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'stock_keeper:product_acceptance' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'product_acceptance' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-box w-4 h-4 mr-3"></i>
+                                    Inventory Management
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'stock_keeper:receive_stock' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'receive_stock' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-truck w-4 h-4 mr-3"></i>
+                                    Receiving
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'stock_keeper:ship_orders' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'ship_orders' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-clipboard-list w-4 h-4 mr-3"></i>
+                                    Order Picking
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'stock_keeper:return_orders' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'return_orders' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-rotate-left w-4 h-4 mr-3"></i>
+                                    Return Orders
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'stock_keeper:warehouses' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'warehouses' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-warehouse w-4 h-4 mr-3"></i>
+                                    Warehouses
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{% url 'stock_keeper:inventory_log' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'inventory_log' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-file-alt w-4 h-4 mr-3"></i>
+                                    Stock History
+                                </a>
+                            </li>
+
+                        </ul>
+                    </li>
+                    {% endif %}
+                    
+                    <!-- Packaging Agent Specific Sidebar -->
+                    {% if user.has_role_packaging %}
+                    
+                    <!-- Packaging Section -->
+                    <li>
+                        <div class="px-3 py-2 mb-2">
+                            <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Packaging</h3>
+                        </div>
+                        <ul class="space-y-0.5">
+                            <li>
+                                <a href="{% url 'packaging:dashboard' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'packaging:dashboard' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-tachometer-alt w-4 h-4 mr-3"></i>
+                                    Dashboard
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'packaging:orders' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'packaging:orders' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-box w-4 h-4 mr-3"></i>
+                                    Orders
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'packaging:materials_inventory' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'materials_inventory' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-boxes w-4 h-4 mr-3"></i>
+                                    Materials
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'packaging:materials_management' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'materials_management' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-cogs w-4 h-4 mr-3"></i>
+                                    Materials Management
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'packaging:reports' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'reports' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-chart-bar w-4 h-4 mr-3"></i>
+                                    Reports
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    
+                    <!-- Delivery Agent Specific Sidebar -->
+                    {% if user.has_role_delivery and not user.has_role_delivery_manager %}
+                    
+                    <!-- Delivery Agent Section -->
+                    <li>
+                        <div class="px-3 py-2 mb-2">
+                            <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Delivery Agent</h3>
+                        </div>
+                        <ul class="space-y-0.5">
+                            <li>
+                                <a href="{% url 'delivery:dashboard' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'delivery:dashboard' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-tachometer-alt w-4 h-4 mr-3"></i>
+                                    Dashboard
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'delivery:orders' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'delivery:orders' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-truck w-4 h-4 mr-3"></i>
+                                    Orders
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'delivery:performance' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'delivery:performance' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-chart-line w-4 h-4 mr-3"></i>
+                                    Performance
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'delivery:settings' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'delivery:settings' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-cog w-4 h-4 mr-3"></i>
+                                    Settings
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    
+                    <!-- Delivery Manager Specific Sidebar -->
+                    {% if user.has_role_delivery_manager %}
+                    
+                    <!-- Delivery Manager Section -->
+                    <li>
+                        <div class="px-3 py-2 mb-2">
+                            <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Delivery Manager</h3>
+                        </div>
+                        <ul class="space-y-0.5">
+                            <li>
+                                <a href="{% url 'delivery:manager_dashboard' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'manager_dashboard' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-tachometer-alt w-4 h-4 mr-3"></i>
+                                    Dashboard
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'delivery:manager_all_orders' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'manager_all_orders' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-list w-4 h-4 mr-3"></i>
+                                    All Orders
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'delivery:manager_shipping_companies' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'manager_shipping_companies' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-building w-4 h-4 mr-3"></i>
+                                    Shipping Companies
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'delivery:manager_assign_orders' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'manager_assign_orders' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-tasks w-4 h-4 mr-3"></i>
+                                    Assign Orders
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'delivery:manager_update_orders' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'manager_update_orders' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-edit w-4 h-4 mr-3"></i>
+                                    Update Statuses
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a href="{% url 'delivery:manager_process_returns' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'manager_process_returns' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                                    <i class="fas fa-undo w-4 h-4 mr-3"></i>
+                                    Process Returns
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                    
+                    <!-- Seller Specific Sidebar -->
+                    {% if user.has_role_seller %}
+                    <li>
+                        <a href="{% url 'sellers:dashboard' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'sellers:dashboard' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                            <i class="fas fa-tachometer-alt w-4 h-4 mr-3"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="{% url 'sellers:orders' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'sellers:orders' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                            <i class="fas fa-shopping-cart w-4 h-4 mr-3"></i>
+                            Orders
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="{% url 'sellers:inventory' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'sellers:inventory' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                            <i class="fas fa-boxes w-4 h-4 mr-3"></i>
+                            Inventory
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="{% url 'sellers:products' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'sellers:products' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                            <i class="fas fa-box w-4 h-4 mr-3"></i>
+                            Products
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="{% url 'sellers:finance' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'sellers:finance' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                            <i class="fas fa-money-bill-wave w-4 h-4 mr-3"></i>
+                            Finance
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a href="{% url 'sellers:sourcing_requests' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded {% if 'sellers:sourcing_requests' in request.resolver_match.url_name %}bg-gray-100 text-gray-900{% endif %}">
+                            <i class="fas fa-globe w-4 h-4 mr-3"></i>
+                            Sourcing
+                        </a>
+                    </li>
+                    
+                    
+                    {% endif %}
+                    
+                    <!-- Additional Sections for Admin Users -->
+                    {% if user.has_role_admin or user.is_superuser %}
+                     <!-- Sourcing Section -->
+                     <li>
+                         <a href="{% url 'sourcing:dashboard' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded transition-colors {% if '/sourcing/' in request.path %}bg-yellow-100 text-yellow-800 border-l-4 border-yellow-400{% endif %}">
+                             <i class="fas fa-globe w-4 h-4 mr-3"></i>
+                             Sourcing
+                         </a>
+                     </li>
+                    
+                    <!-- Packaging Section -->
+                    <li>
+                        <a href="{% url 'packaging:dashboard' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded transition-colors {% if '/packaging/' in request.path %}bg-yellow-100 text-yellow-800 border-l-4 border-yellow-400{% endif %}">
+                            <i class="fas fa-box-open w-4 h-4 mr-3"></i>
+                            Packaging
+                        </a>
+                    </li>
+                    
+                    <!-- Call Center Section -->
+                    <li>
+                        <a href="{% url 'callcenter:dashboard' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded transition-colors {% if '/callcenter/' in request.path %}bg-yellow-100 text-yellow-800 border-l-4 border-yellow-400{% endif %}">
+                            <i class="fas fa-headset w-4 h-4 mr-3"></i>
+                            Call Center
+                        </a>
+                    </li>
+                    
+                    <!-- Delivery Section -->
+                    <li>
+                        <a href="{% url 'delivery:dashboard' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded transition-colors {% if '/delivery/' in request.path %}bg-yellow-100 text-yellow-800 border-l-4 border-yellow-400{% endif %}">
+                            <i class="fas fa-truck w-4 h-4 mr-3"></i>
+                            Delivery
+                        </a>
+                    </li>
+                    
+                    <!-- Subscribers Section -->
+                    <li>
+                        <a href="{% url 'subscribers:list' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded transition-colors {% if '/subscribers/' in request.path %}bg-yellow-100 text-yellow-800 border-l-4 border-yellow-400{% endif %}">
+                            <i class="fas fa-user-friends w-4 h-4 mr-3"></i>
+                            Subscribers
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if user.can_create_roles %}
+                    <li class="pt-4 mt-4 border-t border-gray-600">
+                        <a href="{% url 'roles:role_list' %}" class="flex items-center px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 rounded transition-colors {% if '/roles/' in request.path %}bg-yellow-100 text-yellow-800 border-l-4 border-yellow-400{% endif %}">
+                            <i class="fas fa-user-tag w-4 h-4 mr-3"></i>
+                            Roles
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+                </div>
+                                </div>
+        
+        <!-- Mobile menu backdrop -->
+        <div id="sidebar-backdrop" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 hidden lg:hidden"></div>
+        
+        <!-- Main content -->
+        <main class="main-content flex-1 bg-white lg:ml-64 overflow-y-auto" style="max-height: calc(100vh - 64px);">
+            <div class="content-wrapper w-full">
+                <div class="w-full">
+                    <!-- Messages/Alerts -->
+                    {% if messages %}
+                        <div class="mb-6">
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} mb-4 animate-fade-in">
+                                    <div class="flex items-center p-4 rounded-lg border-l-4 {% if message.tags == 'error' %}bg-red-50 border-red-400 text-red-700{% elif message.tags == 'warning' %}bg-yellow-50 border-yellow-400 text-yellow-700{% elif message.tags == 'success' %}bg-green-50 border-green-400 text-green-700{% else %}bg-blue-50 border-blue-400 text-blue-700{% endif %}">
+                                        <div class="flex-shrink-0">
+                                            {% if message.tags == 'error' %}
+                                                <i class="fas fa-exclamation-circle text-red-500"></i>
+                                            {% elif message.tags == 'warning' %}
+                                                <i class="fas fa-exclamation-triangle text-yellow-500"></i>
+                                            {% elif message.tags == 'success' %}
+                                                <i class="fas fa-check-circle text-green-500"></i>
+                                            {% else %}
+                                                <i class="fas fa-info-circle text-blue-500"></i>
+                                            {% endif %}
+                                        </div>
+                                        <div class="ml-3 flex-1">
+                                            <p class="text-sm font-medium">{{ message }}</p>
+                                        </div>
+                                        <div class="ml-auto pl-3">
+                                            <button type="button" onclick="this.parentElement.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Breadcrumb Navigation -->
+                    {% block breadcrumbs %}
+                    <nav class="flex px-4 py-3 text-gray-700 border-b border-gray-200 bg-gray-50" aria-label="Breadcrumb">
+                        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                            <li class="inline-flex items-center">
+                                <a href="{% url 'dashboard:index' %}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-orange-600 transition-colors duration-200">
+                                    <i class="fas fa-home w-4 h-4 mr-2"></i>
+                                    Home
+                                </a>
+                            </li>
+                            {% if breadcrumb_items %}
+                                {% for item in breadcrumb_items %}
+                                <li>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-chevron-right text-gray-400 mx-2 text-xs"></i>
+                                        {% if item.url %}
+                                        <a href="{{ item.url }}" class="text-sm font-medium text-gray-700 hover:text-orange-600 transition-colors duration-200">
+                                            {% if item.icon %}<i class="{{ item.icon }} mr-1"></i>{% endif %}
+                                            {{ item.label }}
+                                        </a>
+                                        {% else %}
+                                        <span class="text-sm font-medium text-gray-500">
+                                            {% if item.icon %}<i class="{{ item.icon }} mr-1"></i>{% endif %}
+                                            {{ item.label }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </li>
+                                {% endfor %}
+                            {% endif %}
+                        </ol>
+                    </nav>
+                    {% endblock breadcrumbs %}
+
+                    <!-- Content -->
+                        {% block content %}{% endblock %}
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+
+        // Enhanced Sidebar toggle functionality for mobile
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+            
+            // Create mobile toggle button if it doesn't exist
+            if (!document.getElementById('mobile-sidebar-toggle')) {
+                const mobileToggle = document.createElement('button');
+                mobileToggle.id = 'mobile-sidebar-toggle';
+                mobileToggle.className = 'sidebar-toggle';
+                mobileToggle.innerHTML = '<i class="fas fa-bars"></i>';
+                mobileToggle.setAttribute('aria-label', 'Toggle sidebar menu');
+                document.body.appendChild(mobileToggle);
+                
+                mobileToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('open');
+                    
+                    // Update button icon
+                    const icon = this.querySelector('i');
+                    if (sidebar.classList.contains('open')) {
+                        icon.className = 'fas fa-times';
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        icon.className = 'fas fa-bars';
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+            }
+            
+            // Create overlay if it doesn't exist
+            const overlay = document.querySelector('.sidebar-overlay');
+            if (!overlay) {
+                const newOverlay = document.createElement('div');
+                newOverlay.className = 'sidebar-overlay';
+                newOverlay.addEventListener('click', function() {
+                    sidebar.classList.remove('open');
+                    document.body.style.overflow = 'auto';
+                    const mobileToggle = document.getElementById('mobile-sidebar-toggle');
+                    if (mobileToggle) {
+                        const icon = mobileToggle.querySelector('i');
+                        icon.className = 'fas fa-bars';
+                    }
+                });
+                document.body.appendChild(newOverlay);
+            }
+            
+            // Close sidebar on window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('open');
+                    document.body.style.overflow = 'auto';
+                    const mobileToggle = document.getElementById('mobile-sidebar-toggle');
+                    if (mobileToggle) {
+                        const icon = mobileToggle.querySelector('i');
+                        icon.className = 'fas fa-bars';
+                    }
+                }
+            });
+            
+            // Notification dropdown toggle
+            const notificationButton = document.getElementById('notif-dropdown-button');
+            const notificationDropdown = document.getElementById('notif-dropdown');
+            
+            if (notificationButton && notificationDropdown) {
+                notificationButton.addEventListener('click', function() {
+                    notificationDropdown.classList.toggle('hidden');
+                });
+            }
+            
+            // Profile dropdown toggle
+            const profileButton = document.getElementById('user-menu-button');
+            const profileDropdown = document.getElementById('user-menu');
+            
+            if (profileButton && profileDropdown) {
+                profileButton.addEventListener('click', function() {
+                    profileDropdown.classList.toggle('hidden');
+                });
+            }
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(event) {
+                if (notificationButton && notificationDropdown && !notificationButton.contains(event.target) && !notificationDropdown.contains(event.target)) {
+                    notificationDropdown.classList.add('hidden');
+                }
+                
+                if (profileButton && profileDropdown && !profileButton.contains(event.target) && !profileDropdown.contains(event.target)) {
+                    profileDropdown.classList.add('hidden');
+                }
+            });
+
+        });
+
+
+        // Navbar functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Navbar Dropdowns
+            const pendingApprovalsButton = document.getElementById('pending-approvals-button');
+            const pendingApprovalsDropdown = document.getElementById('pending-approvals-dropdown');
+            const notificationsButton = document.getElementById('notifications-button');
+            const notificationsDropdown = document.getElementById('notifications-dropdown');
+            const profileButton = document.getElementById('profile-button');
+            const profileDropdown = document.getElementById('profile-dropdown');
+
+            // Pending Approvals Dropdown
+            if (pendingApprovalsButton && pendingApprovalsDropdown) {
+                pendingApprovalsButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const isHidden = pendingApprovalsDropdown.classList.contains('hidden');
+                    
+                    // Hide other dropdowns
+                    if (notificationsDropdown) notificationsDropdown.classList.add('hidden');
+                    if (profileDropdown) profileDropdown.classList.add('hidden');
+                    
+                    // Toggle pending approvals dropdown
+                    pendingApprovalsDropdown.classList.toggle('hidden');
+                    
+                    // Update button state
+                    if (isHidden) {
+                        this.classList.add('ring-2', 'ring-amber-500/50');
+                    } else {
+                        this.classList.remove('ring-2', 'ring-amber-500/50');
+                    }
+                });
+            }
+
+            // Notifications Dropdown
+            if (notificationsButton && notificationsDropdown) {
+                notificationsButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const isHidden = notificationsDropdown.classList.contains('hidden');
+                    
+                    // Hide other dropdowns
+                    if (pendingApprovalsDropdown) pendingApprovalsDropdown.classList.add('hidden');
+                    if (profileDropdown) profileDropdown.classList.add('hidden');
+                    
+                    // Toggle notifications dropdown
+                    notificationsDropdown.classList.toggle('hidden');
+                    
+                    // Update button state
+                    if (isHidden) {
+                        this.classList.add('ring-2', 'ring-amber-500/50');
+                    } else {
+                        this.classList.remove('ring-2', 'ring-amber-500/50');
+                    }
+                });
+            }
+
+            // Profile Dropdown
+            if (profileButton && profileDropdown) {
+                profileButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const isHidden = profileDropdown.classList.contains('hidden');
+                    
+                    // Hide other dropdowns
+                    if (pendingApprovalsDropdown) pendingApprovalsDropdown.classList.add('hidden');
+                    if (notificationsDropdown) notificationsDropdown.classList.add('hidden');
+                    
+                    // Toggle profile dropdown
+                    profileDropdown.classList.toggle('hidden');
+                    
+                    // Update button state
+                    if (isHidden) {
+                        this.classList.add('ring-2', 'ring-amber-500/50');
+                    } else {
+                        this.classList.remove('ring-2', 'ring-amber-500/50');
+                    }
+                });
+            }
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!pendingApprovalsButton?.contains(e.target)) {
+                    pendingApprovalsDropdown?.classList.add('hidden');
+                    pendingApprovalsButton?.classList.remove('ring-2', 'ring-amber-500/50');
+                }
+                
+                if (!notificationsButton?.contains(e.target)) {
+                    notificationsDropdown?.classList.add('hidden');
+                    notificationsButton?.classList.remove('ring-2', 'ring-amber-500/50');
+                }
+                
+                if (!profileButton?.contains(e.target)) {
+                    profileDropdown?.classList.add('hidden');
+                    profileButton?.classList.remove('ring-2', 'ring-amber-500/50');
+                }
+            });
+
+            // Close dropdowns when pressing Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    pendingApprovalsDropdown?.classList.add('hidden');
+                    notificationsDropdown?.classList.add('hidden');
+                    profileDropdown?.classList.add('hidden');
+                    
+                    pendingApprovalsButton?.classList.remove('ring-2', 'ring-amber-500/50');
+                    notificationsButton?.classList.remove('ring-2', 'ring-amber-500/50');
+                    profileButton?.classList.remove('ring-2', 'ring-amber-500/50');
+                }
+            });
+        });
+        
+        // Ensure tables work properly with horizontal scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            // Keep overflow-x-auto working for table wrappers
+            const tableWrappers = document.querySelectorAll('.overflow-x-auto');
+            tableWrappers.forEach(wrapper => {
+                // Ensure overflow-x-auto works properly
+                if (wrapper.querySelector('table')) {
+                    wrapper.style.overflowX = 'auto';
+                }
+            });
+            
+            // Ensure table cells don't wrap when inside overflow-x-auto containers
+            const tables = document.querySelectorAll('.overflow-x-auto table');
+            tables.forEach(table => {
+                const cells = table.querySelectorAll('thead th, tbody td');
+                cells.forEach(cell => {
+                    // Only apply nowrap if inside overflow-x-auto container
+                    if (table.closest('.overflow-x-auto')) {
+                        cell.style.whiteSpace = 'nowrap';
+                    }
+                });
+            });
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+
+    <!-- Include Modal System -->
+    {% include 'modals/modal_system.html' %}
+
+    <!-- User Guide System -->
+    <script src="{% static 'js/user-guide.js' %}"></script>
+</body>
+</html> 

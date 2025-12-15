@@ -6,7 +6,13 @@ app_name = 'inventory'
 urlpatterns = [
     # Inventory Dashboard
     path('', views.inventory_dashboard, name='dashboard'),
-    
+
+    # Convenience redirects for common URLs
+    path('locations/', views.warehouse_list, name='locations'),
+    path('activity/', views.movements, name='activity'),
+    path('receiving/', views.receiving_view, name='receiving'),
+    path('labels/', views.labels_view, name='labels'),
+
     # Products
     path('products/', views.inventory_products, name='products'),
     path('products/add/', views.add_product, name='add_product'),

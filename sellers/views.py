@@ -1678,4 +1678,59 @@ def get_seller_products(request, seller_id):
         })
 
 
+@login_required
+def seller_create(request):
+    """Admin view to create a new seller."""
+    # Check if user has admin permissions
+    if not (request.user.has_role('Super Admin') or request.user.has_role('Admin') or request.user.is_superuser):
+        messages.error(request, "You don't have permission to access this page.")
+        return redirect('dashboard:index')
+
+    from django.contrib.auth import get_user_model
+    from roles.models import Role, UserRole
+
+    User = get_user_model()
+
+    if request.method == 'POST':
+        # Get form data
+        email = request.POST.get('email')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        phone = request.POST.get('phone', '')
+        password = request.POST.get('password')
+
+        # Validate email
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'A user with this email already exists.')
+            return render(request, 'sellers/seller_create.html')
+
+        try:
+            # Create user
+            user = User.objects.create_user(
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name,
+                phone=phone
+            )
+
+            # Assign Seller role
+            seller_role = Role.objects.filter(name='Seller').first()
+            if seller_role:
+                UserRole.objects.create(user=user, role=seller_role, is_active=True)
+
+            # Log the action
+            AuditLog.objects.create(
+                user=request.user,
+                action='create_seller',
+                details=f'Created seller: {email}'
+            )
+
+            messages.success(request, f'Seller {first_name} {last_name} created successfully.')
+            return redirect('sellers:seller_list')
+
+        except Exception as e:
+            messages.error(request, f'Error creating seller: {str(e)}')
+
+    return render(request, 'sellers/seller_create.html')
 

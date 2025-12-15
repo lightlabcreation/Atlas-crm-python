@@ -19,7 +19,9 @@ urlpatterns = [
     path('agents/<int:agent_id>/edit/', views.agent_edit, name='agent_edit'),
     
     path('reports/agent-performance/', views.agent_performance, name='agent_performance'),
+    path('reports/agent-performance/export/', views.export_agent_performance, name='export_agent_performance'),
     path('reports/order-statistics/', views.order_statistics, name='order_statistics'),
+    path('reports/order-statistics/export/', views.export_order_statistics, name='export_order_statistics'),
     
     # Settings
     path('settings/', views.settings, name='settings'),

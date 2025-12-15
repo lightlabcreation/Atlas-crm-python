@@ -80,4 +80,7 @@ urlpatterns = [
     # Reconciliation
     path('reconciliation/', views.reconciliation, name='reconciliation'),
     path('reconciliation/auto-match/', views.reconciliation_auto_match, name='reconciliation_auto_match'),
+
+    # Finance Settings (convenience URL)
+    path('settings/', views.finance_settings, name='settings'),
 ]

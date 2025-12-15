@@ -4,6 +4,9 @@
 {% block title %}Call Center Manager Dashboard{% endblock %}
 
 {% block content %}
+<!-- Hidden CSRF token for JavaScript fetch calls -->
+<form id="csrf-form" style="display:none;">{% csrf_token %}</form>
+
 <div class="min-h-screen bg-gray-50">
     <!-- Header Section -->
     <div class="bg-white shadow-sm border-b border-gray-200">

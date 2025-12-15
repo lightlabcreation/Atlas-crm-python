@@ -239,3 +239,55 @@ def delete_own_account(request):
         'success': False,
         'message': 'Invalid request method.'
     })
+
+
+@login_required
+@user_passes_test(is_admin)
+def audit_logs(request):
+    """View audit logs for privileged actions."""
+    from users.models import AuditLog
+
+    # Get filter parameters
+    user_filter = request.GET.get('user', '')
+    action_filter = request.GET.get('action', '')
+    date_from = request.GET.get('date_from', '')
+    date_to = request.GET.get('date_to', '')
+
+    # Base queryset
+    logs = AuditLog.objects.all().select_related('user').order_by('-timestamp')
+
+    # Apply filters
+    if user_filter:
+        logs = logs.filter(
+            Q(user__email__icontains=user_filter) |
+            Q(user__first_name__icontains=user_filter) |
+            Q(user__last_name__icontains=user_filter)
+        )
+
+    if action_filter:
+        logs = logs.filter(action__icontains=action_filter)
+
+    if date_from:
+        logs = logs.filter(timestamp__date__gte=date_from)
+
+    if date_to:
+        logs = logs.filter(timestamp__date__lte=date_to)
+
+    # Pagination
+    paginator = Paginator(logs, 50)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Get distinct action types for filter dropdown
+    action_types = AuditLog.objects.values_list('action', flat=True).distinct()
+
+    context = {
+        'page_obj': page_obj,
+        'user_filter': user_filter,
+        'action_filter': action_filter,
+        'date_from': date_from,
+        'date_to': date_to,
+        'action_types': action_types,
+    }
+
+    return render(request, 'settings/audit_logs.html', context)

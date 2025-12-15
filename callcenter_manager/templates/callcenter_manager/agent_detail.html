@@ -227,15 +227,17 @@
                             View Orders
                         </a>
                         
-                        <button class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        <a href="{% url 'callcenter_manager:orders_management' %}?status=unassigned&assign_to={{ agent.id }}"
+                           class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium text-center block">
                             <i class="fas fa-plus mr-2"></i>
                             Assign Order
-                        </button>
-                        
-                        <button class="w-full bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium">
+                        </a>
+
+                        <a href="{% url 'callcenter_manager:agent_performance' %}?agent={{ agent.id }}"
+                           class="w-full bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-md text-sm font-medium text-center block">
                             <i class="fas fa-chart-bar mr-2"></i>
                             View Reports
-                        </button>
+                        </a>
                     </div>
                 </div>
 

@@ -201,3 +201,18 @@ def callcenter_analytics_json(request):
         'agent_performance': CallCenterAnalytics.get_agent_performance(days, limit)
     }
     return JsonResponse(data)
+
+
+@login_required
+def analytics_dashboard(request):
+    """Analytics dashboard with comprehensive charts and reports."""
+    from django.shortcuts import render
+
+    days = int(request.GET.get('days', 30))
+
+    context = {
+        'days': days,
+        'executive_summary': DashboardKPIs.get_executive_summary(days),
+    }
+
+    return render(request, 'analytics/dashboard.html', context)

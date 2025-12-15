@@ -4,8 +4,9 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db.models import Q, Count, Sum
 from django.utils import timezone
-from django.http import JsonResponse
-from datetime import timedelta
+from django.http import JsonResponse, HttpResponse
+from datetime import timedelta, datetime
+import csv
 from orders.models import Order
 from products.models import Product
 from users.models import User
@@ -417,19 +418,32 @@ def agent_performance(request):
     if not has_manager_role(request.user):
         messages.error(request, "You don't have permission to access this page.")
         return redirect('dashboard:index')
-    
+
+    # Get period filter
+    period = request.GET.get('period', 'week')
+    today = timezone.now().date()
+
+    if period == 'week':
+        start_date = today - timedelta(days=7)
+    elif period == 'month':
+        start_date = today - timedelta(days=30)
+    elif period == 'year':
+        start_date = today - timedelta(days=365)
+    else:
+        start_date = today - timedelta(days=7)
+
     # Get all agents
     agents = User.objects.filter(user_roles__role__name='Call Center Agent', user_roles__is_active=True, is_active=True).prefetch_related('user_roles__role').distinct().order_by('first_name', 'last_name')
-    
+
     # Calculate agent performance
-    agent_performance = []
+    agent_performance_data = []
     for agent in agents:
-        agent_orders = Order.objects.filter(agent=agent).select_related('agent', 'seller')
+        agent_orders = Order.objects.filter(agent=agent, created_at__date__gte=start_date).select_related('agent', 'seller')
         total_orders = agent_orders.count()
         completed_orders = agent_orders.filter(status='completed').count()
         success_rate = (completed_orders / total_orders * 100) if total_orders > 0 else 0
-        
-        agent_performance.append({
+
+        agent_performance_data.append({
             'agent': agent,
             'total_orders': total_orders,
             'completed_orders': completed_orders,
@@ -437,19 +451,71 @@ def agent_performance(request):
             'performance_score': min(100, round(success_rate + 10, 1)),  # Add some bonus
             'customer_rating': 4.2 + (success_rate / 100 * 0.8),  # Simulate rating
         })
-    
+
     # Sort by performance score
-    agent_performance.sort(key=lambda x: x['performance_score'], reverse=True)
-    
+    agent_performance_data.sort(key=lambda x: x['performance_score'], reverse=True)
+
     context = {
         'total_agents': agents.count(),
-        'total_orders_handled': sum(ap['total_orders'] for ap in agent_performance),
-        'top_performer': agent_performance[0]['agent'].get_full_name() if agent_performance else None,
-        'agent_performance': agent_performance,
-        'top_performers': agent_performance[:3],
+        'total_orders_handled': sum(ap['total_orders'] for ap in agent_performance_data),
+        'top_performer': agent_performance_data[0]['agent'].get_full_name() if agent_performance_data else None,
+        'agent_performance': agent_performance_data,
+        'top_performers': agent_performance_data[:3],
+        'period': period,
     }
-    
+
     return render(request, 'callcenter_manager/agent_performance.html', context)
+
+
+@login_required
+def export_agent_performance(request):
+    """Export agent performance data to CSV."""
+    if not has_manager_role(request.user):
+        messages.error(request, "You don't have permission to access this page.")
+        return redirect('dashboard:index')
+
+    # Get period filter
+    period = request.GET.get('period', 'week')
+    today = timezone.now().date()
+
+    if period == 'week':
+        start_date = today - timedelta(days=7)
+    elif period == 'month':
+        start_date = today - timedelta(days=30)
+    elif period == 'year':
+        start_date = today - timedelta(days=365)
+    else:
+        start_date = today - timedelta(days=7)
+
+    # Get all agents
+    agents = User.objects.filter(user_roles__role__name='Call Center Agent', user_roles__is_active=True, is_active=True).prefetch_related('user_roles__role').distinct().order_by('first_name', 'last_name')
+
+    # Create CSV response
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="agent_performance_{period}_{today.strftime("%Y%m%d")}.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Agent Performance Report', f'Period: {period.title()}', f'Generated: {today.strftime("%Y-%m-%d")}'])
+    writer.writerow([])
+    writer.writerow(['Agent Name', 'Email', 'Total Orders', 'Completed Orders', 'Success Rate (%)', 'Performance Score'])
+
+    for agent in agents:
+        agent_orders = Order.objects.filter(agent=agent, created_at__date__gte=start_date)
+        total_orders = agent_orders.count()
+        completed_orders = agent_orders.filter(status='completed').count()
+        success_rate = (completed_orders / total_orders * 100) if total_orders > 0 else 0
+        performance_score = min(100, round(success_rate + 10, 1))
+
+        writer.writerow([
+            agent.get_full_name() or agent.email,
+            agent.email,
+            total_orders,
+            completed_orders,
+            round(success_rate, 1),
+            performance_score
+        ])
+
+    return response
 
 @login_required
 def order_statistics(request):
@@ -457,60 +523,71 @@ def order_statistics(request):
     if not has_manager_role(request.user):
         messages.error(request, "You don't have permission to access this page.")
         return redirect('dashboard:index')
-    
-    # Get all orders
-    all_orders = Order.objects.all()
-    
+
+    # Get period filter
+    period = request.GET.get('period', 'week')
+    today = timezone.now().date()
+
+    if period == 'week':
+        start_date = today - timedelta(days=7)
+    elif period == 'month':
+        start_date = today - timedelta(days=30)
+    elif period == 'year':
+        start_date = today - timedelta(days=365)
+    else:
+        start_date = today - timedelta(days=7)
+
+    # Get orders for period
+    all_orders = Order.objects.filter(created_at__date__gte=start_date)
+
     # Basic statistics
     total_orders = all_orders.count()
     pending_orders = all_orders.filter(status='pending').count()
     processing_orders = all_orders.filter(status='processing').count()
     completed_orders = all_orders.filter(status='completed').count()
     cancelled_orders = all_orders.filter(status='cancelled').count()
-    
-    # Monthly statistics
-    from datetime import date
-    today = date.today()
-    monthly_orders = all_orders.filter(created_at__month=today.month, created_at__year=today.year).count()
-    
+
+    # Monthly statistics (always from current month)
+    monthly_orders = Order.objects.filter(created_at__month=today.month, created_at__year=today.year).count()
+
     # Calculate completion rate
     completion_rate = (completed_orders / total_orders * 100) if total_orders > 0 else 0
-    
+
     # Calculate average order value
-    from django.db import models
+    from django.db import models as db_models
     total_revenue = all_orders.aggregate(
-        total=models.Sum(models.F('price_per_unit') * models.F('quantity'))
+        total=db_models.Sum(db_models.F('price_per_unit') * db_models.F('quantity'))
     )['total'] or 0
     avg_order_value = total_revenue / total_orders if total_orders > 0 else 0
-    
+
     # Revenue by status
     pending_revenue = all_orders.filter(status='pending').aggregate(
-        total=models.Sum(models.F('price_per_unit') * models.F('quantity'))
+        total=db_models.Sum(db_models.F('price_per_unit') * db_models.F('quantity'))
     )['total'] or 0
-    
+
     processing_revenue = all_orders.filter(status='processing').aggregate(
-        total=models.Sum(models.F('price_per_unit') * models.F('quantity'))
+        total=db_models.Sum(db_models.F('price_per_unit') * db_models.F('quantity'))
     )['total'] or 0
-    
+
     completed_revenue = all_orders.filter(status='completed').aggregate(
-        total=models.Sum(models.F('price_per_unit') * models.F('quantity'))
+        total=db_models.Sum(db_models.F('price_per_unit') * db_models.F('quantity'))
     )['total'] or 0
-    
+
     # Get top agents
     agents = User.objects.filter(user_roles__role__name='Call Center Agent', user_roles__is_active=True, is_active=True)
     top_agents = []
     for agent in agents:
-        agent_orders = Order.objects.filter(agent=agent)
+        agent_orders = Order.objects.filter(agent=agent, created_at__date__gte=start_date)
         if agent_orders.exists():
             top_agents.append({
                 'agent': agent,
                 'total_orders': agent_orders.count(),
                 'performance_score': min(100, (agent_orders.filter(status='completed').count() / agent_orders.count() * 100) + 10),
             })
-    
+
     # Sort by performance
     top_agents.sort(key=lambda x: x['performance_score'], reverse=True)
-    
+
     context = {
         'total_orders': total_orders,
         'monthly_orders': monthly_orders,
@@ -524,9 +601,68 @@ def order_statistics(request):
         'processing_revenue': processing_revenue,
         'completed_revenue': completed_revenue,
         'top_agents': top_agents[:5],
+        'period': period,
     }
-    
+
     return render(request, 'callcenter_manager/order_statistics.html', context)
+
+
+@login_required
+def export_order_statistics(request):
+    """Export order statistics to CSV."""
+    if not has_manager_role(request.user):
+        messages.error(request, "You don't have permission to access this page.")
+        return redirect('dashboard:index')
+
+    # Get period filter
+    period = request.GET.get('period', 'week')
+    today = timezone.now().date()
+
+    if period == 'week':
+        start_date = today - timedelta(days=7)
+    elif period == 'month':
+        start_date = today - timedelta(days=30)
+    elif period == 'year':
+        start_date = today - timedelta(days=365)
+    else:
+        start_date = today - timedelta(days=7)
+
+    # Get orders for period
+    all_orders = Order.objects.filter(created_at__date__gte=start_date)
+
+    # Create CSV response
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="order_statistics_{period}_{today.strftime("%Y%m%d")}.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Order Statistics Report', f'Period: {period.title()}', f'Generated: {today.strftime("%Y-%m-%d")}'])
+    writer.writerow([])
+
+    # Summary statistics
+    writer.writerow(['Summary Statistics'])
+    writer.writerow(['Total Orders', all_orders.count()])
+    writer.writerow(['Pending Orders', all_orders.filter(status='pending').count()])
+    writer.writerow(['Processing Orders', all_orders.filter(status='processing').count()])
+    writer.writerow(['Completed Orders', all_orders.filter(status='completed').count()])
+    writer.writerow(['Cancelled Orders', all_orders.filter(status='cancelled').count()])
+    writer.writerow([])
+
+    # Order details
+    writer.writerow(['Order Details'])
+    writer.writerow(['Order Code', 'Customer', 'Status', 'Date', 'Price', 'Quantity', 'Agent'])
+
+    for order in all_orders.select_related('agent').order_by('-created_at')[:500]:
+        writer.writerow([
+            order.order_code or order.id,
+            order.customer or 'N/A',
+            order.status,
+            order.created_at.strftime('%Y-%m-%d %H:%M') if order.created_at else 'N/A',
+            order.price_per_unit or 0,
+            order.quantity or 0,
+            order.agent.get_full_name() if order.agent else 'Unassigned'
+        ])
+
+    return response
 
 @login_required
 def add_note(request, order_id):

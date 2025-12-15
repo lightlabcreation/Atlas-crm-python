@@ -7,7 +7,10 @@ app_name = 'packaging'
 urlpatterns = [
     # Redirect root packaging URL to agent
     path('', RedirectView.as_view(pattern_name='packaging:dashboard', permanent=False)),
-    
+
+    # Convenience redirect for /packaging/materials/
+    path('materials/', RedirectView.as_view(pattern_name='packaging:materials_inventory', permanent=False)),
+
     # Packaging Dashboard
     path('agent/', views.dashboard, name='dashboard'),
     

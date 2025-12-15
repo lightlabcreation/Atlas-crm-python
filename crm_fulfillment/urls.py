@@ -51,6 +51,8 @@ urlpatterns = [
     path('notifications/', include('notifications.urls')),
     # Analytics API
     path('analytics/', include('analytics.urls')),
+    # Reports
+    path('reports/', views.reports_dashboard, name='reports'),
     # Landing pages
     path('', include('landing.urls')),
     path('i18n/', include('django.conf.urls.i18n')),

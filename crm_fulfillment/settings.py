@@ -195,7 +195,7 @@ else:
                 'USER': os.environ.get('DB_USER', 'atlas_user'),
                 'PASSWORD': os.environ.get('DB_PASSWORD', 'atlas_secure_pass_2024'),
                 'HOST': os.environ.get('DB_HOST', 'localhost'),
-                'PORT': os.environ.get('DB_PORT', '5433'),
+                'PORT': os.environ.get('DB_PORT', '5435'),
             }
         }
     else:

@@ -6,7 +6,10 @@ app_name = 'sourcing'
 urlpatterns = [
     # Sourcing Dashboard
     path('', views.sourcing_dashboard, name='dashboard'),
-    
+
+    # Convenience redirect for /sourcing/create/
+    path('create/', views.sourcing_request_create, name='create'),
+
     # Requests
     path('requests/', views.sourcing_request_list, name='requests'),
     path('requests/create/', views.comprehensive_sourcing_create, name='comprehensive_create'),

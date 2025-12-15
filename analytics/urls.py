@@ -7,6 +7,9 @@ from . import views
 app_name = 'analytics'
 
 urlpatterns = [
+    # Analytics Dashboard
+    path('', views.analytics_dashboard, name='dashboard'),
+
     # REST API endpoints
     path('api/executive-summary/', views.ExecutiveSummaryView.as_view(), name='api_executive_summary'),
     path('api/orders/', views.OrderAnalyticsView.as_view(), name='api_orders'),

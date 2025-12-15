@@ -14,7 +14,11 @@ urlpatterns = [
 
     # Import/Export
     path('import/', views.import_orders, name='import'),
+    path('bulk-import/', views.import_orders, name='bulk_import'),
     path('export/', views.download_template, name='export'),
+
+    # Returns convenience URL
+    path('returns/', views.returns_dashboard_redirect, name='returns'),
 
     # Call Center approval
     path('<int:order_id>/callcenter-approve/', views.callcenter_approve_order, name='callcenter_approve'),

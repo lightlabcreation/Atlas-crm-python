@@ -4,16 +4,30 @@
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
+    "test:all": "node tests/run_all_tests.js",
+    "test:functional": "playwright test tests/comprehensive_functionality.spec.js",
+    "test:api": "mocha tests/api_endpoints.test.js --timeout 30000",
+    "test:lighthouse": "node tests/lighthouse_audit.js",
+    "test:a11y": "node tests/pa11y_accessibility.js",
     "test:delivery": "playwright test tests/phase5_delivery_finance/test_delivery_confirmation.spec.js",
     "test:ui": "playwright test --ui",
-    "test:headed": "playwright test --headed"
+    "test:headed": "playwright test --headed",
+    "test:requirements": "playwright test tests/requirements_verification.spec.js --reporter=list"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.0",
     "@playwright/test": "^1.57.0",
-    "playwright": "^1.57.0"
+    "chai": "^6.2.1",
+    "lighthouse": "^12.8.2",
+    "mocha": "^11.7.5",
+    "node-fetch": "^2.7.0",
+    "pa11y": "^9.0.1",
+    "playwright": "^1.57.0",
+    "puppeteer": "^24.33.0",
+    "supertest": "^7.1.4"
   }
 }

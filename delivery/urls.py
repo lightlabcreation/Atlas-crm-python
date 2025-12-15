@@ -6,7 +6,11 @@ app_name = 'delivery'
 urlpatterns = [
     # Delivery Dashboard (Legacy - for Delivery Agents)
     path('', views.dashboard, name='dashboard'),
-    
+
+    # Convenience redirects
+    path('manager/', views.manager_dashboard, name='manager'),
+    path('agent/', views.dashboard, name='agent'),
+
     # Orders
     path('orders/', views.order_list, name='orders'),
     path('orders/<int:order_id>/', views.order_detail, name='order_detail'),

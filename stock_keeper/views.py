@@ -1108,13 +1108,24 @@ def receive_stock(request):
     # Apply date filter
     date_from = request.GET.get('date_from', '')
     date_to = request.GET.get('date_to', '')
-    
+    search_query = request.GET.get('search', '')
+
     # Get recent receivings (completed stock_in movements)
     recent_receivings = InventoryMovement.objects.filter(
         movement_type='stock_in',
         status='completed'
     ).select_related('product', 'to_warehouse', 'processed_by', 'product__seller').order_by('-created_at')
-    
+
+    # Apply search filter
+    if search_query:
+        recent_receivings = recent_receivings.filter(
+            Q(reference_number__icontains=search_query) |
+            Q(product__name_en__icontains=search_query) |
+            Q(product__name_ar__icontains=search_query) |
+            Q(product__code__icontains=search_query) |
+            Q(tracking_number__icontains=search_query)
+        )
+
     # Filter by receiving type
     if receiving_type == 'client_stock':
         recent_receivings = recent_receivings.filter(
@@ -1122,15 +1133,18 @@ def receive_stock(request):
         )
     elif receiving_type == 'sourcing':
         recent_receivings = recent_receivings.filter(reference_type='Sourcing Purchase')
-    
+
     # Apply date filter
     if date_from:
         recent_receivings = recent_receivings.filter(created_at__date__gte=date_from)
     if date_to:
         recent_receivings = recent_receivings.filter(created_at__date__lte=date_to)
-    
-    # Limit to 10 most recent
-    recent_receivings = recent_receivings[:10]
+
+    # Limit results (show more if searching)
+    if search_query:
+        recent_receivings = recent_receivings[:50]
+    else:
+        recent_receivings = recent_receivings[:10]
     
     # Get pending receiving tasks
     pending_receiving = InventoryMovement.objects.filter(
@@ -1157,8 +1171,9 @@ def receive_stock(request):
         'sourcing_requests': sourcing_requests,
         'date_from': date_from,
         'date_to': date_to,
+        'search_query': search_query,
     }
-    
+
     return render(request, 'stock_keeper/receive_stock.html', context)
 
 @login_required
@@ -1166,12 +1181,33 @@ def receive_stock(request):
 def ship_orders(request):
     """Order shipping interface."""
     if request.method == 'POST':
+        action = request.POST.get('action')
+
+        # Handle start picking action first
+        if action == 'start_picking':
+            order_id = request.POST.get('order_id')
+            if order_id:
+                try:
+                    order = Order.objects.get(id=order_id)
+                    # Update workflow status to packaging_in_progress
+                    order.workflow_status = 'packaging_in_progress'
+                    order.save()
+                    messages.success(request, f'Started picking for order {order.order_code}')
+                except Order.DoesNotExist:
+                    messages.error(request, 'Order not found')
+                except Exception as e:
+                    messages.error(request, f'Error starting order: {str(e)}')
+            return redirect('stock_keeper:ship_orders')
+
         # Handle order shipping
         order_id = request.POST.get('order_id')
         product_id = request.POST.get('product_id')
-        quantity = int(request.POST.get('quantity', 0))
+        try:
+            quantity = int(request.POST.get('quantity', 0))
+        except (ValueError, TypeError):
+            quantity = 0
         warehouse_id = request.POST.get('warehouse_id')
-        
+
         if order_id and product_id and quantity > 0 and warehouse_id:
             order = get_object_or_404(Order, id=order_id)
             product = get_object_or_404(Product, id=product_id)
@@ -1236,21 +1272,7 @@ def ship_orders(request):
         ready_orders = ready_orders.filter(created_at__date__gte=date_from)
     if date_to:
         ready_orders = ready_orders.filter(created_at__date__lte=date_to)
-    
-    # Handle start picking action
-    if request.method == 'POST' and request.POST.get('action') == 'start_picking':
-        order_id = request.POST.get('order_id')
-        if order_id:
-            try:
-                order = Order.objects.get(id=order_id)
-                # Update workflow status to packaging_in_progress
-                order.workflow_status = 'packaging_in_progress'
-                order.save()
-                messages.success(request, f'Started picking for order {order.order_code}')
-                return redirect('stock_keeper:ship_orders')
-            except Order.DoesNotExist:
-                messages.error(request, 'Order not found')
-    
+
     # Get warehouses for form
     warehouses = Warehouse.objects.filter(is_active=True).order_by('name')
     

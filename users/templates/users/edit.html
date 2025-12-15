@@ -14,9 +14,15 @@
                     <p class="mt-1 text-sm text-gray-500">Update user information and permissions</p>
                 </div>
                 <div class="flex space-x-3">
+                    {% if request.GET.from == 'sellers' %}
+                    <a href="{% url 'sellers:seller_list' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium">
+                        Back to Sellers
+                    </a>
+                    {% else %}
                     <a href="{% url 'users:list' %}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm font-medium">
                         Back to Users
                     </a>
+                    {% endif %}
                 </div>
             </div>
         </div>

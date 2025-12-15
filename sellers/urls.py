@@ -7,6 +7,7 @@ app_name = 'sellers'
 urlpatterns = [
     # Admin Management
     path('', views.seller_list, name='seller_list'),
+    path('create/', views.seller_create, name='seller_create'),
     # Seller Dashboard
     path('dashboard/', views.dashboard, name='dashboard'),
     path('orders/', views.order_list, name='orders'),

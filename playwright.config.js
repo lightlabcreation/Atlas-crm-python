@@ -36,7 +36,7 @@ module.exports = defineConfig({
   /* Shared settings for all the projects below */
   use: {
     /* Base URL to use in actions like `await page.goto('/')` */
-    baseURL: 'https://atlas.alexandratechlab.com',
+    baseURL: 'https://atlas-crm.alexandratechlab.com',
 
     /* Collect trace when retrying the failed test */
     trace: 'on-first-retry',

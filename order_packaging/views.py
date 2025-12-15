@@ -18,6 +18,12 @@ import uuid
 import csv
 from io import StringIO, BytesIO
 import xlsxwriter
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
 
 User = get_user_model()
 
@@ -1139,10 +1145,191 @@ def export_report_csv(request, context):
     return response
 
 def export_report_pdf(request, context):
-    """Export packaging report data as PDF."""
-    # For simplicity, we'll redirect to CSV export for now
-    # In a real implementation, you'd use a PDF library like ReportLab or WeasyPrint
-    return export_report_csv(request, context)
+    """Export packaging report data as PDF using ReportLab."""
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=30)
+    elements = []
+    styles = getSampleStyleSheet()
+
+    # Custom styles
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=18,
+        spaceAfter=20,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor('#1f2937')
+    )
+
+    section_style = ParagraphStyle(
+        'SectionTitle',
+        parent=styles['Heading2'],
+        fontSize=14,
+        spaceBefore=15,
+        spaceAfter=10,
+        textColor=colors.HexColor('#374151')
+    )
+
+    # Title
+    elements.append(Paragraph("Packaging Report", title_style))
+    elements.append(Paragraph(f"Generated on {timezone.now().strftime('%Y-%m-%d %H:%M')}", styles['Normal']))
+    elements.append(Paragraph(f"Period: {context.get('date_filter', 'All Time').title()}", styles['Normal']))
+    elements.append(Spacer(1, 20))
+
+    # Key Metrics Section
+    elements.append(Paragraph("Key Metrics", section_style))
+    metrics_data = [
+        ['Total Completed', 'Avg Duration (min)', 'Total Checks', 'Pass Rate (%)'],
+        [
+            str(context.get('total_completed', 0)),
+            str(context.get('avg_duration', 0)),
+            str(context.get('total_checks', 0)),
+            f"{context.get('pass_rate', 0)}%"
+        ]
+    ]
+    metrics_table = Table(metrics_data, colWidths=[130, 130, 130, 130])
+    metrics_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#3b82f6')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f3f4f6')),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#d1d5db')),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+    ]))
+    elements.append(metrics_table)
+    elements.append(Spacer(1, 15))
+
+    # Quality Check Results
+    elements.append(Paragraph("Quality Check Results", section_style))
+    qc_data = [
+        ['Passed', 'Conditional', 'Failed'],
+        [
+            str(context.get('passed_checks', 0)),
+            str(context.get('conditional_checks', 0)),
+            str(context.get('failed_checks', 0))
+        ]
+    ]
+    qc_table = Table(qc_data, colWidths=[173, 173, 174])
+    qc_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (0, 0), colors.HexColor('#10b981')),
+        ('BACKGROUND', (1, 0), (1, 0), colors.HexColor('#f59e0b')),
+        ('BACKGROUND', (2, 0), (2, 0), colors.HexColor('#ef4444')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f3f4f6')),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#d1d5db')),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+    ]))
+    elements.append(qc_table)
+    elements.append(Spacer(1, 15))
+
+    # Daily Activity
+    daily_stats = context.get('daily_stats', [])
+    if daily_stats:
+        elements.append(Paragraph("Daily Activity", section_style))
+        daily_data = [['Date', 'Packages Completed', 'Quality Checks', 'Avg Duration (min)']]
+        for stat in daily_stats:
+            daily_data.append([
+                stat['date'].strftime('%Y-%m-%d') if hasattr(stat['date'], 'strftime') else str(stat['date']),
+                str(stat.get('completed', 0)),
+                str(stat.get('checks', 0)),
+                str(stat.get('avg_duration', 0))
+            ])
+        daily_table = Table(daily_data, colWidths=[130, 130, 130, 130])
+        daily_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#6366f1')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#d1d5db')),
+            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f9fafb')]),
+        ]))
+        elements.append(daily_table)
+        elements.append(Spacer(1, 15))
+
+    # Packager Performance
+    packager_stats = context.get('packager_stats', [])
+    if packager_stats:
+        elements.append(Paragraph("Packager Performance", section_style))
+        packager_data = [['Packager', 'Packages', 'Avg Duration', 'Total Time', 'QC Checks', 'Pass Rate']]
+        for stat in packager_stats:
+            packager_name = stat['packager'].get_full_name() if hasattr(stat['packager'], 'get_full_name') else str(stat['packager'])
+            packager_data.append([
+                packager_name[:20],  # Truncate long names
+                str(stat.get('packages_completed', 0)),
+                str(stat.get('avg_duration', 0)),
+                str(stat.get('total_time', 0)),
+                str(stat.get('quality_checks', 0)),
+                f"{stat.get('quality_pass_rate', 0)}%"
+            ])
+        packager_table = Table(packager_data, colWidths=[100, 70, 80, 80, 70, 70])
+        packager_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#8b5cf6')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('ALIGN', (0, 1), (0, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#d1d5db')),
+            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f9fafb')]),
+        ]))
+        elements.append(packager_table)
+        elements.append(Spacer(1, 15))
+
+    # Material Usage
+    material_stats = context.get('material_stats', [])
+    if material_stats:
+        elements.append(Paragraph("Material Usage", section_style))
+        material_data = [['Material', 'Quantity', 'Unit', 'Cost ($)']]
+        for material in material_stats:
+            material_data.append([
+                str(material.get('name', ''))[:25],  # Truncate long names
+                str(material.get('quantity', 0)),
+                str(material.get('unit', '')),
+                f"${material.get('cost', 0):.2f}"
+            ])
+        material_table = Table(material_data, colWidths=[180, 100, 100, 100])
+        material_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#059669')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('ALIGN', (0, 1), (0, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 9),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+            ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#d1d5db')),
+            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f9fafb')]),
+        ]))
+        elements.append(material_table)
+
+    # Build PDF
+    doc.build(elements)
+
+    # Return response
+    buffer.seek(0)
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="packaging_report_{timezone.now().strftime("%Y%m%d")}.pdf"'
+    return response
 
 @login_required
 @user_passes_test(has_packaging_role)
@@ -1660,34 +1847,34 @@ def quality_analytics(request):
 
 @login_required
 @user_passes_test(has_packaging_role)
-def export_materials(request):
-    """Export materials inventory to CSV."""
+def export_materials_csv(request):
+    """Export materials inventory to CSV (alternative endpoint)."""
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename="materials_inventory_{timezone.now().strftime("%Y%m%d")}.csv"'
-    
+
     writer = csv.writer(response)
-    
+
     # Write header
     writer.writerow(['Materials Inventory Report', f'Generated on {timezone.now().strftime("%Y-%m-%d %H:%M")}'])
     writer.writerow([])
-    
+
     # Get materials
     materials = PackagingMaterial.objects.all().order_by('name')
-    
+
     # Write materials data
-    writer.writerow(['Name', 'Type', 'Current Stock', 'Min Stock Level', 'Unit Cost', 'Supplier', 'Last Updated'])
-    
+    writer.writerow(['Name', 'Type', 'Current Stock', 'Min Stock Level', 'Cost Per Unit', 'Supplier', 'Last Updated'])
+
     for material in materials:
         writer.writerow([
             material.name,
             material.get_material_type_display(),
             material.current_stock,
             material.min_stock_level,
-            material.unit_cost,
+            material.cost_per_unit,
             material.supplier or 'N/A',
             material.updated_at.strftime('%Y-%m-%d %H:%M')
         ])
-    
+
     return response
 
 @login_required

@@ -1645,3 +1645,53 @@ def release_reservation(request, reservation_id):
     }
 
     return render(request, 'inventory/release_reservation.html', context)
+
+
+@login_required
+def receiving_view(request):
+    """Stock receiving interface for stock keepers."""
+    # Get recent incoming movements
+    recent_receiving = InventoryMovement.objects.filter(
+        movement_type='in'
+    ).select_related('product', 'to_warehouse', 'created_by').order_by('-created_at')[:20]
+
+    # Get warehouses for receiving
+    warehouses = Warehouse.objects.filter(is_active=True)
+
+    # Get products for selection
+    products = Product.objects.filter(is_approved=True).order_by('name_en')
+
+    # Stats
+    today_received = InventoryMovement.objects.filter(
+        movement_type='in',
+        created_at__date=timezone.now().date()
+    ).count()
+
+    context = {
+        'recent_receiving': recent_receiving,
+        'warehouses': warehouses,
+        'products': products,
+        'today_received': today_received,
+    }
+
+    return render(request, 'inventory/receiving.html', context)
+
+
+@login_required
+def labels_view(request):
+    """Label printing interface for products."""
+    # Get products with their inventory records
+    products = Product.objects.filter(is_approved=True).select_related('seller').order_by('-created_at')[:50]
+
+    # Get selected product for label preview
+    selected_product_id = request.GET.get('product')
+    selected_product = None
+    if selected_product_id:
+        selected_product = Product.objects.filter(id=selected_product_id).first()
+
+    context = {
+        'products': products,
+        'selected_product': selected_product,
+    }
+
+    return render(request, 'inventory/labels.html', context)
