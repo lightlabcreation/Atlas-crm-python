@@ -37,7 +37,6 @@ django-cleanup>=8.0.0
 gunicorn>=21.2.0
 argon2-cffi>=23.1.0
 django-ratelimit>=4.1.0
-django-recaptcha3
 python-barcode
 qrcode[pil]
 django-auditlog
@@ -45,3 +44,5 @@ cryptography
 django-fernet-fields
 celery>=5.3.0
 redis>=5.0.0
+django-recaptcha
+
