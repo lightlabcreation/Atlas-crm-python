@@ -4,8 +4,8 @@
 
 **Atlas CRM** ek comprehensive **Fulfillment Management System** hai jo UAE-based e-commerce businesses ke liye banaya gaya hai. Ye system sellers ko unke orders manage karne, inventory track karne, aur delivery process ko handle karne mein help karta hai.
 
-**Live URL:** https://atlas.kiaantechnology.com
-
+<!-- **Live URL:** https://atlas.kiaantechnology.com -->
+**Live URL:** https://web-production-5ba14555.up.railway.app
 ---
 
 ## System Architecture (System Ki Architecture)
@@ -406,7 +406,10 @@ delivery_completed
 For technical support or questions about this system, please contact the development team.
 
 **Project Location:** `/home/maani/atlas-crm`
-**Live URL:** https://atlas.kiaantechnology.com
+<!-- **Live URL:** https://atlas.kiaantechnology.com -->
+**Live URL:** https://web-production-5ba14555.up.railway.app
+
+
 
 ---
 

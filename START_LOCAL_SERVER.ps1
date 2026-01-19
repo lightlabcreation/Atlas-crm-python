@@ -59,7 +59,9 @@ Write-Host "  Starting Django Development Server" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  Local URL:    http://localhost:8000" -ForegroundColor Green
-Write-Host "  Production:   https://atlas.kiaantechnology.com" -ForegroundColor Yellow
+# Write-Host "  Production:   https://atlas.kiaantechnology.com" -ForegroundColor Yellow
+Write-Host "  Production:   https://web-production-5ba14555.up.railway.app" -ForegroundColor Yellow
+
 Write-Host ""
 Write-Host "  Press Ctrl+C to stop the server" -ForegroundColor Yellow
 Write-Host "========================================" -ForegroundColor Cyan

@@ -38,6 +38,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'testserver',  # For Django test client
+    'https://web-production-5ba14555.up.railway.app'
 ]
 
 # Add Railway domain if RAILWAY_STATIC_URL is set
@@ -362,10 +363,13 @@ CSRF_TRUSTED_ORIGINS = [
     "http://atlas.alexandratechlab.com",
     "http://localhost:8070",
     "http://127.0.0.1:8070",
+    "https://web-production-5ba14555.up.railway.app",
 ]
 
 # Site URL for generating absolute URLs
-SITE_URL = os.environ.get('SITE_URL', 'https://atlas.alexandratechlab.com')
+# SITE_URL = os.environ.get('SITE_URL', 'https://atlas.alexandratechlab.com')
+SITE_URL = os.environ.get('SITE_URL', 'https://web-production-5ba14555.up.railway.app')
+
 
 # ============================================
 # SECURITY CONFIGURATION

@@ -60,7 +60,8 @@ echo   Starting Django Development Server
 echo ========================================
 echo.
 echo   Server URL: http://localhost:8000
-echo   Production: https://atlas.kiaantechnology.com
+echo   Production: https://web-production-5ba14555.up.railway.app
+
 echo.
 echo   Press Ctrl+C to stop the server
 echo ========================================
