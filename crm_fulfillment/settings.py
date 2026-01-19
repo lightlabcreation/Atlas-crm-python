@@ -50,7 +50,7 @@ if os.environ.get('RAILWAY_PUBLIC_DOMAIN'):
     ALLOWED_HOSTS.append(os.environ.get('RAILWAY_PUBLIC_DOMAIN'))
 
 # Silence test key warnings for django-recaptcha
-SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
+SILENCED_SYSTEM_CHECKS = ['django_recaptcha3.recaptcha_test_key_error']
 
 # Email Configuration
 # Email Configuration for Hostinger (can be overridden by environment variables)
@@ -87,7 +87,7 @@ INSTALLED_APPS = [
     'django_otp',
     'django_otp.plugins.otp_totp',
     'django_otp.plugins.otp_static',
-    'django_recaptcha',  # reCAPTCHA v3/v2 for forms
+    'django_recaptcha3',  # reCAPTCHA v3/v2 for forms
     'auditlog',  # Audit trail system
     # Celery
     'django_celery_beat',
