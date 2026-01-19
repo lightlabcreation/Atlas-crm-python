@@ -170,23 +170,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'crm_fulfillment.wsgi.application'
 
+# old code 
+# DATABASE_URL = os.environ.get('DATABASE_URL')
+# if DATABASE_URL:
+#     # Parse Railway DATABASE_URL format: postgresql://user:password@host:port/database
+#     import dj_database_url
+#     DATABASES = {
+#         'default': dj_database_url.config(
+#             default=DATABASE_URL,
+#             conn_max_age=600,
+#             conn_health_checks=True,
+#         )
+#     }
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-# Support for environment-based database configuration (Docker and Railway)
 DATABASE_URL = os.environ.get('DATABASE_URL')
-
 if DATABASE_URL:
-    # Parse Railway DATABASE_URL format: postgresql://user:password@host:port/database
+    raise RuntimeError('DATABASE_URL is not set. Please attach Railway PostgreSQL.')
     import dj_database_url
     DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
+    "default": dj_database_url.config(
+        default=DATABASE_URL,
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+}
 else:
     DATABASE_TYPE = os.environ.get('DATABASE', 'postgres').lower()
 
