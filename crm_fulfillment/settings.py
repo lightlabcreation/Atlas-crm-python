@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-for-dev-only')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
 # Debug messages
 TEMPLATE_DEBUG = DEBUG
@@ -37,6 +37,7 @@ ALLOWED_HOSTS = [
     'atlas-crm.alexandratechlab.com',
     'localhost',
     '127.0.0.1',
+    'testserver',  # For Django test client
 ]
 
 # Add Railway domain if RAILWAY_STATIC_URL is set

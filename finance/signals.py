@@ -17,29 +17,31 @@ def create_order_fee(sender, instance, created, **kwargs):
 
         # Check if OrderFee already exists (shouldn't but just in case)
         if not hasattr(instance, 'order_fees') or not OrderFee.objects.filter(order=instance).exists():
-            # Calculate base price
-            base_price = float(instance.price_per_unit * instance.quantity)
+            # Calculate base price using Decimal
+            price = Decimal(str(instance.price_per_unit or 0))
+            qty = Decimal(str(instance.quantity or 1))
+            base_price = price * qty
 
             # Get seller fee if seller exists
             seller_fee_amount = Decimal('0.00')
             if instance.seller:
                 seller_fee_obj = SellerFee.objects.filter(seller=instance.seller, is_active=True).first()
                 if seller_fee_obj:
-                    seller_fee_amount = Decimal(str(base_price)) * (seller_fee_obj.fee_percentage / 100)
+                    seller_fee_amount = base_price * (Decimal(str(seller_fee_obj.fee_percentage)) / Decimal('100'))
             elif instance.product and instance.product.seller:
                 seller_fee_obj = SellerFee.objects.filter(seller=instance.product.seller, is_active=True).first()
                 if seller_fee_obj:
-                    seller_fee_amount = Decimal(str(base_price)) * (seller_fee_obj.fee_percentage / 100)
+                    seller_fee_amount = base_price * (Decimal(str(seller_fee_obj.fee_percentage)) / Decimal('100'))
 
-            # Create OrderFee with calculated values
+            # Create OrderFee with calculated values using Decimal arithmetic
             OrderFee.objects.create(
                 order=instance,
                 seller_fee=seller_fee_amount,
-                upsell_fee=Decimal(str(base_price * 0.03)),  # 3% of order value
+                upsell_fee=base_price * Decimal('0.03'),  # 3% of order value
                 confirmation_fee=Decimal('10.00'),  # Fixed fee
-                fulfillment_fee=Decimal(str(base_price * 0.02)),  # 2% of order value
+                fulfillment_fee=base_price * Decimal('0.02'),  # 2% of order value
                 shipping_fee=Decimal('12.00'),  # Fixed shipping fee
-                warehouse_fee=Decimal(str(base_price * 0.01)),  # 1% warehouse fee
+                warehouse_fee=base_price * Decimal('0.01'),  # 1% warehouse fee
                 tax_rate=Decimal('5.00'),  # 5% VAT
             )
 
@@ -67,14 +69,17 @@ def update_order_fee_on_status_change(sender, instance, created, **kwargs):
 
         except OrderFee.DoesNotExist:
             # Create OrderFee if it doesn't exist for existing orders
-            base_price = float(instance.price_per_unit * instance.quantity)
+            price = Decimal(str(instance.price_per_unit or 0))
+            qty = Decimal(str(instance.quantity or 1))
+            base_price = price * qty
+            
             OrderFee.objects.create(
                 order=instance,
-                upsell_fee=Decimal(str(base_price * 0.03)),
+                upsell_fee=base_price * Decimal('0.03'),
                 confirmation_fee=Decimal('10.00'),
-                fulfillment_fee=Decimal(str(base_price * 0.02)),
+                fulfillment_fee=base_price * Decimal('0.02'),
                 shipping_fee=Decimal('12.00'),
-                warehouse_fee=Decimal(str(base_price * 0.01)),
+                warehouse_fee=base_price * Decimal('0.01'),
                 cancellation_fee=Decimal('5.00') if instance.status == 'cancelled' else Decimal('0.00'),
                 return_fee=Decimal('15.00') if instance.status == 'returned' else Decimal('0.00'),
                 tax_rate=Decimal('5.00'),

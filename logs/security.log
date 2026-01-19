@@ -1834,3 +1834,62 @@ INFO 2025-12-07 08:25:40,109 database 3050967 130792680579200 AXES: Successful l
 INFO 2025-12-07 08:25:40,111 database 3050967 130792680579200 AXES: Cleaned up 0 expired access attempts from database that were older than 2025-12-07 13:25:39.959193+00:00
 INFO 2025-12-07 08:25:40,116 database 3050967 130792680579200 AXES: Reset 0 access attempts from database.
 INFO 2025-12-07 08:25:40,117 database 3050967 130792680579200 AXES: Deleted 0 failed login attempts by {username: "********************", ip_address: "********************", user_agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36", path_info: "/users/login/"} from database.
+INFO 2026-01-17 15:23:15,243 apps 7012 916 AXES: BEGIN version 8.1.0, blocking by ip_address
+INFO 2026-01-17 15:24:12,610 apps 12556 12144 AXES: BEGIN version 8.1.0, blocking by ip_address
+INFO 2026-01-17 15:26:27,455 apps 11620 13384 AXES: BEGIN version 8.1.0, blocking by ip_address
+INFO 2026-01-17 15:26:29,529 apps 13812 5312 AXES: BEGIN version 8.1.0, blocking by ip_address
+INFO 2026-01-17 15:29:16,858 database 13812 13228 AXES: User login failed, running database handler for failure.
+INFO 2026-01-17 15:29:16,861 database 13812 13228 AXES: Cleaned up 0 expired access attempts from database that were older than 2026-01-17 08:59:16.391374+00:00
+WARNING 2026-01-17 15:29:16,868 database 13812 13228 AXES: New login failure by {username: "********************", ip_address: "********************", user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36", path_info: "/users/login/"}. Created new record in the database.
+INFO 2026-01-17 15:31:53,046 apps 8580 9244 AXES: BEGIN version 8.1.0, blocking by ip_address
+INFO 2026-01-17 15:32:32,550 apps 14744 5832 AXES: BEGIN version 8.1.0, blocking by ip_address
+INFO 2026-01-17 15:33:25,956 apps 8076 4988 AXES: BEGIN version 8.1.0, blocking by ip_address
+ERROR 2026-01-17 15:33:27,650 log 8076 4988 Invalid HTTP_HOST header: 'testserver'. You may need to add 'testserver' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "D:\atlas project-17-jan-26\atlas-crm\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "D:\atlas project-17-jan-26\atlas-crm\venv\Lib\site-packages\django\utils\deprecation.py", line 119, in __call__
+    response = self.process_request(request)
+  File "D:\atlas project-17-jan-26\atlas-crm\venv\Lib\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+  File "D:\atlas project-17-jan-26\atlas-crm\venv\Lib\site-packages\django\http\request.py", line 202, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'testserver'. You may need to add 'testserver' to ALLOWED_HOSTS.
+INFO 2026-01-17 15:34:04,059 apps 16352 15908 AXES: BEGIN version 8.1.0, blocking by ip_address
+INFO 2026-01-17 15:34:18,022 apps 14136 13892 AXES: BEGIN version 8.1.0, blocking by ip_address
+INFO 2026-01-17 15:34:47,795 apps 14500 13684 AXES: BEGIN version 8.1.0, blocking by ip_address
+INFO 2026-01-17 15:34:47,940 database 14500 13684 AXES: Successful login by {username: "********************", ip_address: "********************", user_agent: "<unknown>", path_info: "<unknown>"}.
+INFO 2026-01-17 15:34:47,945 database 14500 13684 AXES: Cleaned up 0 expired access attempts from database that were older than 2026-01-17 09:04:47.930548+00:00
+INFO 2026-01-17 15:34:47,955 database 14500 13684 AXES: Reset 0 access attempts from database.
+INFO 2026-01-17 15:34:47,956 database 14500 13684 AXES: Deleted 0 failed login attempts by {username: "********************", ip_address: "********************", user_agent: "<unknown>", path_info: "<unknown>"} from database.
+INFO 2026-01-17 15:35:21,907 apps 8488 15068 AXES: BEGIN version 8.1.0, blocking by ip_address
+INFO 2026-01-17 15:35:22,062 database 8488 15068 AXES: Successful login by {username: "********************", ip_address: "********************", user_agent: "<unknown>", path_info: "<unknown>"}.
+INFO 2026-01-17 15:35:22,066 database 8488 15068 AXES: Cleaned up 0 expired access attempts from database that were older than 2026-01-17 09:05:22.056718+00:00
+INFO 2026-01-17 15:35:22,083 database 8488 15068 AXES: Reset 0 access attempts from database.
+INFO 2026-01-17 15:35:22,083 database 8488 15068 AXES: Deleted 0 failed login attempts by {username: "********************", ip_address: "********************", user_agent: "<unknown>", path_info: "<unknown>"} from database.
+INFO 2026-01-17 15:36:37,997 apps 11256 8056 AXES: BEGIN version 8.1.0, blocking by ip_address
+INFO 2026-01-17 15:36:38,191 database 11256 8056 AXES: Successful login by {username: "********************", ip_address: "********************", user_agent: "<unknown>", path_info: "<unknown>"}.
+INFO 2026-01-17 15:36:38,196 database 11256 8056 AXES: Cleaned up 0 expired access attempts from database that were older than 2026-01-17 09:06:38.181051+00:00
+INFO 2026-01-17 15:36:38,222 database 11256 8056 AXES: Reset 0 access attempts from database.
+INFO 2026-01-17 15:36:38,222 database 11256 8056 AXES: Deleted 0 failed login attempts by {username: "********************", ip_address: "********************", user_agent: "<unknown>", path_info: "<unknown>"} from database.
+INFO 2026-01-17 15:38:39,685 apps 9964 7696 AXES: BEGIN version 8.1.0, blocking by ip_address
+INFO 2026-01-17 15:38:39,848 database 9964 7696 AXES: Successful login by {username: "********************", ip_address: "********************", user_agent: "<unknown>", path_info: "<unknown>"}.
+INFO 2026-01-17 15:38:39,851 database 9964 7696 AXES: Cleaned up 0 expired access attempts from database that were older than 2026-01-17 09:08:39.839985+00:00
+INFO 2026-01-17 15:38:39,869 database 9964 7696 AXES: Reset 0 access attempts from database.
+INFO 2026-01-17 15:38:39,869 database 9964 7696 AXES: Deleted 0 failed login attempts by {username: "********************", ip_address: "********************", user_agent: "<unknown>", path_info: "<unknown>"} from database.
+INFO 2026-01-17 15:39:10,826 apps 3476 5232 AXES: BEGIN version 8.1.0, blocking by ip_address
+INFO 2026-01-17 15:39:11,008 database 3476 5232 AXES: Successful login by {username: "********************", ip_address: "********************", user_agent: "<unknown>", path_info: "<unknown>"}.
+INFO 2026-01-17 15:39:11,010 database 3476 5232 AXES: Cleaned up 0 expired access attempts from database that were older than 2026-01-17 09:09:10.998858+00:00
+INFO 2026-01-17 15:39:11,023 database 3476 5232 AXES: Reset 0 access attempts from database.
+INFO 2026-01-17 15:39:11,024 database 3476 5232 AXES: Deleted 0 failed login attempts by {username: "********************", ip_address: "********************", user_agent: "<unknown>", path_info: "<unknown>"} from database.
+INFO 2026-01-17 15:42:01,700 apps 9584 14900 AXES: BEGIN version 8.1.0, blocking by ip_address
+INFO 2026-01-17 15:42:50,602 apps 8416 15144 AXES: BEGIN version 8.1.0, blocking by ip_address
+INFO 2026-01-17 15:43:09,961 apps 2276 10344 AXES: BEGIN version 8.1.0, blocking by ip_address
+INFO 2026-01-17 15:44:03,424 apps 12592 14108 AXES: BEGIN version 8.1.0, blocking by ip_address
+INFO 2026-01-17 15:54:16,274 apps 2984 5088 AXES: BEGIN version 8.1.0, blocking by ip_address
+INFO 2026-01-17 16:02:39,051 apps 13736 1072 AXES: BEGIN version 8.1.0, blocking by ip_address
+INFO 2026-01-17 16:02:39,261 database 13736 1072 AXES: Successful login by {username: "********************", ip_address: "********************", user_agent: "<unknown>", path_info: "<unknown>"}.
+INFO 2026-01-17 16:02:39,266 database 13736 1072 AXES: Cleaned up 0 expired access attempts from database that were older than 2026-01-17 09:32:39.250803+00:00
+INFO 2026-01-17 16:02:39,285 database 13736 1072 AXES: Reset 0 access attempts from database.
+INFO 2026-01-17 16:02:39,286 database 13736 1072 AXES: Deleted 0 failed login attempts by {username: "********************", ip_address: "********************", user_agent: "<unknown>", path_info: "<unknown>"} from database.
+INFO 2026-01-17 16:03:17,697 apps 17932 17816 AXES: BEGIN version 8.1.0, blocking by ip_address

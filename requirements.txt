@@ -60,3 +60,5 @@ qrcode[pil]
 django-auditlog
 cryptography
 django-fernet-fields
+celery>=5.3.0
+redis>=5.0.0

@@ -182,20 +182,20 @@ class OrderFee(models.Model):
     order = models.OneToOneField('orders.Order', on_delete=models.CASCADE, related_name='order_fees')
     
     # Fee amounts
-    seller_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    upsell_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    confirmation_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    cancellation_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    fulfillment_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    shipping_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    return_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    warehouse_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    seller_fee = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    upsell_fee = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    confirmation_fee = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    cancellation_fee = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    fulfillment_fee = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    shipping_fee = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    return_fee = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    warehouse_fee = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     
     # Calculated totals
-    total_fees = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=5.00)  # 5% VAT
-    tax_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    final_total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    total_fees = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('5.00'))  # 5% VAT
+    tax_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    final_total = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)
@@ -212,19 +212,21 @@ class OrderFee(models.Model):
         return f"Fees for Order {self.order.order_code}"
     
     def save(self, *args, **kwargs):
-        # Auto-calculate totals
+        # Auto-calculate totals - ensure all values are Decimal
         self.total_fees = (
-            self.seller_fee + self.upsell_fee + self.confirmation_fee + 
-            self.cancellation_fee + self.fulfillment_fee + self.shipping_fee + 
-            self.return_fee + self.warehouse_fee
+            Decimal(str(self.seller_fee or 0)) + Decimal(str(self.upsell_fee or 0)) + 
+            Decimal(str(self.confirmation_fee or 0)) + Decimal(str(self.cancellation_fee or 0)) + 
+            Decimal(str(self.fulfillment_fee or 0)) + Decimal(str(self.shipping_fee or 0)) + 
+            Decimal(str(self.return_fee or 0)) + Decimal(str(self.warehouse_fee or 0))
         )
         
-        # Calculate tax
-        base_price = float(self.order.price_per_unit * self.order.quantity)
-        self.tax_amount = (base_price + float(self.total_fees)) * (float(self.tax_rate) / 100.0)
+        # Calculate tax using Decimal arithmetic
+        base_price = Decimal(str(self.order.price_per_unit or 0)) * Decimal(str(self.order.quantity or 1))
+        tax_rate_decimal = Decimal(str(self.tax_rate or 0)) / Decimal('100')
+        self.tax_amount = (base_price + self.total_fees) * tax_rate_decimal
         
         # Calculate final total
-        self.final_total = base_price + float(self.total_fees) + float(self.tax_amount)
+        self.final_total = base_price + self.total_fees + self.tax_amount
         
         super().save(*args, **kwargs)
     

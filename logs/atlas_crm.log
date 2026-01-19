@@ -13545,3 +13545,44 @@ Traceback (most recent call last):
     raise (import_string(cls) if isinstance(cls, str) else cls)()
 django_ratelimit.exceptions.Ratelimited
 INFO 2025-12-07 08:25:02,266 tasks 3806611 130342932914304 Stock alert check completed. Created: 0, Resolved: 0
+INFO 2026-01-17 15:26:29,591 autoreload 13812 5312 Watching for file changes with StatReloader
+INFO 2026-01-17 15:27:34,224 basehttp 13812 10544 "GET / HTTP/1.1" 200 90179
+INFO 2026-01-17 15:27:34,425 basehttp 13812 13140 "GET /static/css/arabic-fonts.css HTTP/1.1" 200 1858
+INFO 2026-01-17 15:27:34,481 basehttp 13812 14724 "GET /static/img/logo_icon.png HTTP/1.1" 200 387988
+INFO 2026-01-17 15:27:34,500 basehttp 13812 13140 "GET /static/img/seller_dashboard.png HTTP/1.1" 200 105177
+INFO 2026-01-17 15:27:34,566 basehttp 13812 10544 "GET /static/css/custom.css HTTP/1.1" 200 19524
+INFO 2026-01-17 15:27:36,351 basehttp 13812 10544 "GET /static/img/delivery_logo_white.png HTTP/1.1" 200 133510
+INFO 2026-01-17 15:27:41,330 basehttp 13812 10544 "GET /static/img/atlas_logo.svg HTTP/1.1" 200 1740
+INFO 2026-01-17 15:28:27,905 basehttp 13812 13628 "GET / HTTP/1.1" 200 90179
+INFO 2026-01-17 15:28:28,027 basehttp 13812 928 "GET /static/css/arabic-fonts.css HTTP/1.1" 200 1858
+INFO 2026-01-17 15:28:28,029 basehttp 13812 13628 "GET /static/css/custom.css HTTP/1.1" 200 19524
+INFO 2026-01-17 15:28:29,803 basehttp 13812 928 "GET /static/img/seller_dashboard.png HTTP/1.1" 200 105177
+INFO 2026-01-17 15:28:29,806 basehttp 13812 13628 "GET /static/img/logo_icon.png HTTP/1.1" 200 387988
+INFO 2026-01-17 15:28:29,942 basehttp 13812 13628 "GET /static/img/delivery_logo_white.png HTTP/1.1" 200 133510
+INFO 2026-01-17 15:28:31,152 basehttp 13812 13628 "GET /static/img/atlas_logo.svg HTTP/1.1" 200 1740
+INFO 2026-01-17 15:28:49,238 basehttp 13812 6608 "GET /users/login/ HTTP/1.1" 200 18304
+WARNING 2026-01-17 15:28:54,523 log 13812 6608 Not Found: /favicon.ico
+WARNING 2026-01-17 15:28:54,524 basehttp 13812 6608 "GET /favicon.ico HTTP/1.1" 404 8931
+INFO 2026-01-17 15:29:16,891 basehttp 13812 13228 "POST /users/login/ HTTP/1.1" 200 19360
+INFO 2026-01-17 15:33:59,006 autoreload 13812 5312 D:\atlas project-17-jan-26\atlas-crm\crm_fulfillment\settings.py changed, reloading.
+INFO 2026-01-17 15:34:04,106 autoreload 16352 15908 Watching for file changes with StatReloader
+INFO 2026-01-17 15:42:41,832 autoreload 16352 15908 D:\atlas project-17-jan-26\atlas-crm\finance\models.py changed, reloading.
+INFO 2026-01-17 15:42:50,802 autoreload 8416 15144 Watching for file changes with StatReloader
+INFO 2026-01-17 15:43:02,169 autoreload 8416 15144 D:\atlas project-17-jan-26\atlas-crm\finance\models.py changed, reloading.
+INFO 2026-01-17 15:43:10,099 autoreload 2276 10344 Watching for file changes with StatReloader
+INFO 2026-01-17 15:43:52,819 autoreload 2276 10344 D:\atlas project-17-jan-26\atlas-crm\finance\signals.py changed, reloading.
+INFO 2026-01-17 15:44:03,499 autoreload 12592 14108 Watching for file changes with StatReloader
+INFO 2026-01-17 15:54:18,204 signals 2984 5088 Confirmed reservations for order #TEST003
+INFO 2026-01-17 15:54:18,298 signals 2984 5088 Confirmed reservations for order #TEST004
+INFO 2026-01-17 15:54:18,385 signals 2984 5088 Fulfilled reservations for order #TEST005
+INFO 2026-01-17 16:03:13,803 autoreload 12592 14108 D:\atlas project-17-jan-26\atlas-crm\crm_fulfillment\settings.py changed, reloading.
+INFO 2026-01-17 16:03:17,753 autoreload 17932 17816 Watching for file changes with StatReloader
+INFO 2026-01-17 16:13:23,607 basehttp 17932 18412 "GET / HTTP/1.1" 200 90179
+INFO 2026-01-17 16:13:24,348 basehttp 17932 16684 "GET /static/img/atlas_logo.svg HTTP/1.1" 200 1740
+INFO 2026-01-17 18:07:05,148 basehttp 17932 17156 "GET / HTTP/1.1" 200 90179
+INFO 2026-01-17 18:07:05,260 basehttp 17932 5636 "GET /static/css/arabic-fonts.css HTTP/1.1" 200 1858
+INFO 2026-01-17 18:07:05,263 basehttp 17932 17156 "GET /static/css/custom.css HTTP/1.1" 200 19524
+INFO 2026-01-17 18:07:05,357 basehttp 17932 5636 "GET /static/img/seller_dashboard.png HTTP/1.1" 200 105177
+INFO 2026-01-17 18:07:05,403 basehttp 17932 14120 "GET /static/img/logo_icon.png HTTP/1.1" 200 387988
+INFO 2026-01-17 18:07:05,447 basehttp 17932 5636 "GET /static/img/delivery_logo_white.png HTTP/1.1" 200 133510
+INFO 2026-01-17 18:07:07,359 basehttp 17932 5636 "GET /static/img/atlas_logo.svg HTTP/1.1" 200 1740
