@@ -36,6 +36,10 @@ ENV/
 db.sqlite3-journal
 /staticfiles
 
+# Database exports (sensitive data - temporary commit allowed for Railway import)
+# db_export.json
+database_exports/*.json
+
 # Environment
 .env
 .env.local
