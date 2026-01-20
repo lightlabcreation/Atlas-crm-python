@@ -138,6 +138,7 @@ MIDDLEWARE = [
     'order_packaging.middleware.PackagingAgentAccessMiddleware',  # Restrict Packaging Agent to packaging URLs only
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 # Authentication backends for axes
@@ -287,6 +288,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 
 # Cloudinary Configuration
 # IMPORTANT: Replace 'YOUR_CLOUD_NAME_HERE' with your actual Cloudinary Cloud Name from dashboard
