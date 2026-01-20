@@ -38,7 +38,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'testserver',  # For Django test client
-    'https://web-production-5ba14555.up.railway.app'
+    'web-production-5ba14555.up.railway.app'
 ]
 
 # Add Railway domain if RAILWAY_STATIC_URL is set
@@ -177,38 +177,52 @@ WSGI_APPLICATION = 'crm_fulfillment.wsgi.application'
 # Support for environment-based database configuration (Docker and Railway)
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
-if DATABASE_URL:
-    # Parse Railway DATABASE_URL format: postgresql://user:password@host:port/database
-    import dj_database_url
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
-else:
-    DATABASE_TYPE = os.environ.get('DATABASE', 'postgres').lower()
+# if DATABASE_URL:
+#     # Parse Railway DATABASE_URL format: postgresql://user:password@host:port/database
+#     import dj_database_url
+#     DATABASES = {
+#         'default': dj_database_url.config(
+#             default=DATABASE_URL,
+#             conn_max_age=600,
+#             conn_health_checks=True,
+#         )
+#     }
+# else:
+#     DATABASE_TYPE = os.environ.get('DATABASE', 'postgres').lower()
 
-    if DATABASE_TYPE == 'postgres':
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': os.environ.get('DB_NAME', 'atlas_crm'),
-                'USER': os.environ.get('DB_USER', 'atlas_user'),
-                'PASSWORD': os.environ.get('DB_PASSWORD', 'atlas_secure_pass_2024'),
-                'HOST': os.environ.get('DB_HOST', 'localhost'),
-                'PORT': os.environ.get('DB_PORT', '5435'),
-            }
-        }
-    else:
-        # Default to SQLite for local development
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.sqlite3',
-                'NAME': BASE_DIR / 'db.sqlite3',
-            }
-        }
+#     if DATABASE_TYPE == 'postgres':
+#         DATABASES = {
+#             'default': {
+#                 'ENGINE': 'django.db.backends.postgresql',
+#                 'NAME': os.environ.get('DB_NAME', 'atlas_crm'),
+#                 'USER': os.environ.get('DB_USER', 'atlas_user'),
+#                 'PASSWORD': os.environ.get('DB_PASSWORD', 'atlas_secure_pass_2024'),
+#                 'HOST': os.environ.get('DB_HOST', 'localhost'),
+#                 'PORT': os.environ.get('DB_PORT', '5435'),
+#             }
+#         }
+#     else:
+#         # Default to SQLite for local development
+#         DATABASES = {
+#             'default': {
+#                 'ENGINE': 'django.db.backends.sqlite3',
+#                 'NAME': BASE_DIR / 'db.sqlite3',
+#             }
+#         }
+
+
+
+import dj_database_url
+
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'),
+        conn_max_age=600,
+        conn_health_checks=True,
+        ssl_require=True,
+    )
+}
+
 
 
 # Password hashing - Use Argon2 (spec requirement)
