@@ -215,14 +215,42 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 
 import dj_database_url
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
-        conn_max_age=600,
-        conn_health_checks=True,
-        ssl_require=True,
-    )
-}
+# Database configuration for Railway and local development
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    # Railway or production database
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=True,
+        )
+    }
+else:
+    # Fallback for local development or when DATABASE_URL is not set
+    DATABASE_TYPE = os.environ.get('DATABASE', 'sqlite').lower()
+    
+    if DATABASE_TYPE == 'postgres':
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': os.environ.get('DB_NAME', 'atlas_crm'),
+                'USER': os.environ.get('DB_USER', 'atlas_user'),
+                'PASSWORD': os.environ.get('DB_PASSWORD', 'atlas_secure_pass_2024'),
+                'HOST': os.environ.get('DB_HOST', 'localhost'),
+                'PORT': os.environ.get('DB_PORT', '5432'),
+            }
+        }
+    else:
+        # Default to SQLite for local development
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
 
 
 
